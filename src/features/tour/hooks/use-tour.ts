@@ -24,11 +24,13 @@ import { ROLES } from "@/lib/auth/roles";
 import { recordTourOutcome } from "../actions";
 import { TOUR_VERSIONS } from "../constants";
 import { buildSteps } from "../lib/build-steps";
-import { launchDriver } from "../lib/driver-adapter";
+import { isAnyTourActive, launchDriver } from "../lib/driver-adapter";
+import { PAGE_TOUR_REGISTRY } from "../lib/page-tour-registry";
 import { resolveTourKey, TOUR_HOME_ROUTE } from "../lib/resolve-tour-key";
 import { TOUR_STEP_REGISTRY } from "../lib/step-registry";
 import { waitForMobileSheet } from "../lib/wait-for-sheet";
 import type {
+  PageTourKey,
   TourCookiePayload,
   TourKey,
   TourOutcome,
@@ -82,9 +84,16 @@ function useVisibleNavIds() {
 }
 
 function useCommitOutcome() {
-  return useCallback(async (key: TourKey, outcome: TourOutcome) => {
-    await recordTourOutcome(key, outcome);
-  }, []);
+  return useCallback(
+    async (
+      key: TourKey | PageTourKey,
+      version: number,
+      outcome: TourOutcome,
+    ) => {
+      await recordTourOutcome(key, version, outcome);
+    },
+    [],
+  );
 }
 
 /**
@@ -161,7 +170,7 @@ export function useTour({ initialState, blocked = false }: UseTourOptions) {
         ...prev,
         [key]: { version: TOUR_VERSIONS[key], outcome },
       }));
-      await commitOutcomeBase(key, outcome);
+      await commitOutcomeBase(key, TOUR_VERSIONS[key], outcome);
     },
     [commitOutcomeBase],
   );
@@ -172,12 +181,13 @@ export function useTour({ initialState, blocked = false }: UseTourOptions) {
     if (blocked) return;
     // Radix primitives (used throughout this codebase) set this attribute.
     if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+    if (isAnyTourActive()) return;
 
     const seen = state[tourKey];
     if (seen && seen.version >= TOUR_VERSIONS[tourKey]) return;
 
     const resolvedSteps = buildSteps(TOUR_STEP_REGISTRY[tourKey], ctx).filter(
-      (s) => s.centered || visibleNavIds.has(s.navId),
+      (s) => s.centered || (!!s.navId && visibleNavIds.has(s.navId)),
     );
     if (resolvedSteps.length === 0) return;
 
@@ -218,7 +228,7 @@ export function useReplayTour() {
   const replay = useCallback(() => {
     if (!tourKey) return;
     const resolvedSteps = buildSteps(TOUR_STEP_REGISTRY[tourKey], ctx).filter(
-      (s) => s.centered || visibleNavIds.has(s.navId),
+      (s) => s.centered || (!!s.navId && visibleNavIds.has(s.navId)),
     );
     if (resolvedSteps.length === 0) return;
 
@@ -227,10 +237,99 @@ export function useReplayTour() {
       // (§6.3) — an abandoned replay must not suppress an auto tour that
       // hadn't fired yet.
       onSkip: () => {},
-      onComplete: () => void commitOutcome(tourKey, "completed"),
+      onComplete: () =>
+        void commitOutcome(tourKey, TOUR_VERSIONS[tourKey], "completed"),
       prepareStep,
     });
   }, [tourKey, ctx, visibleNavIds, commitOutcome, prepareStep]);
 
   return { replay, canReplay: !!tourKey };
+}
+
+/**
+ * Auto-launch hook for in-page tours — mirrors `useTour` but keys off the
+ * current pathname against `PAGE_TOUR_REGISTRY` instead of role -> tour key,
+ * and targets page-body elements (`elementId`) rather than sidebar nav
+ * items. Mounted once alongside `useTour` in `TourController`; a route
+ * change re-runs the effect (new `pathname`) rather than remounting.
+ *
+ * No mobile-sidebar-sheet prep here — page-tour targets live in page
+ * content, which is on-screen regardless of sidebar open/collapsed state.
+ */
+export function usePageTour({ initialState, blocked = false }: UseTourOptions) {
+  const pathname = usePathname();
+  const { user, ctx } = useTourResolution();
+
+  const [state, setState] = useState<TourCookiePayload>(initialState);
+  const launchedForPathRef = useRef<string | null>(null);
+
+  const commitOutcomeBase = useCommitOutcome();
+  const commitOutcome = useCallback(
+    async (key: PageTourKey, version: number, outcome: TourOutcome) => {
+      setState((prev) => ({ ...prev, [key]: { version, outcome } }));
+      await commitOutcomeBase(key, version, outcome);
+    },
+    [commitOutcomeBase],
+  );
+
+  useEffect(() => {
+    const config = PAGE_TOUR_REGISTRY[pathname];
+    if (!config || !user) return;
+    if (launchedForPathRef.current === pathname) return;
+    if (blocked) return;
+    if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+    if (isAnyTourActive()) return;
+
+    const key: PageTourKey = `page:${pathname}`;
+    const seen = state[key];
+    if (seen && seen.version >= config.version) return;
+
+    const resolvedSteps = buildSteps(config.steps, ctx).filter((s) => {
+      if (s.centered) return true;
+      const selector = s.navId ?? s.elementId;
+      return (
+        !!selector && !!document.querySelector(`[data-tour-id="${selector}"]`)
+      );
+    });
+    if (resolvedSteps.length === 0) return;
+
+    launchedForPathRef.current = pathname;
+    launchDriver(resolvedSteps, {
+      onSkip: () => void commitOutcome(key, config.version, "skipped"),
+      onComplete: () => void commitOutcome(key, config.version, "completed"),
+    });
+  }, [pathname, user, ctx, state, blocked, commitOutcome]);
+}
+
+/**
+ * Manual "Tour this page" trigger — same ignore-cookie-version, only-write-
+ * on-Finish contract as `useReplayTour`, scoped to whatever page config
+ * matches the current pathname.
+ */
+export function useReplayPageTour() {
+  const pathname = usePathname();
+  const { user, ctx } = useTourResolution();
+  const commitOutcome = useCommitOutcome();
+
+  const config = PAGE_TOUR_REGISTRY[pathname];
+
+  const replay = useCallback(() => {
+    if (!config || !user) return;
+    const resolvedSteps = buildSteps(config.steps, ctx).filter((s) => {
+      if (s.centered) return true;
+      const selector = s.navId ?? s.elementId;
+      return (
+        !!selector && !!document.querySelector(`[data-tour-id="${selector}"]`)
+      );
+    });
+    if (resolvedSteps.length === 0) return;
+
+    const key: PageTourKey = `page:${pathname}`;
+    launchDriver(resolvedSteps, {
+      onSkip: () => {},
+      onComplete: () => void commitOutcome(key, config.version, "completed"),
+    });
+  }, [config, user, ctx, pathname, commitOutcome]);
+
+  return { replay, canReplay: !!config && !!user };
 }

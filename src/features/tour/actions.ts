@@ -11,16 +11,17 @@
  */
 
 import { cookies } from "next/headers";
-import {
-  TOUR_COOKIE_NAME,
-  TOUR_COOKIE_OPTIONS,
-  TOUR_VERSIONS,
-} from "./constants";
+import { TOUR_COOKIE_NAME, TOUR_COOKIE_OPTIONS } from "./constants";
 import {
   parseTourCookiePayload,
   serializeTourCookiePayload,
 } from "./lib/cookie-payload";
-import type { TourCookiePayload, TourKey, TourOutcome } from "./types";
+import type {
+  PageTourKey,
+  TourCookiePayload,
+  TourKey,
+  TourOutcome,
+} from "./types";
 
 async function readPayload(): Promise<TourCookiePayload> {
   const store = await cookies();
@@ -31,15 +32,21 @@ export async function getTourState(): Promise<TourCookiePayload> {
   return readPayload();
 }
 
+/**
+ * `version` is passed explicitly (rather than looked up here) so this same
+ * action serves both home tours (`TOUR_VERSIONS[key]`) and page tours
+ * (`PageTourConfig.version`), which live in separate version maps.
+ */
 export async function recordTourOutcome(
-  tourKey: TourKey,
+  key: TourKey | PageTourKey,
+  version: number,
   outcome: TourOutcome,
 ): Promise<void> {
   const store = await cookies();
   const current = await readPayload();
   const next: TourCookiePayload = {
     ...current,
-    [tourKey]: { version: TOUR_VERSIONS[tourKey], outcome },
+    [key]: { version, outcome },
   };
   store.set(
     TOUR_COOKIE_NAME,

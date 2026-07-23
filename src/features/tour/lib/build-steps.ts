@@ -30,7 +30,11 @@ export function buildSteps(
   const isRestrictedCompany = isCompany && !ctx.isCompanyVerified;
 
   return allSteps.filter((step) => {
-    if (isRestrictedCompany && COMPANY_RESTRICTED_NAV_IDS.has(step.navId)) {
+    if (
+      isRestrictedCompany &&
+      step.navId &&
+      COMPANY_RESTRICTED_NAV_IDS.has(step.navId)
+    ) {
       return false;
     }
     if (

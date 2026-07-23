@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUserInfo } from "@/features/auth/hooks/use-session";
 import { useCompanyProfile } from "@/features/company-jobs/hooks";
 import { GameProgressBar } from "@/features/mujourney/components/GameProgressBar";
+import { ReplayPageTourButton } from "@/features/tour/components/replay-page-tour-button";
 import { ROLES } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -73,6 +74,7 @@ export function AppTopbar() {
         <div className="hidden md:flex">
           <GameProgressBar />
         </div>
+        <ReplayPageTourButton />
         <ThemeToggle />
         {!mounted || isLoading ? (
           <div className="flex items-center gap-2 pr-1">

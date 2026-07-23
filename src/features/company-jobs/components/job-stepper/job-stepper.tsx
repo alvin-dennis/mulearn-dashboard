@@ -108,18 +108,21 @@ export function JobStepper({
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 sm:space-y-8">
       {/* Stepper header */}
-      <StepperHeader
-        steps={steps}
-        currentStepIndex={currentStepIndex}
-        onStepClick={goToStep}
-        ariaLabel="Job creation progress"
-      />
+      <div data-tour-id="page:company-jobs-create:stepper-header">
+        <StepperHeader
+          steps={steps}
+          currentStepIndex={currentStepIndex}
+          onStepClick={goToStep}
+          ariaLabel="Job creation progress"
+        />
+      </div>
 
       {/* Step content */}
       <Form {...form}>
         <form
           onSubmit={(e) => e.preventDefault()}
           className="rounded-xl border border-border bg-card p-4 sm:p-6"
+          data-tour-id="page:company-jobs-create:step-form"
         >
           {renderStep()}
 
@@ -156,6 +159,7 @@ export function JobStepper({
                   disabled={isSubmitting}
                   onClick={() => form.handleSubmit(handleFinalSubmit)()}
                   className="w-full gap-2 sm:w-auto"
+                  data-tour-id="page:company-jobs-create:submit"
                 >
                   {isSubmitting ? (
                     <>
@@ -174,6 +178,7 @@ export function JobStepper({
                   type="button"
                   onClick={nextStep}
                   className="w-full gap-1.5 sm:w-auto"
+                  data-tour-id="page:company-jobs-create:next"
                 >
                   Next
                   <ArrowRight className="h-4 w-4" />

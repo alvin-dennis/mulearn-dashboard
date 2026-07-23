@@ -25,7 +25,10 @@ function ProfileEditContent() {
 export function EditProfilePageClient() {
   return (
     <div className="space-y-6 px-1 py-1 sm:px-2">
-      <div className="flex items-start gap-3 sm:items-center">
+      <div
+        className="flex items-start gap-3 sm:items-center"
+        data-tour-id="page:company-profile-edit:header"
+      >
         <Button
           variant="ghost"
           size="sm"

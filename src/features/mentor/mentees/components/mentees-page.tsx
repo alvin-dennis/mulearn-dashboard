@@ -106,7 +106,10 @@ export function MenteesPage({ title = "Mentees" }: { title?: string } = {}) {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2"
+          data-tour-id="page:mentor-mentees:search"
+        >
           <div className="relative w-full md:w-56">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -120,6 +123,7 @@ export function MenteesPage({ title = "Mentees" }: { title?: string } = {}) {
           <Button
             variant="outline"
             className="hidden md:flex"
+            data-tour-id="page:mentor-mentees:join-session"
             onClick={() => setJoinDialog({ open: true, sessionId: "" })}
           >
             <LogIn className="mr-2 h-4 w-4" />
@@ -142,7 +146,7 @@ export function MenteesPage({ title = "Mentees" }: { title?: string } = {}) {
           </p>
         </div>
       ) : (
-        <Table>
+        <Table data-tour-id="page:mentor-mentees:table">
           <TableHeader>
             <TableRow>
               <TableHead>Mentee</TableHead>

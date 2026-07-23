@@ -137,7 +137,7 @@ export function CompanyTasksPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+        <div data-tour-id="page:company-tasks:header">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Company Tasks
           </h1>
@@ -148,6 +148,7 @@ export function CompanyTasksPage() {
         <Button
           className="shrink-0 gap-2"
           onClick={() => setIsCreateModalOpen(true)}
+          data-tour-id="page:company-tasks:create"
         >
           <Plus className="h-4 w-4" />
           Create Task
@@ -163,7 +164,10 @@ export function CompanyTasksPage() {
         }}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-4 lg:w-[480px]">
+        <TabsList
+          className="grid w-full grid-cols-4 lg:w-[480px]"
+          data-tour-id="page:company-tasks:status-tabs"
+        >
           <TabsTrigger value="all">All Tasks ({allCount})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({approvedCount})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({pendingCount})</TabsTrigger>
@@ -189,7 +193,10 @@ export function CompanyTasksPage() {
         )
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div
+            className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            data-tour-id="page:company-tasks:list"
+          >
             {tasks.map((task: CompanyTask) => (
               <Card key={task.id} className="flex flex-col h-full">
                 <CardHeader className="pb-3">

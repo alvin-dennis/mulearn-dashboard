@@ -10,7 +10,7 @@
  */
 
 import type { TourCookiePayload } from "../types";
-import { useTour } from "../hooks/use-tour";
+import { usePageTour, useTour } from "../hooks/use-tour";
 
 interface TourControllerProps {
   initialState: TourCookiePayload;
@@ -18,7 +18,14 @@ interface TourControllerProps {
   blocked?: boolean;
 }
 
+/**
+ * Mounts both the sidebar-shell home tour (fires once, on `/dashboard`) and
+ * the in-page tour (fires per-route, on whatever page has a
+ * `PAGE_TOUR_REGISTRY` entry) off the same cookie payload. `useTour`'s
+ * `isAnyTourActive()` guard keeps them from ever overlapping.
+ */
 export function TourController({ initialState, blocked }: TourControllerProps) {
   useTour({ initialState, blocked });
+  usePageTour({ initialState, blocked });
   return null;
 }

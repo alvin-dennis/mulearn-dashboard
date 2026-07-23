@@ -28,7 +28,11 @@ export default function CompanyDashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Link href="/dashboard/company/jobs" className="block group">
+        <Link
+          href="/dashboard/company/jobs"
+          className="block group"
+          data-tour-id="page:company-home:jobs-card"
+        >
           <Card className="h-full transition-colors hover:bg-muted/50">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
@@ -48,7 +52,11 @@ export default function CompanyDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/company/tasks" className="block group">
+        <Link
+          href="/dashboard/company/tasks"
+          className="block group"
+          data-tour-id="page:company-home:tasks-card"
+        >
           <Card className="h-full transition-colors hover:bg-muted/50">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
@@ -68,7 +76,11 @@ export default function CompanyDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/company/mentors" className="block group">
+        <Link
+          href="/dashboard/company/mentors"
+          className="block group"
+          data-tour-id="page:company-home:mentors-card"
+        >
           <Card className="h-full transition-colors hover:bg-muted/50">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
@@ -106,7 +118,11 @@ export default function CompanyDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/company/analytics" className="block group">
+        <Link
+          href="/dashboard/company/analytics"
+          className="block group"
+          data-tour-id="page:company-home:analytics-card"
+        >
           <Card className="h-full transition-colors hover:bg-muted/50">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">

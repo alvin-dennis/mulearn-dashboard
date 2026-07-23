@@ -28,7 +28,7 @@ export function JobsPageHeader({
         </p>
       </div>
       <div className="flex gap-3">
-        <div className="relative">
+        <div className="relative" data-tour-id="page:company-jobs:search">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="jobs-search"
@@ -38,7 +38,11 @@ export function JobsPageHeader({
             className="w-full pl-9 sm:w-64"
           />
         </div>
-        <Button onClick={onCreateJob} className="gap-2 shrink-0">
+        <Button
+          onClick={onCreateJob}
+          className="gap-2 shrink-0"
+          data-tour-id="page:company-jobs:create"
+        >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Create Job</span>
           <span className="sm:hidden">New</span>

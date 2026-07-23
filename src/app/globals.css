@@ -805,44 +805,44 @@ h5 {
    ============================================ */
 
 html body .driver-popover {
-  background-color: var(--popover);
-  color: var(--popover-foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  background-color: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-xl) !important;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.08),
-    0 16px 40px rgba(0, 0, 0, 0.16);
+    0 16px 40px rgba(0, 0, 0, 0.16) !important;
   min-width: 280px;
   max-width: 340px;
-  padding: 20px;
+  padding: 20px !important;
 }
 
 html body.dark .driver-popover,
 html .dark body .driver-popover {
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.35),
-    0 16px 40px rgba(0, 0, 0, 0.5);
+    0 16px 40px rgba(0, 0, 0, 0.5) !important;
 }
 
 html body .driver-popover-title {
-  color: var(--popover-foreground);
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.35;
+  color: var(--popover-foreground) !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
   padding-right: 64px;
 }
 
 html body .driver-popover-description {
-  color: var(--muted-foreground);
-  font-size: 14px;
-  line-height: 1.6;
+  color: var(--muted-foreground) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
   margin-top: 6px;
 }
 
 html body .driver-popover-progress-text {
-  color: var(--muted-foreground);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--muted-foreground) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
 }
 
 /* Moved out of the footer into the wrapper — sits where the close (×)
@@ -883,9 +883,9 @@ html body .driver-popover-footer .driver-popover-btn-disabled {
 
 /* Skip — shadcn "link" variant: no fill, no border, underline on hover */
 html body .driver-popover-skip-btn {
-  background-color: transparent;
-  border: none;
-  color: var(--primary);
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--primary) !important;
   border-radius: 0;
   padding: 7px 4px;
   text-underline-offset: 4px;
@@ -893,47 +893,47 @@ html body .driver-popover-skip-btn {
 
 html body .driver-popover-skip-btn:hover,
 html body .driver-popover-skip-btn:focus-visible {
-  background-color: transparent;
+  background-color: transparent !important;
   text-decoration: underline;
 }
 
 /* Previous — shadcn "outline" variant: bordered, fills brand-blue on hover */
 html body .driver-popover-prev-btn {
-  background-color: transparent;
-  color: var(--brand-blue);
-  border: 2px solid var(--brand-blue);
+  background-color: transparent !important;
+  color: var(--brand-blue) !important;
+  border: 2px solid var(--brand-blue) !important;
   font-weight: 700;
 }
 
 html body .driver-popover-prev-btn:hover,
 html body .driver-popover-prev-btn:focus-visible {
-  background-color: var(--brand-blue);
-  color: var(--primary-foreground);
+  background-color: var(--brand-blue) !important;
+  color: var(--primary-foreground) !important;
 }
 
 /* Next / Done — shadcn "default" variant: solid brand-blue fill */
 html body .driver-popover-next-btn,
 html body .driver-popover-next-btn.driver-popover-done-btn {
-  background-color: var(--brand-blue);
-  color: var(--primary-foreground);
-  border: 1px solid var(--brand-blue);
+  background-color: var(--brand-blue) !important;
+  color: var(--primary-foreground) !important;
+  border: 1px solid var(--brand-blue) !important;
   font-weight: 600;
 }
 
 html body .driver-popover-next-btn:hover,
 html body .driver-popover-next-btn:focus-visible {
-  background-color: var(--brand-blue);
+  background-color: var(--brand-blue) !important;
 }
 
 html body .driver-popover-arrow {
-  border-color: var(--popover);
+  border-color: var(--popover) !important;
   filter: drop-shadow(0 0 1px var(--border));
 }
 
 html body .driver-active-element {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md) !important;
 }
 
 html body .driver-overlay {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.65) !important;
 }

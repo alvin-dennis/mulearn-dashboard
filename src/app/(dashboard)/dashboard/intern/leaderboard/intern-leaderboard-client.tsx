@@ -172,7 +172,10 @@ export function LeaderboardPageClient() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        data-tour-id="page:intern-leaderboard:header"
+      >
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Trophy className="w-8 h-8 text-warning" />
@@ -185,7 +188,10 @@ export function LeaderboardPageClient() {
       </div>
 
       {/* Podium Section */}
-      <div className="relative flex flex-col md:flex-row items-end justify-center gap-4 md:gap-8 pt-20 pb-12">
+      <div
+        className="relative flex flex-col md:flex-row items-end justify-center gap-4 md:gap-8 pt-20 pb-12"
+        data-tour-id="page:intern-leaderboard:podium"
+      >
         {/* Rank 2 */}
         <div className="flex flex-col items-center w-full md:w-64 z-10">
           <div className="relative mb-4">
@@ -297,13 +303,19 @@ export function LeaderboardPageClient() {
       </div>
 
       {/* User Status Banner */}
-      <div className="bg-brand-blue/10 border border-brand-blue/20 rounded-full py-3 px-8 text-center text-sm font-medium text-brand-blue max-w-2xl mx-auto flex items-center justify-center gap-2 mb-12 animate-pulse">
+      <div
+        className="bg-brand-blue/10 border border-brand-blue/20 rounded-full py-3 px-8 text-center text-sm font-medium text-brand-blue max-w-2xl mx-auto flex items-center justify-center gap-2 mb-12 animate-pulse"
+        data-tour-id="page:intern-leaderboard:your-rank"
+      >
         You are ranked <span className="font-black">#{userRank}</span> with{" "}
         <span className="font-black">{userScore.toLocaleString()}</span> points
       </div>
 
       {/* Rankings Table */}
-      <div className="space-y-4 leaderboard-table">
+      <div
+        className="space-y-4 leaderboard-table"
+        data-tour-id="page:intern-leaderboard:rankings"
+      >
         <style>{`
           .leaderboard-table [class*="md:hidden"] div.mb-3 > div > p:first-child {
             display: none;
@@ -311,23 +323,25 @@ export function LeaderboardPageClient() {
         `}</style>
         <h3 className="text-xl font-bold">Rankings</h3>
 
-        <TableTop
-          onSearchText={(val) => {
-            setSearchText(val);
-            setPage(1);
-          }}
-          onPerPageNumber={(val) => {
-            setPerPage(val);
-            setPage(1);
-          }}
-          CSV=""
-          perPage={perPage}
-          perPageOptions={[10, 20, 50]}
-          searchPlaceholder="Search users..."
-          searchSize="md"
-          searchPosition="left"
-          searchWrapperClassName="bg-card/40 border-border/40"
-        />
+        <div data-tour-id="page:intern-leaderboard:search">
+          <TableTop
+            onSearchText={(val) => {
+              setSearchText(val);
+              setPage(1);
+            }}
+            onPerPageNumber={(val) => {
+              setPerPage(val);
+              setPage(1);
+            }}
+            CSV=""
+            perPage={perPage}
+            perPageOptions={[10, 20, 50]}
+            searchPlaceholder="Search users..."
+            searchSize="md"
+            searchPosition="left"
+            searchWrapperClassName="bg-card/40 border-border/40"
+          />
+        </div>
 
         <Table
           rows={others}

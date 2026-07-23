@@ -24,6 +24,16 @@ export interface LaunchDriverHandlers {
   prepareStep?: (step: TourStep) => Promise<void>;
 }
 
+/**
+ * True while any driver.js tour (home or page) is currently on-screen.
+ * driver.js stamps this class on `<html>` for the duration of `d.drive()`.
+ * Used to stop a page tour launching over a still-open home tour (or
+ * vice versa) when a route change fires mid-tour.
+ */
+export function isAnyTourActive(): boolean {
+  return document.documentElement.classList.contains("driver-active");
+}
+
 export function launchDriver(
   steps: readonly TourStep[],
   handlers: LaunchDriverHandlers,
@@ -47,7 +57,9 @@ export function launchDriver(
     smoothScroll: true,
     allowClose: false,
     steps: steps.map((s) => ({
-      element: s.centered ? undefined : `[data-tour-id="${s.navId}"]`,
+      element: s.centered
+        ? undefined
+        : `[data-tour-id="${s.navId ?? s.elementId}"]`,
       popover: { title: s.title, description: s.description },
     })),
     onNextClick: (_element, _step, opts) => {

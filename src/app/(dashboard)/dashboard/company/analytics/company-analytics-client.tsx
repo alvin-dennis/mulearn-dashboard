@@ -47,7 +47,7 @@ export function CompanyAnalyticsPageClient() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div data-tour-id="page:company-analytics:header">
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <BarChart2 className="h-8 w-8 text-primary" />
           Analytics & Insights
@@ -64,7 +64,10 @@ export function CompanyAnalyticsPageClient() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="scrollbar-none flex w-full justify-start gap-1 overflow-x-auto h-auto p-1 bg-muted rounded-xl">
+        <TabsList
+          data-tour-id="page:company-analytics:tabs"
+          className="scrollbar-none flex w-full justify-start gap-1 overflow-x-auto h-auto p-1 bg-muted rounded-xl"
+        >
           <TabsTrigger
             value="dashboard-summary"
             className="shrink-0 whitespace-nowrap py-2.5 px-4 rounded-lg text-xs md:text-sm font-medium"
@@ -140,7 +143,10 @@ function DashboardSummaryView() {
 
   return (
     <div className="space-y-6">
-      <Card className="border border-border bg-card">
+      <Card
+        data-tour-id="page:company-analytics:period-filter"
+        className="border border-border bg-card"
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <CardTitle className="text-lg font-semibold">
@@ -213,7 +219,10 @@ function DashboardSummaryView() {
       ) : (
         <>
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            data-tour-id="page:company-analytics:summary-cards"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             {cards.map((card) => {
               const isIncrease = card.delta_type === "increase";
               return (
