@@ -40,18 +40,22 @@ const TOUR_ELIGIBLE_ROLES: readonly string[] = [
 
 /**
  * Admin and Associate explicitly get no tour (power users, highest nav
- * churn, self-explanatory console) — checked first so it wins even when
- * the user also holds another qualifying role.
+ * churn, self-explanatory console) — but only when held on their own. If
+ * paired with a tour-eligible role (e.g. Admin + Campus Lead), that role's
+ * tour still shows.
  */
 export function resolveTourKey(roles: readonly string[]): TourKey | null {
-  if (roles.includes(ROLES.ADMIN) || roles.includes(ROLES.ASSOCIATE)) {
+  const hasEligibleRole =
+    TOUR_ELIGIBLE_ROLES.some((r) => roles.includes(r)) || hasIgLeadRole(roles);
+
+  if (
+    (roles.includes(ROLES.ADMIN) || roles.includes(ROLES.ASSOCIATE)) &&
+    !hasEligibleRole
+  ) {
     return null;
   }
 
-  if (
-    !TOUR_ELIGIBLE_ROLES.some((r) => roles.includes(r)) &&
-    !hasIgLeadRole(roles)
-  ) {
+  if (!hasEligibleRole) {
     return null;
   }
 
@@ -77,8 +81,8 @@ export function resolveTourKey(roles: readonly string[]): TourKey | null {
 /** Home route each tour key launches on — must match `getRoleHomePath`. */
 export const TOUR_HOME_ROUTE: Record<TourKey, string> = {
   dashboard: "/dashboard",
-  intern: "/dashboard/intern",
-  campus: "/dashboard/campus/manage",
-  zonal: "/dashboard/zonal",
-  district: "/dashboard/district",
+  intern: "/dashboard",
+  campus: "/dashboard",
+  zonal: "/dashboard",
+  district: "/dashboard",
 };
