@@ -25,6 +25,7 @@ import {
 import { VersionBadge } from "@/components/ui/version-badge";
 import { useCompanyProfile } from "@/features/company-jobs/hooks/use-company-profile";
 import { useUserProfile } from "@/features/profile";
+import { ReplayTourButton } from "@/features/tour";
 import { useFilteredNav } from "@/hooks/use-filtered-nav";
 import { authStore } from "@/lib/auth";
 import { ROLES } from "@/lib/auth/roles";
@@ -34,7 +35,7 @@ import { useUIStore } from "@/stores/ui-store";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const { resolvedTheme } = useTheme();
   const { mainItems, managementItems, bottomItems } = useFilteredNav();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
@@ -103,7 +104,14 @@ export function AppSidebar() {
             isRestrictedCompanyFeature && "opacity-70",
           )}
         >
-          <Link href={item.linkHref ?? item.href} prefetch={false}>
+          <Link
+            href={item.linkHref ?? item.href}
+            prefetch={false}
+            data-tour-id={item.id}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+            }}
+          >
             <Icon
               className={cn(
                 "w-5 h-5 shrink-0",
@@ -180,6 +188,7 @@ export function AppSidebar() {
         >
           <SidebarMenu className="gap-1">
             {bottomItems.map(renderNavItem)}
+            <ReplayTourButton />
           </SidebarMenu>
 
           <Button

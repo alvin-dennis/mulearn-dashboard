@@ -4,6 +4,7 @@ import { z } from "zod";
 import { endpoints } from "@/api/endpoints";
 import { publicServerClient } from "@/api/server";
 import { clearWhatsNewCookie } from "@/app/(dashboard)/whats-new-actions";
+import { clearTourCookie } from "@/features/tour";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -32,6 +33,7 @@ export async function POST() {
   cookieStore.delete({ name: "tempToken", ...cookieOptions });
 
   await clearWhatsNewCookie();
+  await clearTourCookie();
 
   return NextResponse.json({ success: true });
 }

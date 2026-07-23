@@ -796,3 +796,125 @@ h5 {
     animation-play-state: paused;
   }
 }
+
+/* ============================================
+   Onboarding Tour — driver.js theme overrides
+   Mirrors the app's Dialog/card look (rounded, bordered,
+   soft shadow) so the tour reads as part of the product,
+   not a third-party widget, in both light and dark.
+   ============================================ */
+
+html body .driver-popover {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 16px 40px rgba(0, 0, 0, 0.16);
+  min-width: 280px;
+  max-width: 340px;
+  padding: 20px;
+}
+
+html body.dark .driver-popover,
+html .dark body .driver-popover {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+html body .driver-popover-title {
+  color: var(--popover-foreground);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  padding-right: 64px;
+}
+
+html body .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+html body .driver-popover-progress-text {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Moved out of the footer into the wrapper — sits where the close (×)
+   button used to, top-right of the card, next to the title. */
+html body .driver-popover-progress-corner {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+html body .driver-popover-footer {
+  margin-top: 18px;
+  padding-top: 0;
+  border-top: none;
+}
+
+html body .driver-popover-skip-btn {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+html body .driver-popover-skip-btn:hover,
+html body .driver-popover-skip-btn:focus-visible {
+  background-color: var(--accent);
+  opacity: 1;
+}
+
+html body .driver-popover-footer-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+html body .driver-popover-footer-btn:hover,
+html body .driver-popover-footer-btn:focus-visible {
+  opacity: 0.85;
+}
+
+html body .driver-popover-footer .driver-popover-btn-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+html body .driver-popover-next-btn,
+html body .driver-popover-next-btn.driver-popover-done-btn {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+html body .driver-popover-arrow {
+  border-color: var(--popover);
+  filter: drop-shadow(0 0 1px var(--border));
+}
+
+html body .driver-active-element {
+  border-radius: var(--radius-md);
+}
+
+html body .driver-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
