@@ -45,7 +45,7 @@ export function launchDriver(
     doneBtnText: "Finish",
     showButtons: ["next", "previous"],
     smoothScroll: true,
-    allowClose: true,
+    allowClose: false,
     steps: steps.map((s) => ({
       element: s.centered ? undefined : `[data-tour-id="${s.navId}"]`,
       popover: { title: s.title, description: s.description },

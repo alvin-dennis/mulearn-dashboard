@@ -922,7 +922,7 @@ html body .driver-popover-next-btn.driver-popover-done-btn {
 
 html body .driver-popover-next-btn:hover,
 html body .driver-popover-next-btn:focus-visible {
-  opacity: 0.95;
+  background-color: var(--brand-blue);
 }
 
 html body .driver-popover-arrow {
