@@ -98,6 +98,8 @@ export function EditInterestGroupForm({
     removeIconImage,
     isRemovingCoverImage,
     isRemovingIconImage,
+    isUploadingCoverImage,
+    isUploadingIconImage,
   } = useEditInterestGroup();
 
   // ── Simple text fields ─────────────────────────────────
@@ -582,10 +584,16 @@ export function EditInterestGroupForm({
         </SheetClose>
         <Button
           type="submit"
-          disabled={isPending}
-          aria-label={isPending ? "Saving changes" : "Save changes"}
+          disabled={isPending || isUploadingCoverImage || isUploadingIconImage}
+          aria-label={
+            isPending || isUploadingCoverImage || isUploadingIconImage
+              ? "Saving changes"
+              : "Save changes"
+          }
         >
-          {isPending ? "Saving…" : "Save Changes"}
+          {isPending || isUploadingCoverImage || isUploadingIconImage
+            ? "Saving…"
+            : "Save Changes"}
         </Button>
       </SheetFooter>
 
