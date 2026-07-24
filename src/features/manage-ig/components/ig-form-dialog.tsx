@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Loader2, Lock, Plus, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { type Control, Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
@@ -23,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  IG_COVER_IMAGE_ASPECT,
+  IG_ICON_IMAGE_ASPECT,
+  IG_IMAGE_MAX_MB,
+} from "../constants/ig-images.constants";
 import { useInterestGroupsAdmin } from "../hooks/use-manage-ig";
 import {
   type InterestGroup,
@@ -185,7 +190,6 @@ const DEFAULT_VALUES: InterestGroupCreate = {
   name: "",
   code: "",
   category: "coder",
-  icon: "",
   about: "",
   prerequisites: [],
   career_opportunities: [],
@@ -208,6 +212,8 @@ export function InterestGroupFormDialog({
     createInterestGroup,
     updateInterestGroup,
     partialUpdateInterestGroup,
+    uploadCoverImage,
+    uploadIconImage,
   } = useInterestGroupsAdmin();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -217,7 +223,8 @@ export function InterestGroupFormDialog({
   const [mentorMuids, setMentorMuids] = useState<string[]>([]);
   const [topBlogs, setTopBlogs] = useState<BlogEntry[]>([]);
   const [peopleToFollow, setPeopleToFollow] = useState<PersonEntry[]>([]);
-  const [erroredIconUrl, setErroredIconUrl] = useState<string | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [iconImageFile, setIconImageFile] = useState<File | null>(null);
 
   const {
     control,
@@ -231,17 +238,16 @@ export function InterestGroupFormDialog({
     defaultValues: DEFAULT_VALUES,
   });
 
-  const watchedIcon = watch("icon");
-
   useEffect(() => {
     if (!isOpen) return;
     setCurrentStep(1);
+    setCoverImageFile(null);
+    setIconImageFile(null);
     if (initialData) {
       reset({
         name: initialData.name,
         code: initialData.code,
         category: initialData.category as InterestGroupCreate["category"],
-        icon: initialData.icon ?? "",
         about: initialData.about ?? "",
         prerequisites: normalizeArrayField(initialData.prerequisites),
         career_opportunities: normalizeArrayField(
@@ -293,7 +299,7 @@ export function InterestGroupFormDialog({
 
   const validateStep = async (): Promise<boolean> => {
     if (currentStep === 1) {
-      return trigger(["name", "code", "category", "icon"]);
+      return trigger(["name", "code", "category"]);
     }
     return true;
   };
@@ -323,8 +329,23 @@ export function InterestGroupFormDialog({
         } else {
           await updateInterestGroup(initialData.id, payload);
         }
+        // PUT/PATCH never carry images — replace via the standalone endpoints.
+        // Silenced so the save only shows one "Interest Group updated" toast.
+        if (coverImageFile) {
+          await uploadCoverImage(initialData.id, coverImageFile, {
+            silent: true,
+          });
+        }
+        if (iconImageFile) {
+          await uploadIconImage(initialData.id, iconImageFile, {
+            silent: true,
+          });
+        }
       } else {
-        await createInterestGroup(payload);
+        await createInterestGroup(payload, {
+          coverImage: coverImageFile,
+          iconImage: iconImageFile,
+        });
       }
 
       setCurrentStep(1);
@@ -504,36 +525,33 @@ export function InterestGroupFormDialog({
                         </p>
                       ) : null}
                     </div>
+                  </div>
 
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
-                        Icon URL <span className="text-destructive">*</span>
+                        Cover image
                       </p>
-                      <div className="flex items-center gap-3">
-                        {watchedIcon &&
-                        /^(https?:\/\/|\/)/.test(watchedIcon) &&
-                        erroredIconUrl !== watchedIcon ? (
-                          <Image
-                            key={watchedIcon}
-                            src={watchedIcon}
-                            alt=""
-                            width={40}
-                            height={40}
-                            onError={() => setErroredIconUrl(watchedIcon)}
-                            className="h-10 w-10 shrink-0 rounded-lg border border-border object-cover"
-                          />
-                        ) : null}
-                        <Input
-                          className="rounded-xl border-border bg-background"
-                          placeholder="https://example.com/icon.png"
-                          {...register("icon")}
-                        />
-                      </div>
-                      {errors.icon?.message ? (
-                        <p className="text-xs text-destructive">
-                          {errors.icon.message}
-                        </p>
-                      ) : null}
+                      <ImageUpload
+                        value={coverImageFile}
+                        onChange={setCoverImageFile}
+                        currentUrl={initialData?.cover_image}
+                        maxSizeMB={IG_IMAGE_MAX_MB}
+                        aspectRatio={IG_COVER_IMAGE_ASPECT}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">
+                        Icon image
+                      </p>
+                      <ImageUpload
+                        value={iconImageFile}
+                        onChange={setIconImageFile}
+                        currentUrl={initialData?.icon_image}
+                        maxSizeMB={IG_IMAGE_MAX_MB}
+                        aspectRatio={IG_ICON_IMAGE_ASPECT}
+                        cropShape="round"
+                      />
                     </div>
                   </div>
                 </section>
@@ -840,7 +858,20 @@ export function InterestGroupFormDialog({
                           : "Not set",
                         true,
                       ],
-                      ["Icon URL", values.icon || "Not set", true],
+                      [
+                        "Cover image",
+                        coverImageFile?.name ||
+                          (initialData?.cover_image
+                            ? "Already set"
+                            : "Not set"),
+                        false,
+                      ],
+                      [
+                        "Icon image",
+                        iconImageFile?.name ||
+                          (initialData?.icon_image ? "Already set" : "Not set"),
+                        false,
+                      ],
                       [
                         "About",
                         values.about

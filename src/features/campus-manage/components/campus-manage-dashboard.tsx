@@ -98,6 +98,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAssignCampusMentor } from "@/features/campus/hooks/campus.hooks";
+import { IGIcon } from "@/features/interest-groups";
 import { chipColor } from "@/lib/chip-colors";
 import { cn } from "@/lib/utils";
 import {
@@ -542,26 +543,6 @@ function CompactStatCard({
         <p className="text-2xl font-bold">{value}</p>
       </CardContent>
     </Card>
-  );
-}
-
-function ChapterIcon({ src }: { src?: string | null }) {
-  const [hasError, setHasError] = useState(false);
-  const isValidSrc = !!src && /^(https?:\/\/|\/)/.test(src);
-
-  if (!isValidSrc || hasError) {
-    return <BookOpen className="h-4 w-4" />;
-  }
-
-  return (
-    <Image
-      src={src}
-      alt=""
-      width={36}
-      height={36}
-      className="h-full w-full object-cover"
-      onError={() => setHasError(true)}
-    />
   );
 }
 
@@ -2092,12 +2073,16 @@ export function CampusManageDashboard() {
                             <CardHeader className="pb-3 border-b border-border/40">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/5 text-primary">
-                                    <ChapterIcon
-                                      key={chapter.id}
-                                      src={chapter.icon || chapter.iconLink}
-                                    />
-                                  </div>
+                                  <IGIcon
+                                    key={chapter.id}
+                                    src={
+                                      chapter.igIconImage ??
+                                      chapter.icon ??
+                                      chapter.iconLink
+                                    }
+                                    size={36}
+                                    className="rounded-xl bg-primary/5 text-primary"
+                                  />
                                   <div className="min-w-0 space-y-0.5">
                                     <CardTitle className="truncate text-sm font-bold leading-tight text-foreground">
                                       {chapter.name}

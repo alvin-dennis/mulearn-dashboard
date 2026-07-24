@@ -4,6 +4,7 @@ import { Plus, Trash2, XCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
@@ -24,6 +25,11 @@ import {
 import { TagInput } from "@/components/ui/tag-input";
 import { Textarea } from "@/components/ui/textarea";
 import type { InterestGroupDetail } from "@/features/interest-groups/schemas";
+import {
+  IG_COVER_IMAGE_ASPECT,
+  IG_ICON_IMAGE_ASPECT,
+  IG_IMAGE_MAX_MB,
+} from "../constants/ig-images.constants";
 import { useEditInterestGroup } from "../hooks/use-edit-interest-group";
 
 // ─── Types ──────────────────────────────────────────────────
@@ -79,7 +85,16 @@ export function EditInterestGroupForm({
   group,
   onSuccess,
 }: EditInterestGroupFormProps) {
-  const { editInterestGroup, isPending } = useEditInterestGroup();
+  const {
+    editInterestGroup,
+    isPending,
+    uploadCoverImage,
+    removeCoverImage,
+    uploadIconImage,
+    removeIconImage,
+    isRemovingCoverImage,
+    isRemovingIconImage,
+  } = useEditInterestGroup();
 
   // ── Simple text fields ─────────────────────────────────
   const [name, setName] = useState(group.name || "");
@@ -87,9 +102,15 @@ export function EditInterestGroupForm({
   const [resource, setResource] = useState(group.resource || "");
   const [officeHours, setOfficeHours] = useState(group.office_hours || "");
   const [thinktank, setThinktank] = useState(group.thinktank || "");
-  const [icon, setIcon] = useState(group.icon || "");
   const [code, setCode] = useState(group.code || "");
   const [category, setCategory] = useState(group.category || "others");
+
+  // ── Cover / icon images — replaced/removed via standalone endpoints,
+  // never sent as part of the PATCH payload below ──────────
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [iconImageFile, setIconImageFile] = useState<File | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState(group.cover_image ?? null);
+  const [iconImageUrl, setIconImageUrl] = useState(group.icon_image ?? null);
 
   // ── Array (tag) fields ─────────────────────────────────
   const [prerequisites, setPrerequisites] = useState<string[]>(
@@ -163,7 +184,6 @@ export function EditInterestGroupForm({
       payload.office_hours = officeHours || null;
     if (thinktank !== (group.thinktank || ""))
       payload.thinktank = thinktank || null;
-    if (icon !== (group.icon || "")) payload.icon = icon;
     if (code !== (group.code || "")) payload.code = code;
     if (category !== (group.category || "others")) payload.category = category;
 
@@ -197,13 +217,38 @@ export function EditInterestGroupForm({
         mentors.length > 0 ? mentors.map((m) => ({ muid: m })) : [];
     }
 
-    if (Object.keys(payload).length === 0) {
-      onSuccess?.();
-      return;
+    if (Object.keys(payload).length > 0) {
+      await editInterestGroup({ id: group.id, data: payload });
     }
 
-    await editInterestGroup({ id: group.id, data: payload });
+    // Images never travel through PATCH — replace via the standalone
+    // upload endpoints when a new file was picked in this session.
+    if (coverImageFile) {
+      const url = await uploadCoverImage(group.id, coverImageFile);
+      setCoverImageUrl(url);
+      setCoverImageFile(null);
+    }
+    if (iconImageFile) {
+      const url = await uploadIconImage(group.id, iconImageFile);
+      setIconImageUrl(url);
+      setIconImageFile(null);
+    }
+
     onSuccess?.();
+  };
+
+  const handleRemoveCoverImage = async () => {
+    if (!window.confirm("Remove this interest group's cover image?")) return;
+    await removeCoverImage(group.id);
+    setCoverImageUrl(null);
+    setCoverImageFile(null);
+  };
+
+  const handleRemoveIconImage = async () => {
+    if (!window.confirm("Remove this interest group's icon image?")) return;
+    await removeIconImage(group.id);
+    setIconImageUrl(null);
+    setIconImageFile(null);
   };
 
   return (
@@ -260,13 +305,52 @@ export function EditInterestGroupForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ig-icon">Icon URL</Label>
-            <Input
-              id="ig-icon"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              placeholder="https://..."
+            <Label>Cover image</Label>
+            <ImageUpload
+              value={coverImageFile}
+              onChange={setCoverImageFile}
+              currentUrl={coverImageUrl}
+              maxSizeMB={IG_IMAGE_MAX_MB}
+              aspectRatio={IG_COVER_IMAGE_ASPECT}
+              disabled={isRemovingCoverImage}
             />
+            {coverImageUrl && !coverImageFile ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={handleRemoveCoverImage}
+                disabled={isRemovingCoverImage}
+              >
+                {isRemovingCoverImage ? "Removing…" : "Remove cover image"}
+              </Button>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Icon image</Label>
+            <ImageUpload
+              value={iconImageFile}
+              onChange={setIconImageFile}
+              currentUrl={iconImageUrl}
+              maxSizeMB={IG_IMAGE_MAX_MB}
+              aspectRatio={IG_ICON_IMAGE_ASPECT}
+              cropShape="round"
+              disabled={isRemovingIconImage}
+            />
+            {iconImageUrl && !iconImageFile ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={handleRemoveIconImage}
+                disabled={isRemovingIconImage}
+              >
+                {isRemovingIconImage ? "Removing…" : "Remove icon image"}
+              </Button>
+            ) : null}
           </div>
 
           <div className="space-y-2">

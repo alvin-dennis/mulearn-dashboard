@@ -1,12 +1,16 @@
 export type {
   InterestGroup,
   InterestGroupCreate,
+  InterestGroupCreateResponse,
   InterestGroupListResponse,
   InterestGroupRequest,
   InterestGroupRequestListResponse,
   InterestGroupUpdate,
 } from "./manage-ig.schema";
 export {
+  IgCoverImageResponseSchema,
+  IgIconImageResponseSchema,
+  InterestGroupCreateResponseSchema,
   InterestGroupCreateSchema,
   InterestGroupListResponseSchema,
   InterestGroupRequestListResponseSchema,

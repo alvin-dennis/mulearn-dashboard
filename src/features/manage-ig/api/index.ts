@@ -5,9 +5,13 @@ export {
   getAdminInterestGroups,
   getIgRequests,
   partialUpdateInterestGroup,
+  removeIgCoverImage,
+  removeIgIconImage,
   submitIgRequest,
   updateIgRequestStatus,
   updateInterestGroup,
+  uploadIgCoverImage,
+  uploadIgIconImage,
 } from "./manage-ig.api";
 
 export {

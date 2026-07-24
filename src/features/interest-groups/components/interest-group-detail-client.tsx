@@ -21,32 +21,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
-import { useInterestGroupDetail } from "@/features/interest-groups";
+import { IGIcon, useInterestGroupDetail } from "@/features/interest-groups";
 import { ImpactProjectsSection } from "@/features/manage-ig";
 import { PersonCard } from "./person-card";
-
-function IGIcon({ src }: { src?: string | null }) {
-  const [hasError, setHasError] = useState(false);
-  const isValidSrc = !!src && /^(https?:\/\/|\/)/.test(src);
-
-  if (!isValidSrc || hasError) {
-    return <BookOpen className="h-4 w-4" />;
-  }
-
-  return (
-    <Image
-      src={src}
-      alt=""
-      width={36}
-      height={36}
-      className="h-full w-full object-cover"
-      onError={() => setHasError(true)}
-    />
-  );
-}
 
 export function InterestGroupDetailClient() {
   const router = useRouter();
@@ -132,12 +111,27 @@ export function InterestGroupDetailClient() {
 
       {/* ── Hero ── */}
       <div className="relative overflow-hidden rounded-[2rem] bg-linear-to-br from-primary/90 via-primary to-primary/80 p-6 sm:p-8 md:p-12 text-primary-foreground shadow-xl shadow-primary/10">
+        {group.cover_image && (
+          <Image
+            key={group.cover_image}
+            src={group.cover_image}
+            alt=""
+            fill
+            priority
+            className="object-cover opacity-30"
+          />
+        )}
         <div className="absolute -right-20 -top-20 h-64 w-64 sm:h-80 sm:w-80 md:h-96 md:w-96 rounded-full bg-card/10 blur-3xl" />
         <div className="absolute -left-20 -bottom-20 h-64 w-64 sm:h-80 sm:w-80 md:h-96 md:w-96 rounded-full bg-foreground/10 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-6 md:gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-4 sm:space-y-6 max-w-3xl">
             <div className="flex flex-wrap items-center gap-3">
-              {group.icon && <IGIcon key={group.id} src={group.icon} />}
+              <IGIcon
+                key={group.id}
+                src={group.icon_image ?? group.icon}
+                size={44}
+                className="border-card/20 bg-card/10 text-primary-foreground backdrop-blur-md"
+              />
               {group.category && (
                 <div className="inline-flex items-center rounded-full bg-card/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-md border border-card/10">
                   {group.category}

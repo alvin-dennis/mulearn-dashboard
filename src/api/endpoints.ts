@@ -1006,6 +1006,12 @@ export const endpoints = {
 
       /** PATCH - Update IG request status */
       requestUpdate: (id: string) => `/api/v1/dashboard/ig/request/${id}/`,
+
+      /** POST/DELETE - Upload/replace or remove an IG's cover image (multipart, field "image") */
+      coverImage: (id: string) => `/api/v1/dashboard/ig/${id}/cover-image/`,
+
+      /** POST/DELETE - Upload/replace or remove an IG's icon image (multipart, field "image") */
+      iconImage: (id: string) => `/api/v1/dashboard/ig/${id}/icon-image/`,
     },
   },
 

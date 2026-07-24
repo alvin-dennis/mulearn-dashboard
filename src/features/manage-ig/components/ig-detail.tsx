@@ -19,12 +19,13 @@ import {
   Twitter,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Loader from "@/app/loading";
 import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
-import { useInterestGroupDetail } from "@/features/interest-groups";
+import { IGIcon, useInterestGroupDetail } from "@/features/interest-groups";
 import { PersonCard } from "@/features/interest-groups/components/person-card";
 import type { InterestGroup } from "../schemas";
 import { InterestGroupFormDialog } from "./ig-form-dialog";
@@ -107,6 +108,16 @@ export function IGDetail() {
 
       {/* ── Hero ── */}
       <div className="relative overflow-hidden rounded-[2rem] bg-linear-to-br from-primary/90 via-primary to-primary/80 p-6 sm:p-8 md:p-12 text-primary-foreground shadow-xl shadow-primary/10">
+        {group.cover_image && (
+          <Image
+            key={group.cover_image}
+            src={group.cover_image}
+            alt=""
+            fill
+            priority
+            className="object-cover opacity-30"
+          />
+        )}
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
           <Button
             type="button"
@@ -124,6 +135,12 @@ export function IGDetail() {
         <div className="relative z-10 flex flex-col gap-6 md:gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-4 sm:space-y-6 max-w-3xl">
             <div className="flex flex-wrap items-center gap-3">
+              <IGIcon
+                key={group.id}
+                src={group.icon_image ?? group.icon}
+                size={44}
+                className="border-card/20 bg-card/10 text-primary-foreground backdrop-blur-md"
+              />
               {group.category && (
                 <div className="inline-flex items-center rounded-full bg-card/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-md border border-card/10">
                   {group.category}
