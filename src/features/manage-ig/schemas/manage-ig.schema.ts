@@ -92,7 +92,35 @@ export const InterestGroupSchema = z.object({
     ])
     .nullable()
     .optional(),
-  thinktank: z.string().nullable().optional(),
+  // Muid-based list, same shape as leads/mentors.
+  thinktank: z
+    .union([
+      z.array(
+        z.object({
+          full_name: z.string().optional().nullable(),
+          muid: z.string().optional().nullable(),
+          profile_pic: z.string().url().optional().nullable(),
+          socials: z
+            .object({
+              github: z.string().optional().nullable(),
+              facebook: z.string().optional().nullable(),
+              instagram: z.string().optional().nullable(),
+              linkedin: z.string().optional().nullable(),
+              dribble: z.string().optional().nullable(),
+              behance: z.string().optional().nullable(),
+              stackoverflow: z.string().optional().nullable(),
+              medium: z.string().optional().nullable(),
+              hackerrank: z.string().optional().nullable(),
+            })
+            .optional()
+            .nullable(),
+        }),
+      ),
+      z.array(z.string()),
+      z.string(),
+    ])
+    .nullable()
+    .optional(),
   office_hours: z.string().nullable().optional(),
   /** Legacy emoji/short-code icon. Read-only — no longer settable via Create/Update. */
   icon: z.string().nullable().optional(),

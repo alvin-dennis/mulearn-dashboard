@@ -394,11 +394,11 @@ export function IGDetail() {
         {/* ── Sidebar ── */}
         <div className="space-y-6 lg:col-span-4 px-2 sm:px-0 min-w-0">
           <div className="space-y-6 lg:sticky lg:top-8">
-            {/* Quick Info / Meta */}
+            {/* Quick Links */}
             <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
               <div className="border-b border-border/50 bg-muted/30 px-4 sm:px-6 py-3 sm:py-4">
                 <h3 className="text-base sm:text-lg font-bold text-foreground">
-                  Quick Info
+                  Quick Links
                 </h3>
               </div>
               <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
@@ -414,23 +414,6 @@ export function IGDetail() {
                       </p>
                       <p className="mt-1 text-sm font-semibold text-foreground">
                         {group.office_hours}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Thinktank */}
-                {group.thinktank && (
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">
-                      <span className="text-sm font-bold">#</span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Think Tank
-                      </p>
-                      <p className="mt-1 text-sm font-mono font-semibold text-foreground">
-                        {group.thinktank}
                       </p>
                     </div>
                   </div>
@@ -452,6 +435,33 @@ export function IGDetail() {
                 )}
               </div>
             </div>
+
+            {/* ── Sidebar: Think Tank — MUID only ────────────────────── */}
+            {group.thinktank && group.thinktank.length > 0 && (
+              <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
+                <div className="border-b border-border/50 bg-muted/30 px-4 sm:px-6 py-3 sm:py-4">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Think Tanks
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-3">
+                    {group.thinktank.map((person) => (
+                      <PersonCard
+                        key={
+                          person.muid ??
+                          person.full_name ??
+                          Math.random().toString()
+                        }
+                        {...person}
+                        avatarBgClass="from-brand-blue/20 to-brand-blue/5"
+                        accentClass="text-brand-blue"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── Sidebar: Leads — MUID only ─────────────────────────── */}
             {group.leads && group.leads.length > 0 && (
@@ -482,8 +492,8 @@ export function IGDetail() {
 
             <div className="rounded-3xl bg-linear-to-br from-muted/50 to-muted/10 p-6 border border-border/50 text-center">
               <p className="text-sm font-medium text-muted-foreground">
-                Need help or have questions? Reach out to the leads or join the
-                think tank channel.
+                Need help or have questions? Reach out to the leads or think
+                tank members.
               </p>
             </div>
 

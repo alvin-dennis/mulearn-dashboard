@@ -54,7 +54,10 @@ interface PersonToFollow {
 
 /** Extract muid strings from the various API shapes */
 function toMuidArray(
-  raw: InterestGroupDetail["leads"] | InterestGroupDetail["mentors"],
+  raw:
+    | InterestGroupDetail["leads"]
+    | InterestGroupDetail["mentors"]
+    | InterestGroupDetail["thinktank"],
 ): string[] {
   if (!raw) return [];
   if (Array.isArray(raw)) {
@@ -101,7 +104,6 @@ export function EditInterestGroupForm({
   const [about, setAbout] = useState(group.about || "");
   const [resource, setResource] = useState(group.resource || "");
   const [officeHours, setOfficeHours] = useState(group.office_hours || "");
-  const [thinktank, setThinktank] = useState(group.thinktank || "");
   const [code, setCode] = useState(group.code || "");
   const [category, setCategory] = useState(group.category || "others");
 
@@ -126,9 +128,12 @@ export function EditInterestGroupForm({
     group.people_to_follow || [],
   );
 
-  // Leads & Mentors — plain arrays of muid strings
+  // Leads, Mentors & Think Tank — plain arrays of muid strings
   const [leads, setLeads] = useState<string[]>(toMuidArray(group.leads));
   const [mentors, setMentors] = useState<string[]>(toMuidArray(group.mentors));
+  const [thinktank, setThinktank] = useState<string[]>(
+    toMuidArray(group.thinktank),
+  );
 
   // ── Helpers for complex arrays ─────────────────────────
 
@@ -182,8 +187,6 @@ export function EditInterestGroupForm({
       payload.resource = resource || null;
     if (officeHours !== (group.office_hours || ""))
       payload.office_hours = officeHours || null;
-    if (thinktank !== (group.thinktank || ""))
-      payload.thinktank = thinktank || null;
     if (code !== (group.code || "")) payload.code = code;
     if (category !== (group.category || "others")) payload.category = category;
 
@@ -215,6 +218,12 @@ export function EditInterestGroupForm({
     if (JSON.stringify(mentors) !== JSON.stringify(origMentorMuids)) {
       payload.mentors =
         mentors.length > 0 ? mentors.map((m) => ({ muid: m })) : [];
+    }
+
+    const origThinktankMuids = toMuidArray(group.thinktank);
+    if (JSON.stringify(thinktank) !== JSON.stringify(origThinktankMuids)) {
+      payload.thinktank =
+        thinktank.length > 0 ? thinktank.map((m) => ({ muid: m })) : [];
     }
 
     if (Object.keys(payload).length > 0) {
@@ -399,16 +408,6 @@ export function EditInterestGroupForm({
               placeholder="e.g. Mon & Wed 4-5 PM"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ig-thinktank">Think Tank</Label>
-            <Input
-              id="ig-thinktank"
-              value={thinktank}
-              onChange={(e) => setThinktank(e.target.value)}
-              placeholder="e.g. #web-thinktank"
-            />
-          </div>
         </fieldset>
 
         {/* ── Tag Fields ── */}
@@ -554,6 +553,18 @@ export function EditInterestGroupForm({
           <MuidSearchInput
             value={mentors}
             onChange={setMentors}
+            placeholder="Search users by muid…"
+          />
+        </fieldset>
+
+        {/* ── Think Tank (MUID only) ── */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Think Tank
+          </legend>
+          <MuidSearchInput
+            value={thinktank}
+            onChange={setThinktank}
             placeholder="Search users by muid…"
           />
         </fieldset>

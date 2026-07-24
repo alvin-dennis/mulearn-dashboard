@@ -198,7 +198,7 @@ const DEFAULT_VALUES: InterestGroupCreate = {
   people_to_follow: [],
   leads: [],
   mentors: [],
-  thinktank: "",
+  thinktank: [],
   office_hours: "",
 };
 
@@ -221,6 +221,7 @@ export function InterestGroupFormDialog({
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [leadMuids, setLeadMuids] = useState<string[]>([]);
   const [mentorMuids, setMentorMuids] = useState<string[]>([]);
+  const [thinktankMuids, setThinktankMuids] = useState<string[]>([]);
   const [topBlogs, setTopBlogs] = useState<BlogEntry[]>([]);
   const [peopleToFollow, setPeopleToFollow] = useState<PersonEntry[]>([]);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
@@ -258,7 +259,7 @@ export function InterestGroupFormDialog({
         people_to_follow: [],
         leads: [],
         mentors: [],
-        thinktank: initialData.thinktank ?? "",
+        thinktank: [],
         office_hours: initialData.office_hours ?? "",
       });
       setTopBlogs(toTopBlogsArray(initialData.top_blogs));
@@ -287,10 +288,16 @@ export function InterestGroupFormDialog({
     };
     setLeadMuids(extract(initialData?.leads));
     setMentorMuids(extract(initialData?.mentors));
+    setThinktankMuids(extract(initialData?.thinktank));
   }, [initialData]);
 
   const requestClose = () => {
-    if (isDirty || leadMuids.length > 0 || mentorMuids.length > 0) {
+    if (
+      isDirty ||
+      leadMuids.length > 0 ||
+      mentorMuids.length > 0 ||
+      thinktankMuids.length > 0
+    ) {
       setConfirmCloseOpen(true);
       return;
     }
@@ -320,6 +327,7 @@ export function InterestGroupFormDialog({
         people_to_follow: peopleToFollow.map(({ _key: _, ...p }) => p),
         leads: leadMuids.map((m) => ({ muid: m })),
         mentors: mentorMuids.map((m) => ({ muid: m })),
+        thinktank: thinktankMuids.map((m) => ({ muid: m })),
       };
 
       if (initialData) {
@@ -816,6 +824,16 @@ export function InterestGroupFormDialog({
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-foreground">
+                        Think Tank
+                      </p>
+                      <MuidSearchInput
+                        value={thinktankMuids}
+                        onChange={setThinktankMuids}
+                        placeholder="Search users by muid…"
+                      />
+                    </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
                         Office Hours
@@ -824,16 +842,6 @@ export function InterestGroupFormDialog({
                         className="rounded-xl border-border bg-background"
                         placeholder="e.g. Mon–Fri 6PM–8PM"
                         {...register("office_hours")}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">
-                        Thinktank URL
-                      </p>
-                      <Input
-                        className="rounded-xl border-border bg-background"
-                        placeholder="Link to thinktank"
-                        {...register("thinktank")}
                       />
                     </div>
                   </div>
@@ -930,8 +938,14 @@ export function InterestGroupFormDialog({
                           : "Not set",
                         false,
                       ],
+                      [
+                        "Think Tank",
+                        thinktankMuids.length > 0
+                          ? thinktankMuids.join(", ")
+                          : "Not set",
+                        false,
+                      ],
                       ["Office Hours", values.office_hours || "Not set", false],
-                      ["Thinktank URL", values.thinktank || "Not set", false],
                     ].map(([label, value, required]) => (
                       <div
                         key={label as string}
