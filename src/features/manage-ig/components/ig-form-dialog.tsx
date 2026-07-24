@@ -327,7 +327,10 @@ export function InterestGroupFormDialog({
         people_to_follow: peopleToFollow.map(({ _key: _, ...p }) => p),
         leads: leadMuids.map((m) => ({ muid: m })),
         mentors: mentorMuids.map((m) => ({ muid: m })),
-        thinktank: thinktankMuids.map((m) => ({ muid: m })),
+        thinktank:
+          thinktankMuids.length > 0
+            ? thinktankMuids.map((m) => ({ muid: m }))
+            : (initialData?.thinktank ?? []),
       };
 
       if (initialData) {

@@ -4,6 +4,7 @@ import { Plus, Trash2, XCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -246,18 +247,21 @@ export function EditInterestGroupForm({
     onSuccess?.();
   };
 
-  const handleRemoveCoverImage = async () => {
-    if (!window.confirm("Remove this interest group's cover image?")) return;
-    await removeCoverImage(group.id);
-    setCoverImageUrl(null);
-    setCoverImageFile(null);
-  };
+  const [removeImageTarget, setRemoveImageTarget] = useState<
+    "cover" | "icon" | null
+  >(null);
 
-  const handleRemoveIconImage = async () => {
-    if (!window.confirm("Remove this interest group's icon image?")) return;
-    await removeIconImage(group.id);
-    setIconImageUrl(null);
-    setIconImageFile(null);
+  const confirmRemoveImage = async () => {
+    if (removeImageTarget === "cover") {
+      await removeCoverImage(group.id);
+      setCoverImageUrl(null);
+      setCoverImageFile(null);
+    } else if (removeImageTarget === "icon") {
+      await removeIconImage(group.id);
+      setIconImageUrl(null);
+      setIconImageFile(null);
+    }
+    setRemoveImageTarget(null);
   };
 
   return (
@@ -329,7 +333,7 @@ export function EditInterestGroupForm({
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive"
-                onClick={handleRemoveCoverImage}
+                onClick={() => setRemoveImageTarget("cover")}
                 disabled={isRemovingCoverImage}
               >
                 {isRemovingCoverImage ? "Removing…" : "Remove cover image"}
@@ -354,7 +358,7 @@ export function EditInterestGroupForm({
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive"
-                onClick={handleRemoveIconImage}
+                onClick={() => setRemoveImageTarget("icon")}
                 disabled={isRemovingIconImage}
               >
                 {isRemovingIconImage ? "Removing…" : "Remove icon image"}
@@ -584,6 +588,24 @@ export function EditInterestGroupForm({
           {isPending ? "Saving…" : "Save Changes"}
         </Button>
       </SheetFooter>
+
+      <ConfirmDialog
+        open={removeImageTarget !== null}
+        onOpenChange={(open) => !open && setRemoveImageTarget(null)}
+        title={
+          removeImageTarget === "cover"
+            ? "Remove cover image?"
+            : "Remove icon image?"
+        }
+        description={`This will remove the interest group's ${removeImageTarget} image.`}
+        confirmLabel="Remove"
+        isPending={
+          removeImageTarget === "cover"
+            ? isRemovingCoverImage
+            : isRemovingIconImage
+        }
+        onConfirm={confirmRemoveImage}
+      />
     </form>
   );
 }

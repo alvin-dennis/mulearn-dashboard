@@ -368,9 +368,9 @@ export function IGDetailPanel({ isOpen, onClose, ig, onEdit }: Props) {
           {hasThinktank && (
             <DetailSection icon={Lightbulb} label="Think Tank">
               <div className="space-y-1.5">
-                {thinktank.map((person) => (
+                {thinktank.map((person, i) => (
                   <div
-                    key={person.muid || person.full_name || Math.random()}
+                    key={person.muid || person.full_name || i}
                     className="text-sm flex flex-col"
                   >
                     <span className="font-medium text-foreground">
@@ -395,9 +395,9 @@ export function IGDetailPanel({ isOpen, onClose, ig, onEdit }: Props) {
               {hasLeads && (
                 <DetailSection icon={UserCheck} label="Leads">
                   <div className="space-y-1.5">
-                    {leads.map((lead) => (
+                    {leads.map((lead, i) => (
                       <div
-                        key={lead.muid || lead.full_name || Math.random()}
+                        key={lead.muid || lead.full_name || i}
                         className="text-sm flex flex-col"
                       >
                         <span className="font-medium text-foreground">
@@ -416,9 +416,9 @@ export function IGDetailPanel({ isOpen, onClose, ig, onEdit }: Props) {
               {hasMentors && (
                 <DetailSection icon={Users} label="Mentors">
                   <div className="space-y-1.5">
-                    {mentors.map((mentor) => (
+                    {mentors.map((mentor, i) => (
                       <div
-                        key={mentor.muid || mentor.full_name || Math.random()}
+                        key={mentor.muid || mentor.full_name || i}
                         className="text-sm"
                       >
                         <span className="font-medium text-foreground">

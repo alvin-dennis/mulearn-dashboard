@@ -2081,7 +2081,7 @@ export function CampusManageDashboard() {
                                       chapter.iconLink
                                     }
                                     size={36}
-                                    className="rounded-xl bg-primary/5 text-primary"
+                                    className="rounded-xl border-0 bg-primary/5 text-primary"
                                   />
                                   <div className="min-w-0 space-y-0.5">
                                     <CardTitle className="truncate text-sm font-bold leading-tight text-foreground">

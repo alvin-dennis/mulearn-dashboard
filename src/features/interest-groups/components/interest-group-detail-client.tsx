@@ -349,13 +349,9 @@ export function InterestGroupDetailClient() {
                 </h2>
               </div>
               <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 place-items-stretch">
-                {group.mentors.map((mentor) => (
+                {group.mentors.map((mentor, i) => (
                   <PersonCard
-                    key={
-                      mentor.muid ??
-                      mentor.full_name ??
-                      Math.random().toString()
-                    }
+                    key={mentor.muid ?? mentor.full_name ?? i}
                     {...mentor}
                     avatarBgClass="from-purple-500/20 to-purple-500/5"
                     accentClass="text-brand-purple"
@@ -435,13 +431,9 @@ export function InterestGroupDetailClient() {
                 </div>
                 <div className="p-6">
                   <div className="space-y-3">
-                    {group.thinktank.map((person) => (
+                    {group.thinktank.map((person, i) => (
                       <PersonCard
-                        key={
-                          person.muid ??
-                          person.full_name ??
-                          Math.random().toString()
-                        }
+                        key={person.muid ?? person.full_name ?? i}
                         {...person}
                         avatarBgClass="from-brand-blue/20 to-brand-blue/5"
                         accentClass="text-brand-blue"
@@ -461,13 +453,9 @@ export function InterestGroupDetailClient() {
                 </div>
                 <div className="p-6">
                   <div className="space-y-3">
-                    {group.leads.map((lead) => (
+                    {group.leads.map((lead, i) => (
                       <PersonCard
-                        key={
-                          lead.muid ??
-                          lead.full_name ??
-                          Math.random().toString()
-                        }
+                        key={lead.muid ?? lead.full_name ?? i}
                         {...lead}
                         avatarBgClass="from-purple-500/20 to-purple-500/5"
                         accentClass="text-brand-purple"

@@ -23,7 +23,7 @@ function assertValidIgImage(file: File): void {
     throw new ApiError(400, "Expected an image file");
   }
   if (file.size > IG_IMAGE_MAX_BYTES) {
-    throw new ApiError(400, "Image must be under 5 MB");
+    throw new ApiError(400, `Image must be under ${IG_IMAGE_MAX_MB} MB`);
   }
 }
 
