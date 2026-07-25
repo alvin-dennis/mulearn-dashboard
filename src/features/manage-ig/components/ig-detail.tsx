@@ -485,7 +485,8 @@ export function IGDetail() {
               </p>
             </div>
 
-            <ImpactProjectsSection igId={group.id} canManage />
+            {/* TODO: Impact Projects disabled — backend conflict */}
+            {/* <ImpactProjectsSection igId={group.id} canManage /> */}
           </div>
         </div>
       </div>
