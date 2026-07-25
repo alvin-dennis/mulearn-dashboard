@@ -53,6 +53,7 @@ import type {
 } from "../types";
 import { EventSearch } from "./event-search";
 import { VenueSection } from "./venue-section";
+import { CustomDateTimePicker } from "@/components/ui/custom-datetime-picker";
 
 const MAX_WIZARD_UPLOAD_BYTES = 900 * 1024;
 const MAX_SINGLE_IMAGE_BYTES = 450 * 1024;
@@ -1270,9 +1271,15 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
                         Start datetime{" "}
                         <span className="text-destructive">*</span>
                       </p>
-                      <Input
-                        type="datetime-local"
-                        {...register("start_datetime")}
+                      <Controller
+                        control={control}
+                        name="start_datetime"
+                        render={({ field }) => (
+                          <CustomDateTimePicker
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
                       />
                       {errors.start_datetime?.message ? (
                         <p className="text-xs text-destructive">
@@ -1284,10 +1291,20 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
                       <p className="text-sm font-medium text-foreground">
                         End datetime <span className="text-destructive">*</span>
                       </p>
-                      <Input
-                        type="datetime-local"
-                        min={minEndDatetime}
-                        {...register("end_datetime")}
+                      <Controller
+                        control={control}
+                        name="end_datetime"
+                        render={({ field }) => (
+                          <CustomDateTimePicker
+                            value={field.value}
+                            onChange={field.onChange}
+                            minDate={
+                              minEndDatetime
+                                ? new Date(minEndDatetime)
+                                : undefined
+                            }
+                          />
+                        )}
                       />
                       {errors.end_datetime?.message ? (
                         <p className="text-xs text-destructive">
