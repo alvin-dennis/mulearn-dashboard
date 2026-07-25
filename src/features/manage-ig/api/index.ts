@@ -1,4 +1,11 @@
 export {
+  createImpactProject,
+  deleteImpactProject,
+  getImpactProjects,
+  updateImpactProject,
+  uploadImpactProjectImage,
+} from "./impact-projects.api";
+export {
   createInterestGroup,
   deleteInterestGroup,
   exportIgCSV,
@@ -13,11 +20,3 @@ export {
   uploadIgCoverImage,
   uploadIgIconImage,
 } from "./manage-ig.api";
-
-export {
-  createImpactProject,
-  deleteImpactProject,
-  getImpactProjects,
-  updateImpactProject,
-  uploadImpactProjectImage,
-} from "./impact-projects.api";
