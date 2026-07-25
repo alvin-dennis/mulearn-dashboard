@@ -12,8 +12,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useJobs } from "@/features/company-jobs/hooks/use-jobs";
-import type { Job } from "@/features/company-jobs/types";
+import { type Job, useJobApplicants, useJobs } from "@/features/company-jobs";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -24,11 +23,35 @@ const STATUS_STYLES: Record<string, string> = {
 
 function JobRow({ job }: { job: Job }) {
   const statusStyle = STATUS_STYLES[job.status] ?? STATUS_STYLES.Draft;
+
+  const embeddedCount =
+    job.applicant_count ??
+    job.applications_count ??
+    job.total_applicants ??
+    job.applicantCount ??
+    job.applicationsCount;
+
+  const hasEmbeddedCount =
+    embeddedCount !== undefined && embeddedCount !== null;
+
+  const { data: applicantData } = useJobApplicants(
+    job.id,
+    { perPage: 1 },
+    { enabled: !hasEmbeddedCount },
+  );
+
+  const applicantCount = hasEmbeddedCount
+    ? embeddedCount
+    : (applicantData?.pagination.count ?? 0);
+
   return (
-    <div className="flex items-center justify-between border-b border-border py-3.5 last:border-b-0">
+    <Link
+      href={`/dashboard/company/jobs/${job.id}`}
+      className="group flex cursor-pointer items-center justify-between rounded-lg border-b border-border px-2 -mx-2 py-3.5 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 last:border-b-0"
+    >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-foreground">
+          <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
             {job.title}
           </p>
           <span
@@ -58,12 +81,12 @@ function JobRow({ job }: { job: Job }) {
         </div>
       </div>
       <div className="ml-4 shrink-0 text-right">
-        <p className="text-lg font-bold text-foreground">0</p>
+        <p className="text-lg font-bold text-foreground">{applicantCount}</p>
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
           applicants
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

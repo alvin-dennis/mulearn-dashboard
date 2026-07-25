@@ -193,6 +193,7 @@ const companyDetailsSchema = z.object({
   // Basic Info
   companyName: z
     .string()
+    .trim()
     .min(1, "Company name is required")
     .max(75, "Max 75 characters"),
   companyDescription: z.string().min(1, "Description is required"),
@@ -284,6 +285,8 @@ interface RegisterRoleDetailsProps {
   isLoadingColleges?: boolean;
   isLoadingDepartments?: boolean;
   isLoadingCompanies?: boolean;
+  onCollegeSearchChange?: (search: string) => void;
+  onDepartmentSearchChange?: (search: string) => void;
 }
 
 export function RegisterRoleDetails({
@@ -297,6 +300,8 @@ export function RegisterRoleDetails({
   isLoadingColleges = false,
   isLoadingDepartments = false,
   isLoadingCompanies = false,
+  onCollegeSearchChange,
+  onDepartmentSearchChange,
 }: RegisterRoleDetailsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -478,6 +483,21 @@ export function RegisterRoleDetails({
     setCompanyStep((s) => Math.min(s + 1, 4));
   };
 
+  const handleStepClick = async (targetStep: number) => {
+    if (targetStep === companyStep) return;
+    if (targetStep > companyStep) {
+      for (let s = companyStep; s < targetStep; s++) {
+        const fieldsToValidate = COMPANY_STEP_FIELDS[s];
+        const validStep = await form.trigger(fieldsToValidate);
+        if (!validStep) {
+          setCompanyStep(s);
+          return;
+        }
+      }
+    }
+    setCompanyStep(targetStep);
+  };
+
   return (
     <div className="w-full space-y-6">
       {/* Back button */}
@@ -579,7 +599,10 @@ export function RegisterRoleDetails({
                             }}
                             placeholder="Select your college"
                             searchPlaceholder="Search colleges..."
-                            disabled={isLoading || isLoadingColleges}
+                            disabled={isLoading}
+                            onSearchChange={onCollegeSearchChange}
+                            loading={isLoadingColleges}
+                            emptyText="Type your college to search"
                             onCreateNew={(searchTerm) => {
                               field.onChange("others");
                               form.setValue("customCollege", searchTerm);
@@ -631,7 +654,10 @@ export function RegisterRoleDetails({
                             onValueChange={field.onChange}
                             placeholder="Select your department"
                             searchPlaceholder="Search departments..."
-                            disabled={isLoading || isLoadingDepartments}
+                            disabled={isLoading}
+                            onSearchChange={onDepartmentSearchChange}
+                            loading={isLoadingDepartments}
+                            emptyText="Type your department to search"
                           />
                         </FormControl>
                         <FormMessage />
@@ -755,7 +781,10 @@ export function RegisterRoleDetails({
                         }}
                         placeholder="Select your college"
                         searchPlaceholder="Search colleges..."
-                        disabled={isLoading || isLoadingColleges}
+                        disabled={isLoading}
+                        onSearchChange={onCollegeSearchChange}
+                        loading={isLoadingColleges}
+                        emptyText="Type your college to search"
                         onCreateNew={(searchTerm) => {
                           field.onChange("others");
                           form.setValue("customCollege", searchTerm);
@@ -869,7 +898,13 @@ export function RegisterRoleDetails({
                       key={label}
                       className="flex items-center flex-1 last:flex-none"
                     >
-                      <div className="flex flex-col items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleStepClick(stepNum)}
+                        className="flex flex-col items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg p-1"
+                        aria-label={`Go to step ${stepNum}: ${label}`}
+                        aria-current={isActive ? "step" : undefined}
+                      >
                         <div
                           className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                             isDone
@@ -886,7 +921,7 @@ export function RegisterRoleDetails({
                         >
                           {label}
                         </span>
-                      </div>
+                      </button>
                       {i < COMPANY_STEPS.length - 1 && (
                         <div
                           className={`h-px flex-1 mx-1 mb-4 transition-colors ${isDone ? "bg-primary" : "bg-border"}`}
