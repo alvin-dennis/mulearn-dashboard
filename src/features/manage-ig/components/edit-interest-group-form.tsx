@@ -229,22 +229,38 @@ export function EditInterestGroupForm({
         thinktank.length > 0 ? thinktank.map((m) => ({ muid: m })) : [];
     }
 
-    if (Object.keys(payload).length > 0) {
-      await editInterestGroup({ id: group.id, data: payload });
-    }
+    // Run the metadata PATCH and the standalone image uploads independently —
+    // a failure in one must not stop the others from firing (each mutation
+    // already reports its own error toast).
+    const tasks: Promise<void>[] = [];
 
-    // Images never travel through PATCH — replace via the standalone
-    // upload endpoints when a new file was picked in this session.
+    if (Object.keys(payload).length > 0) {
+      tasks.push(
+        editInterestGroup({ id: group.id, data: payload }).catch(() => {}),
+      );
+    }
     if (coverImageFile) {
-      const url = await uploadCoverImage(group.id, coverImageFile);
-      setCoverImageUrl(url);
-      setCoverImageFile(null);
+      tasks.push(
+        uploadCoverImage(group.id, coverImageFile)
+          .then((url) => {
+            setCoverImageUrl(url ? `${url}?v=${Date.now()}` : url);
+            setCoverImageFile(null);
+          })
+          .catch(() => {}),
+      );
     }
     if (iconImageFile) {
-      const url = await uploadIconImage(group.id, iconImageFile);
-      setIconImageUrl(url);
-      setIconImageFile(null);
+      tasks.push(
+        uploadIconImage(group.id, iconImageFile)
+          .then((url) => {
+            setIconImageUrl(url ? `${url}?v=${Date.now()}` : url);
+            setIconImageFile(null);
+          })
+          .catch(() => {}),
+      );
     }
+
+    await Promise.all(tasks);
 
     onSuccess?.();
   };
