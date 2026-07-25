@@ -3,8 +3,8 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MAX_IMPACT_PROJECT_LINKS } from "../../schemas";
 import type { ImpactProjectLink } from "../../schemas";
+import { MAX_IMPACT_PROJECT_LINKS } from "../../schemas";
 
 const MAX_LINKS = MAX_IMPACT_PROJECT_LINKS;
 

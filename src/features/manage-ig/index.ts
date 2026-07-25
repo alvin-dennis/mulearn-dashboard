@@ -14,7 +14,7 @@ export {
   updateInterestGroup,
   uploadImpactProjectImage,
 } from "./api";
-
+export type { TeamMemberEntry } from "./components";
 export {
   IGClient,
   IGDetail,
@@ -23,14 +23,13 @@ export {
   ImpactProjectCard,
   ImpactProjectFormDialog,
   ImpactProjectLinksEditor,
-  ImpactProjectTeamPicker,
   ImpactProjectsSection,
+  ImpactProjectTeamPicker,
   InterestGroupCard,
   InterestGroupFormDialog,
   InterestGroupsGrid,
   ManageIGTable,
 } from "./components";
-export type { TeamMemberEntry } from "./components";
 
 export {
   impactProjectsKeys,
