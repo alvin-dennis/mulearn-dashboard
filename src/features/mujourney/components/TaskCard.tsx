@@ -41,7 +41,7 @@ export function TaskCard({
   return (
     <Card
       className={cn(
-        "relative transition-all duration-300 bg-card border border-border rounded-xl overflow-hidden shadow-md h-full flex flex-col focus:outline-none focus:ring-2 focus:ring-ring",
+        "relative transition-all duration-300 bg-card border border-border rounded-xl overflow-hidden shadow-md h-full w-full flex flex-col focus:outline-none focus:ring-2 focus:ring-ring",
         cardHoverClass,
         completedFadeClass,
         onClick && status !== "locked" && "cursor-pointer",
@@ -65,9 +65,9 @@ export function TaskCard({
         }
       }}
     >
-      <CardContent className="p-5 sm:p-7 space-y-5 flex flex-col grow">
+      <CardContent className="p-5 sm:p-6 flex flex-col h-full justify-between gap-4">
         {/* Status Badge */}
-        <div>
+        <div className="shrink-0">
           <span
             className={cn(
               "inline-block px-5 py-2 rounded-full text-sm font-semibold",
@@ -79,39 +79,40 @@ export function TaskCard({
         </div>
 
         {/* Task Title - Rendered with Markdown */}
-        <div className="text-xl font-semibold text-card-foreground leading-tight">
-          <MarkdownRenderer content={task.task_name} className="*:mb-0" />
+        <div
+          className="shrink-0 min-h-[3.25rem] flex items-center text-xl font-semibold text-card-foreground leading-snug"
+          title={task.task_name}
+        >
+          <MarkdownRenderer
+            content={task.task_name}
+            className="*:mb-0 line-clamp-2"
+          />
         </div>
 
-        {/* Description - Rendered with Markdown */}
-        {/* {task.task_description && (
-          <div className="text-base text-muted-foreground line-clamp-2 leading-relaxed">
-            <MarkdownRenderer
-              content={task.task_description}
-              className="[&>*]:mb-0"
-            />
-          </div>
-        )} */}
-
         {/* Metadata - Open Sans */}
-        <div className="space-y-3 text-base grow min-w-0">
-          <div className="flex items-start gap-1.5">
-            <span className="font-bold text-card-foreground">
+        <div className="space-y-3 text-base grow min-w-0 flex flex-col justify-center">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-bold text-card-foreground shrink-0">
               Interest Group:
             </span>
-            <span className="text-muted-foreground font-normal">
+            <span
+              className="text-muted-foreground font-normal truncate"
+              title={task.interest_group?.name || "General Tasks"}
+            >
               {task.interest_group?.name || "General Tasks"}
             </span>
           </div>
 
-          <div className="flex items-start gap-1.5">
-            <span className="font-bold text-card-foreground">Karma:</span>
-            <span className="text-muted-foreground font-normal">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-bold text-card-foreground shrink-0">
+              Karma:
+            </span>
+            <span className="text-muted-foreground font-normal truncate">
               {task.karma}
             </span>
           </div>
 
-          <div className="flex items-start gap-1.5 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             <span className="font-bold text-card-foreground shrink-0">
               Hashtag:
             </span>
@@ -125,7 +126,7 @@ export function TaskCard({
         </div>
 
         {/* Action Button - Montserrat */}
-        <div className="mt-auto pt-5">
+        <div className="mt-auto shrink-0 pt-2">
           <Button
             variant="default"
             className={cn(
