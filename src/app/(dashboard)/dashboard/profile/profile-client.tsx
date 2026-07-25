@@ -343,6 +343,14 @@ export function ProfilePageClient() {
             )}
           </div>
         </div>
+
+        <div className="w-full max-w-full overflow-x-hidden lg:col-span-1">
+          <ProfileSidebar
+            profile={profile}
+            isOwnProfile={true}
+            onAccountSettings={() => setShowAccountSettings(true)}
+          />
+        </div>
       </div>
 
       {/* Modals */}

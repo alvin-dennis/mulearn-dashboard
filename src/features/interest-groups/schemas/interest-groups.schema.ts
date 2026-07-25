@@ -17,7 +17,9 @@ export const InterestGroupSchema = z.object({
   id: z.string(),
   name: z.string(),
   code: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string().nullable().optional(),
+  cover_image: z.string().nullable().optional(),
+  icon_image: z.string().nullable().optional(),
   category: z.string().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
@@ -56,6 +58,8 @@ export const InterestGroupDetailSchema = z.object({
   name: z.string(),
   code: z.string().optional().nullable(),
   icon: z.string().optional().nullable(),
+  cover_image: z.string().optional().nullable(),
+  icon_image: z.string().optional().nullable(),
   category: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
 
@@ -65,7 +69,6 @@ export const InterestGroupDetailSchema = z.object({
   // Simple string / URL fields
   about: z.string().optional().nullable(),
   resource: z.string().optional().nullable(),
-  thinktank: z.string().optional().nullable(),
   office_hours: z.string().optional().nullable(),
 
   // Array of strings
@@ -132,6 +135,33 @@ export const InterestGroupDetailSchema = z.object({
 
   // Array of mentor objects from the API
   mentors: z
+    .array(
+      z.object({
+        muid: z.string().optional().nullable(),
+        full_name: z.string().optional().nullable(),
+        profile_pic: z.string().url().optional().nullable(),
+        socials: z
+          .object({
+            github: z.string().optional().nullable(),
+            facebook: z.string().optional().nullable(),
+            instagram: z.string().optional().nullable(),
+            linkedin: z.string().optional().nullable(),
+            dribble: z.string().optional().nullable(),
+            behance: z.string().optional().nullable(),
+            stackoverflow: z.string().optional().nullable(),
+            medium: z.string().optional().nullable(),
+            hackerrank: z.string().optional().nullable(),
+          })
+          .optional()
+          .nullable(),
+      }),
+    )
+    .optional()
+    .nullable()
+    .catch(undefined),
+
+  // Array of think-tank member objects from the API — same shape as leads/mentors.
+  thinktank: z
     .array(
       z.object({
         muid: z.string().optional().nullable(),

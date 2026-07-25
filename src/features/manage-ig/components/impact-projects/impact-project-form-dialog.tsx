@@ -16,8 +16,8 @@ import { useImpactProjectMutations } from "../../hooks/use-impact-project-mutati
 import type { ImpactProject, ImpactProjectLink } from "../../schemas";
 import { ImpactProjectLinksEditor } from "./impact-project-links-editor";
 import {
-  type TeamMemberEntry,
   ImpactProjectTeamPicker,
+  type TeamMemberEntry,
 } from "./impact-project-team-picker";
 
 const STEPS = ["Basic Info", "Team", "Links & Image", "Review"] as const;
