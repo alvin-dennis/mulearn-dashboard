@@ -229,22 +229,40 @@ export function EditInterestGroupForm({
         thinktank.length > 0 ? thinktank.map((m) => ({ muid: m })) : [];
     }
 
-    if (Object.keys(payload).length > 0) {
-      await editInterestGroup({ id: group.id, data: payload });
-    }
+    // Run the metadata PATCH and the standalone image uploads independently —
+    // a failure in one must not stop the others from firing (each mutation
+    // already reports its own error toast).
+    const tasks: Promise<void>[] = [];
 
-    // Images never travel through PATCH — replace via the standalone
-    // upload endpoints when a new file was picked in this session.
-    if (coverImageFile) {
-      const url = await uploadCoverImage(group.id, coverImageFile);
-      setCoverImageUrl(url);
-      setCoverImageFile(null);
+    if (Object.keys(payload).length > 0) {
+      tasks.push(
+        editInterestGroup({ id: group.id, data: payload }).catch(() => {}),
+      );
     }
-    if (iconImageFile) {
-      const url = await uploadIconImage(group.id, iconImageFile);
-      setIconImageUrl(url);
-      setIconImageFile(null);
-    }
+    // TODO: Cover image upload disabled — backend conflict
+    // if (coverImageFile) {
+    //   tasks.push(
+    //     uploadCoverImage(group.id, coverImageFile)
+    //       .then((url) => {
+    //         setCoverImageUrl(url ? `${url}?v=${Date.now()}` : url);
+    //         setCoverImageFile(null);
+    //       })
+    //       .catch(() => {}),
+    //   );
+    // }
+    // TODO: Icon image upload disabled — backend conflict
+    // if (iconImageFile) {
+    //   tasks.push(
+    //     uploadIconImage(group.id, iconImageFile)
+    //       .then((url) => {
+    //         setIconImageUrl(url ? `${url}?v=${Date.now()}` : url);
+    //         setIconImageFile(null);
+    //       })
+    //       .catch(() => {}),
+    //   );
+    // }
+
+    await Promise.all(tasks);
 
     onSuccess?.();
   };
@@ -319,7 +337,8 @@ export function EditInterestGroupForm({
             />
           </div>
 
-          <div className="space-y-2">
+          {/* TODO: Cover image editing disabled — backend conflict */}
+          {/* <div className="space-y-2">
             <Label>Cover image</Label>
             <ImageUpload
               value={coverImageFile}
@@ -341,9 +360,10 @@ export function EditInterestGroupForm({
                 {isRemovingCoverImage ? "Removing…" : "Remove cover image"}
               </Button>
             ) : null}
-          </div>
+          </div> */}
 
-          <div className="space-y-2">
+          {/* TODO: Icon image editing disabled — backend conflict */}
+          {/* <div className="space-y-2">
             <Label>Icon image</Label>
             <ImageUpload
               value={iconImageFile}
@@ -366,7 +386,7 @@ export function EditInterestGroupForm({
                 {isRemovingIconImage ? "Removing…" : "Remove icon image"}
               </Button>
             ) : null}
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="ig-category">Category</Label>

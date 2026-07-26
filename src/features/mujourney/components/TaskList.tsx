@@ -67,8 +67,8 @@ export function TaskList({
 
   return (
     <div className="relative group">
-      {/* Arrow wrapper perfectly aligned with the cards (accounting for py-8) */}
-      <div className="absolute inset-y-8 left-0 right-0 pointer-events-none z-10">
+      {/* Arrow wrapper perfectly aligned with the cards (accounting for py-6) */}
+      <div className="absolute inset-y-6 left-0 right-0 pointer-events-none z-10">
         {/* Left Arrow */}
         <button
           type="button"
@@ -93,20 +93,25 @@ export function TaskList({
       {/* Horizontal scrollable container */}
       <div
         ref={scrollContainerRef}
-        className="flex gap-6 min-h-[500px] py-8 px-2 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex gap-6 py-6 px-2 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {tasks.map((task, index) => {
-          // Use hashtag (without #) with prefix or fallback to index for unique key
-          const baseKey = task.hashtag
+          const taskId =
+            (task as { task_id?: string; id?: string }).task_id ||
+            (task as { task_id?: string; id?: string }).id;
+          const hashtagKey = task.hashtag
             ? task.hashtag.replace("#", "")
-            : `task-${index}`;
-          const uniqueKey = keyPrefix ? `${keyPrefix}-${baseKey}` : baseKey;
+            : "task";
+          const baseKey = taskId ? `${hashtagKey}-${taskId}` : hashtagKey;
+          const uniqueKey = keyPrefix
+            ? `${keyPrefix}-${baseKey}-${index}`
+            : `${baseKey}-${index}`;
 
           return (
             <div
               key={uniqueKey}
-              className="shrink-0 w-[85vw] sm:w-[350px] snap-start h-full"
+              className="shrink-0 w-[85vw] sm:w-[350px] h-[380px] snap-start"
             >
               <TaskCard
                 task={task}

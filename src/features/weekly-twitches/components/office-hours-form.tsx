@@ -91,10 +91,10 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
       await update.mutateAsync({
         id: initialData.id,
         data: values,
-        posterFile,
+        // posterFile, // Commented out due to backend conflict
       });
     } else {
-      await create.mutateAsync({ data: values, posterFile });
+      await create.mutateAsync({ data: values }); // Commented out posterFile due to backend conflict
     }
     onClose();
   };
@@ -215,7 +215,8 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
             />
           </div>
 
-          <div className="space-y-1">
+          {/* TODO: Poster upload disabled — backend conflict */}
+          {/* <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
               Poster Thumbnail
             </p>
@@ -225,7 +226,7 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
               currentUrl={initialData?.poster_thumbnail}
               maxSizeMB={5}
             />
-          </div>
+          </div> */}
 
           <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
             <Button

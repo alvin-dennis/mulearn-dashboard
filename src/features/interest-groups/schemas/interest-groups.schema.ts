@@ -9,22 +9,37 @@ import { ApiResponseSchema } from "@/lib/schemas/api-response";
 
 export { ApiResponseSchema };
 
+function withCacheBust(
+  url: string | null | undefined,
+  version: string | null | undefined,
+): string | null | undefined {
+  if (!url || !version) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}v=${encodeURIComponent(version)}`;
+}
+
 // ============================================
 // Interest Group List Item
 // ============================================
 
-export const InterestGroupSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  code: z.string().optional(),
-  icon: z.string().nullable().optional(),
-  cover_image: z.string().nullable().optional(),
-  icon_image: z.string().nullable().optional(),
-  category: z.string().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
-  member_count: z.number().optional(),
-});
+export const InterestGroupSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    code: z.string().optional(),
+    icon: z.string().nullable().optional(),
+    cover_image: z.string().nullable().optional(),
+    icon_image: z.string().nullable().optional(),
+    category: z.string().optional(),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+    member_count: z.number().optional(),
+  })
+  .transform((ig) => ({
+    ...ig,
+    cover_image: withCacheBust(ig.cover_image, ig.updated_at),
+    icon_image: withCacheBust(ig.icon_image, ig.updated_at),
+  }));
 
 export type InterestGroup = z.infer<typeof InterestGroupSchema>;
 
@@ -53,7 +68,7 @@ export type InterestGroupsListResponse = z.infer<
 // Interest Group Detail Response
 // ============================================
 
-export const InterestGroupDetailSchema = z.object({
+const InterestGroupDetailBaseSchema = z.object({
   id: z.string(),
   name: z.string(),
   code: z.string().optional().nullable(),
@@ -193,6 +208,13 @@ export const InterestGroupDetailSchema = z.object({
   created_by: z.string().optional().nullable(),
   updated_by: z.string().optional().nullable(),
 });
+
+export const InterestGroupDetailSchema =
+  InterestGroupDetailBaseSchema.transform((ig) => ({
+    ...ig,
+    cover_image: withCacheBust(ig.cover_image, ig.updated_at),
+    icon_image: withCacheBust(ig.icon_image, ig.updated_at),
+  }));
 
 export type InterestGroupDetail = z.infer<typeof InterestGroupDetailSchema>;
 
