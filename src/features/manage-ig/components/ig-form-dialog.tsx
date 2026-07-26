@@ -882,15 +882,7 @@ export function InterestGroupFormDialog({
                           (initialData?.icon_image ? "Already set" : "Not set"),
                         false,
                       ],
-                      [
-                        "About",
-                        values.about
-                          ? values.about.length > 120
-                            ? `${values.about.slice(0, 120)}…`
-                            : values.about
-                          : "Not set",
-                        false,
-                      ],
+                      ["About", values.about || "Not set", false],
                       [
                         "Prerequisites",
                         Array.isArray(values.prerequisites) &&
