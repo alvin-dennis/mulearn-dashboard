@@ -951,16 +951,16 @@ export function InterestGroupFormDialog({
                     ].map(([label, value, required]) => (
                       <div
                         key={label as string}
-                        className="flex items-start justify-between gap-4 px-4 py-3"
+                        className="flex items-start justify-between gap-3 px-4 py-3 sm:gap-4"
                       >
-                        <p className="w-40 shrink-0 text-xs font-medium text-muted-foreground">
+                        <p className="w-32 shrink-0 text-xs font-medium text-muted-foreground sm:w-40">
                           {label}
                           {required ? (
                             <span className="ml-0.5 text-destructive">*</span>
                           ) : null}
                         </p>
                         <p
-                          className={`flex-1 text-right text-sm ${
+                          className={`min-w-0 flex-1 whitespace-pre-wrap text-right text-sm break-words [overflow-wrap:anywhere] ${
                             value === "Not set"
                               ? "italic text-muted-foreground/60"
                               : "text-foreground"
