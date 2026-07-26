@@ -254,6 +254,8 @@ export function MarkdownEditor({
         <button
           type="button"
           onClick={() => setTab("write")}
+          aria-label="Write"
+          aria-pressed={tab === "write"}
           className={cn(
             "inline-flex h-7 w-7 shrink-0 items-center justify-center gap-1 rounded-md px-0 text-xs font-medium transition-colors md:w-auto md:px-2.5",
             tab === "write"
@@ -267,6 +269,8 @@ export function MarkdownEditor({
         <button
           type="button"
           onClick={() => setTab("preview")}
+          aria-label="Preview"
+          aria-pressed={tab === "preview"}
           className={cn(
             "inline-flex h-7 w-7 shrink-0 items-center justify-center gap-1 rounded-md px-0 text-xs font-medium transition-colors md:w-auto md:px-2.5",
             tab === "preview"
