@@ -11,6 +11,9 @@
  * mobile. Total karma sits fixed in the donut's center. On desktop only,
  * hovering either the ring or a legend row brightens that slice — mobile
  * gets no touch interaction, just a static readable chart + legend.
+ *
+ * Desktop legend is a vertical list with scroll when items exceed 9.
+ * Mobile legend is a scrollable vertical list.
  */
 
 "use client";
@@ -47,6 +50,9 @@ function useIsDesktop() {
   }, []);
   return isDesktop;
 }
+
+/** Match browser-breakdown pattern: scroll when legend items exceed this count. */
+const LEGEND_SCROLL_THRESHOLD = 9;
 
 export function KarmaDistribution({ profile }: KarmaDistributionProps) {
   const isDesktop = useIsDesktop();
@@ -175,33 +181,49 @@ export function KarmaDistribution({ profile }: KarmaDistributionProps) {
           </div>
         </div>
 
-        {/* Legend */}
-        <ul className="w-full min-w-0 space-y-1 sm:max-w-[13rem] max-h-40 overflow-y-auto sm:max-h-none sm:overflow-visible">
-          {chartData.map((entry, index) => (
-            <li key={entry.id}>
-              <button
-                type="button"
-                disabled={!isDesktop}
-                onMouseEnter={() => isDesktop && setActiveIndex(index)}
-                onMouseLeave={() => isDesktop && setActiveIndex(null)}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
-                  isDesktop ? "hover:bg-muted" : ""
-                } ${activeIndex === index ? "bg-muted" : ""}`}
+        {/* Legend — vertical list with scroll on both desktop and mobile */}
+        {(() => {
+          const scrollable = chartData.length > LEGEND_SCROLL_THRESHOLD;
+          return (
+            <div className="w-full min-w-0 max-w-[13rem]">
+              <ul
+                className={`w-full min-w-0 space-y-1 overflow-y-auto ${
+                  scrollable ? "max-h-40" : ""
+                }`}
               >
-                <span
-                  className="size-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: sliceColor(index) }}
-                />
-                <span className="min-w-0 flex-1 truncate text-foreground">
-                  {entry.name}
-                </span>
-                <span className="shrink-0 font-semibold text-muted-foreground">
-                  {entry.value.toLocaleString()}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+                {chartData.map((entry, index) => (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      disabled={!isDesktop}
+                      onMouseEnter={() => isDesktop && setActiveIndex(index)}
+                      onMouseLeave={() => isDesktop && setActiveIndex(null)}
+                      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
+                        isDesktop ? "hover:bg-muted" : ""
+                      } ${activeIndex === index ? "bg-muted" : ""}`}
+                    >
+                      <span
+                        className="size-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: sliceColor(index) }}
+                      />
+                      <span className="min-w-0 flex-1 truncate text-foreground">
+                        {entry.name}
+                      </span>
+                      <span className="shrink-0 font-semibold text-muted-foreground">
+                        {entry.value.toLocaleString()}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {scrollable && (
+                <p className="mt-1 text-center text-[10px] text-muted-foreground">
+                  Scroll to see more
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
