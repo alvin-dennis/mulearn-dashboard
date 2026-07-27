@@ -327,14 +327,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
       hasIgLeadRole(userRoles),
   },
   {
-    id: "mentor-verification",
-    title: "Mentor Verification",
-    href: "/dashboard/management/mentor-verification",
-    icon: UserCheck,
-    section: "management",
-    roles: MANAGEMENT_ROLES,
-  },
-  {
     id: "management",
     title: "Management",
     href: "/dashboard/management",
