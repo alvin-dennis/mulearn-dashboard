@@ -5,7 +5,6 @@ import { Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { updateInterestGroups } from "@/features/profile/api/profile.api";
 import { EditInterestGroupsModal } from "@/features/profile/components/edit-interest-groups-modal";
-import { useAllPublicTasks } from "@/features/tasks/hooks";
 import { mujourneyKeys } from "../hooks/query-keys";
 import type {
   GetUserLevelsResponse,
@@ -71,94 +70,35 @@ export function BecomeExpertTab({
     level: { unit: "level", count: 1 } as { unit: string; count: number },
   }));
 
-  // The user's own completion state, keyed by hashtag, so mentor tasks
-  // merged in below (from the public catalog, which carries no per-user
-  // completion) can be reconciled against what the user has actually done.
-  const completionByHashtag = useMemo(() => {
-    const map = new Map<string, boolean>();
-    (levelsData?.response ?? []).forEach((level: UserLevelData) => {
-      (level.tasks || []).forEach((task: Task) => {
-        if (task.hashtag) map.set(task.hashtag, Boolean(task.completed));
-      });
-    });
-    return map;
-  }, [levelsData]);
-
-  const { data: mentorData } = useAllPublicTasks({
-    task_source: "ig_mentor",
-  });
-
-  const mentorTasks = useMemo<Task[]>(() => {
-    return (mentorData ?? []).map((task) => ({
-      task_name: task.title,
-      task_description: task.description ?? "",
-      karma: task.karma,
-      hashtag: task.hashtag,
-      completed: completionByHashtag.get(task.hashtag) ?? false,
-      active: task.active,
-      discord_link: task.discord_link,
-      level: task.level,
-      interest_group: task.ig ? { id: task.ig, name: task.ig } : undefined,
-      submission_channel: task.channel ? { name: task.channel } : undefined,
-    }));
-  }, [mentorData, completionByHashtag]);
-
   const expertLevels = useMemo(() => {
-    const map = new Map<string, UserLevelData>();
+    if (!levelsData?.response) return [];
 
-    const addTask = (
-      task: Task,
-      isAlreadyExpert: boolean,
-      levelHint?: string | null,
-    ) => {
-      const isExpertTask =
-        isAlreadyExpert || (task.hashtag || "").includes("#cl-");
-      if (!isExpertTask) return;
+    return levelsData.response
+      .map((level: UserLevelData) => {
+        const filteredTasks = (level.tasks || []).filter((task: Task) => {
+          const isExpertTask = (task.hashtag || "").includes("#cl-");
 
-      const matchesIG = selectedIG
-        ? task.interest_group?.id === selectedIG
-        : true;
-      if (!matchesIG) return;
+          const matchesIG = selectedIG
+            ? task.interest_group?.id === selectedIG
+            : true;
 
-      if (filter === "completed" && !task.completed) return;
-      if (filter === "incomplete" && task.completed) return;
+          if (filter === "completed")
+            return isExpertTask && matchesIG && task.completed;
+          if (filter === "incomplete")
+            return isExpertTask && matchesIG && !task.completed;
+          return isExpertTask && matchesIG;
+        });
 
-      const levelNumber = (levelHint || "").match(/\d+/)?.[0] ?? "1";
-      const levelKey = `Lvl ${levelNumber}`;
-
-      const existing = map.get(levelKey);
-      if (existing) {
-        existing.tasks = [...(existing.tasks || []), task];
-      } else {
-        map.set(levelKey, { name: levelKey, karma: 0, tasks: [task] });
-      }
-    };
-
-    (levelsData?.response ?? []).forEach((level: UserLevelData) => {
-      (level.tasks || []).forEach((task: Task) => {
-        addTask(task, false, level.name);
-      });
-    });
-    mentorTasks.forEach((task) => {
-      addTask(task, true, (task as { level?: string | null }).level);
-    });
-
-    return Array.from(map.values())
-      .map((level) => ({
-        ...level,
-        tasks: Array.from(
+        const uniqueTasks = Array.from(
           new Map(
-            (level.tasks || []).map((task: Task) => [task.hashtag, task]),
+            filteredTasks.map((task: Task) => [task.hashtag, task]),
           ).values(),
-        ),
-      }))
-      .filter((level) => (level.tasks || []).length > 0)
-      .sort((a, b) => {
-        const numA = parseInt(a.name.match(/\d+/)?.[0] ?? "0", 10);
-        const numB = parseInt(b.name.match(/\d+/)?.[0] ?? "0", 10);
-        return numA - numB;
-      });
-  }, [levelsData, selectedIG, filter, mentorTasks]);
+        );
+
+        return { ...level, tasks: uniqueTasks };
+      })
+      .filter((level: UserLevelData) => (level.tasks || []).length > 0);
+  }, [levelsData, selectedIG, filter]);
 
   return (
     <div className="space-y-6">
