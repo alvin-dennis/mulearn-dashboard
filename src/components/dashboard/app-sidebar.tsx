@@ -114,9 +114,7 @@ export function AppSidebar() {
             href={item.linkHref ?? item.href}
             prefetch={false}
             data-tour-id={item.id}
-            onClick={() => {
-              if (isMobile) setOpenMobile(false);
-            }}
+            onClick={handleNavClick}
           >
             <Icon
               className={cn(
