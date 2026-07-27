@@ -102,10 +102,14 @@ export async function fetchJobs(
 ): Promise<JobsListResponse> {
   const query = new URLSearchParams();
 
-  if (params?.pageIndex || params?.page)
-    query.set("page", String(params.page ?? params.pageIndex));
-  if (params?.perPage || params?.per_page)
-    query.set("per_page", String(params.per_page ?? params.perPage));
+  const page = params?.pageIndex ?? params?.page;
+  if (page !== undefined) query.set("pageIndex", String(page));
+
+  const perPage = params?.perPage ?? params?.per_page;
+  if (perPage !== undefined) {
+    query.set("perPage", String(perPage));
+    query.set("per_page", String(perPage));
+  }
   if (params?.search?.trim()) query.set("search", params.search.trim());
   if (params?.sortBy || params?.sort_by)
     query.set("sort_by", (params.sort_by ?? params.sortBy) as string);
@@ -326,13 +330,23 @@ export async function fetchJobApplicants(
     sortBy?: string;
     pageIndex?: number;
     perPage?: number;
+    page?: number;
+    per_page?: number;
   },
 ): Promise<JobApplicantsResponse> {
   const query = new URLSearchParams();
 
   if (params?.status) query.set("status", params.status);
-  if (params?.pageIndex) query.set("pageIndex", String(params.pageIndex));
-  if (params?.perPage) query.set("perPage", String(params.perPage));
+  const p = params?.pageIndex ?? params?.page;
+  if (p !== undefined) {
+    query.set("pageIndex", String(p));
+    query.set("page", String(p));
+  }
+  const pp = params?.perPage ?? params?.per_page;
+  if (pp !== undefined) {
+    query.set("perPage", String(pp));
+    query.set("per_page", String(pp));
+  }
   if (params?.search?.trim()) query.set("search", params.search.trim());
   if (params?.sortBy) query.set("sortBy", params.sortBy);
 

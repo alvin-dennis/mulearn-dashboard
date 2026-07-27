@@ -23,6 +23,7 @@ export {
 export {
   type College,
   CollegeSchema,
+  CollegeSearchResponseSchema,
   type CollegesResponse,
   CollegesResponseSchema,
   type CompaniesResponse,

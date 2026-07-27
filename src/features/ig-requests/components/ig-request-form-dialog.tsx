@@ -132,10 +132,15 @@ export function IGRequestFormDialog() {
           <StepperHeader
             steps={STEPS}
             currentStepIndex={step}
-            onStepClick={(index) => {
-              // Allow going back via the header; going forward must use Next
-              // so step-1 validation isn't skipped.
-              if (index < step) setStep(index);
+            onStepClick={async (index) => {
+              if (index === step) return;
+              if (index > step) {
+                if (step === 0) {
+                  const ok = await form.trigger([...STEP1_FIELDS]);
+                  if (!ok) return;
+                }
+              }
+              setStep(index);
             }}
             ariaLabel="IG request progress"
           />
@@ -397,10 +402,12 @@ export function IGRequestFormDialog() {
                       .map(([label, value]) => (
                         <div
                           key={label}
-                          className="grid grid-cols-3 gap-2 px-3 py-2"
+                          className="grid grid-cols-[minmax(7rem,0.8fr)_minmax(0,1fr)] gap-3 px-3 py-2 sm:grid-cols-3"
                         >
-                          <dt className="text-muted-foreground">{label}</dt>
-                          <dd className="col-span-2 wrap-break-word">
+                          <dt className="min-w-0 text-muted-foreground">
+                            {label}
+                          </dt>
+                          <dd className="min-w-0 whitespace-pre-wrap text-right break-words [overflow-wrap:anywhere] sm:col-span-2">
                             {String(value)}
                           </dd>
                         </div>

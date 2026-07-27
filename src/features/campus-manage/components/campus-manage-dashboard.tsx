@@ -34,6 +34,7 @@ import {
   Zap,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";
 import {
@@ -71,6 +72,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
 import {
@@ -89,6 +98,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAssignCampusMentor } from "@/features/campus/hooks/campus.hooks";
+import { IGIcon } from "@/features/interest-groups";
 import { chipColor } from "@/lib/chip-colors";
 import { cn } from "@/lib/utils";
 import {
@@ -97,10 +107,12 @@ import {
   useCampusLeaderboard,
   useCampusOverview,
   useChangeStudentType,
+  useCreateExecomRole,
   useDeleteSocialLink,
   useDownloadStudentCsv,
   useEventDistribution,
   useExecomMembers,
+  useExecomRoles,
   useIgChapters,
   useKarmaByCluster,
   useRemoveExecomMember,
@@ -122,8 +134,8 @@ import { TransferLeadDialog } from "./transfer-lead-dialog";
 
 const PAGE_SIZE = 10;
 
+const SHOW_EXECOM_SECTION = true;
 // TEMP: hidden per request (2026-07-21) — flip back to `true` to restore.
-const SHOW_EXECOM_SECTION = false;
 const SHOW_CAMPUS_LEVEL = false;
 
 const CORE_CAMPUS_ROLES = [
@@ -535,12 +547,6 @@ function CompactStatCard({
 }
 
 const LEADERBOARD_COLUMNS = [
-  {
-    column: "rank",
-    Label: "Rank",
-    isSortable: false,
-    width: "w-24 text-center",
-  },
   { column: "name", Label: "Student", isSortable: false },
   { column: "karma", Label: "Karma", isSortable: false },
   { column: "level", Label: "Level", isSortable: false },
@@ -578,6 +584,8 @@ export function CampusManageDashboard() {
   } | null>(null);
   const [selectedExecomRole, setSelectedExecomRole] =
     useState<string>("Enabler");
+  const [isCreateRoleOpen, setIsCreateRoleOpen] = useState(false);
+  const [newRoleTitle, setNewRoleTitle] = useState("");
 
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: overview, isLoading: isOverviewLoading } = useCampusOverview();
@@ -599,6 +607,8 @@ export function CampusManageDashboard() {
 
   const { data: chapters = [], isLoading: isChaptersLoading } = useIgChapters();
 
+  const { data: execomRoles = [] } = useExecomRoles();
+
   const socialLinks = overview?.socialLinks;
 
   // ─── Mutations ───────────────────────────────────────────────────────────
@@ -609,6 +619,8 @@ export function CampusManageDashboard() {
   const { mutate: addExecom, isPending: isAdding } = useAddExecomMember();
   const { mutate: removeExecom, isPending: isRemoving } =
     useRemoveExecomMember();
+  const { mutate: createExecomRole, isPending: isCreatingRole } =
+    useCreateExecomRole();
   const { mutate: changeStudentType, isPending: isChangingType } =
     useChangeStudentType();
   const { mutate: downloadCsv, isPending: isDownloadingCsv } =
@@ -652,8 +664,17 @@ export function CampusManageDashboard() {
       }
     }
 
+    // Add custom roles created via the API (dedupe against core/IG roles above)
+    const knownIds = new Set(roles.map((r) => r.id.toLowerCase()));
+    for (const role of execomRoles) {
+      if (!knownIds.has(role.value.toLowerCase())) {
+        knownIds.add(role.value.toLowerCase());
+        roles.push({ id: role.value, title: role.label });
+      }
+    }
+
     return roles;
-  }, [chapters]);
+  }, [chapters, execomRoles]);
 
   // FIX: extracted from IIFE — computed above return
   const karmaTrend = overview?.trend ?? [];
@@ -769,6 +790,20 @@ export function CampusManageDashboard() {
         },
       },
     );
+  };
+
+  const handleCreateExecomRole = () => {
+    const title = newRoleTitle.trim();
+    if (!title) return;
+
+    createExecomRole(title, {
+      onSuccess: () => {
+        toast.success(`Role "${title}" created`);
+        setSelectedExecomRole(title);
+        setNewRoleTitle("");
+        setIsCreateRoleOpen(false);
+      },
+    });
   };
 
   const isAssigningExecomRole = isAdding;
@@ -1142,12 +1177,15 @@ export function CampusManageDashboard() {
                     case "name":
                       return (
                         <div className="flex flex-col">
-                          <span className="text-sm font-semibold tracking-tight transition-colors group-hover:text-primary">
-                            {student.name}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            @{student.muid.split("@")[0]}
-                          </span>
+                          <Link
+                            href={`/profile/${student.muid}`}
+                            className="inline-flex w-fit items-center gap-1"
+                          >
+                            <span className="text-sm font-semibold tracking-tight transition-colors group-hover:text-primary">
+                              {student.name}
+                            </span>
+                            <ExternalLink className="h-3 w-3" />
+                          </Link>
                         </div>
                       );
                     case "karma":
@@ -1780,7 +1818,7 @@ export function CampusManageDashboard() {
                           </p>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(180px,220px)_auto] lg:items-end">
+                          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(220px,0.7fr)_minmax(160px,220px)_auto_auto] lg:items-end">
                             <div className="min-w-0">
                               <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                                 Search User
@@ -1820,21 +1858,37 @@ export function CampusManageDashboard() {
                                 onValueChange={setSelectedExecomRole}
                                 placeholder="Select or type a role..."
                                 emptyText="No matching roles."
-                                disabled={isAssigningExecomRole}
+                                disabled={
+                                  isAssigningExecomRole || isCreatingRole
+                                }
                                 className="h-9 rounded-xl"
                                 onCreateNew={(term) => {
-                                  setSelectedExecomRole(term);
+                                  createExecomRole(term, {
+                                    onSuccess: () => {
+                                      toast.success(`Role "${term}" created`);
+                                      setSelectedExecomRole(term);
+                                    },
+                                  });
                                 }}
                                 createNewText="Use custom role"
                               />
                             </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setIsCreateRoleOpen(true)}
+                              className="w-full font-bold lg:w-auto lg:self-end"
+                            >
+                              <Plus className="h-4 w-4" />
+                              <span className="ml-2">Create Custom Role</span>
+                            </Button>
                             <Button
                               onClick={handleAddExecom}
                               disabled={
                                 isAssigningExecomRole ||
                                 !selectedExecomUser?.muid
                               }
-                              className="h-11 rounded-xl px-6 font-bold shadow-lg shadow-primary/10 transition-all hover:shadow-primary/20 active:scale-[0.98] lg:self-end"
+                              className="font-bold lg:self-end"
                             >
                               {isAssigningExecomRole ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1846,6 +1900,54 @@ export function CampusManageDashboard() {
                           </div>
                         </CardContent>
                       </Card>
+
+                      <Dialog
+                        open={isCreateRoleOpen}
+                        onOpenChange={(open) => {
+                          setIsCreateRoleOpen(open);
+                          if (!open) setNewRoleTitle("");
+                        }}
+                      >
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Create Custom Role</DialogTitle>
+                            <DialogDescription>
+                              Add a new execom role title. It'll be available to
+                              assign right after creation.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Input
+                            value={newRoleTitle}
+                            onChange={(e) => setNewRoleTitle(e.target.value)}
+                            placeholder="e.g. Community Lead"
+                            disabled={isCreatingRole}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleCreateExecomRole();
+                            }}
+                          />
+                          <DialogFooter>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setIsCreateRoleOpen(false)}
+                              disabled={isCreatingRole}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleCreateExecomRole}
+                              disabled={isCreatingRole || !newRoleTitle.trim()}
+                            >
+                              {isCreatingRole ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Create"
+                              )}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
 
                       <SectionTitle
                         title="Current Execom Roster"
@@ -1971,9 +2073,16 @@ export function CampusManageDashboard() {
                             <CardHeader className="pb-3 border-b border-border/40">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
-                                    <BookOpen className="h-4 w-4" />
-                                  </div>
+                                  <IGIcon
+                                    key={chapter.id}
+                                    src={
+                                      chapter.igIconImage ??
+                                      chapter.icon ??
+                                      chapter.iconLink
+                                    }
+                                    size={36}
+                                    className="rounded-xl border-0 bg-primary/5 text-primary"
+                                  />
                                   <div className="min-w-0 space-y-0.5">
                                     <CardTitle className="truncate text-sm font-bold leading-tight text-foreground">
                                       {chapter.name}
