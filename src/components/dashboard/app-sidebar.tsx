@@ -69,6 +69,12 @@ export function AppSidebar() {
     [pathname],
   );
 
+  const handleNavClick = useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
+
   const renderNavItem = (item: NavItem) => {
     const active = isActive(item.href);
 
