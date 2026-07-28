@@ -9,20 +9,17 @@
 export const mujourneyKeys = {
   all: ["mujourney"] as const,
 
-  // Start Learning tab
-  userLevels: () => [...mujourneyKeys.all, "user-levels"] as const,
-  publicLevels: () => [...mujourneyKeys.all, "public-levels"] as const,
+  // Unified task list (redesigned API)
+  taskList: (igId?: string) =>
+    [...mujourneyKeys.all, "task-list", igId ?? "public"] as const,
 
-  // Become Expert tab
-  igTasks: (igId: string) => [...mujourneyKeys.all, "ig-tasks", igId] as const,
-
-  // Public journey
+  // Public journey (for [muid] page)
   publicUserJourney: (muid: string) =>
     [...mujourneyKeys.all, "public-journey", muid] as const,
 
-  // Interest groups
+  // Interest groups (for IG pill labels)
   interestGroups: () => [...mujourneyKeys.all, "interest-groups"] as const,
 
-  // User feed
+  // User level feed (for progress bar)
   userLevelFeed: () => [...mujourneyKeys.all, "user-level-feed"] as const,
 } as const;

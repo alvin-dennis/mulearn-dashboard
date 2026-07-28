@@ -1,81 +1,121 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+/**
+ * MuJourney Dashboard Component
+ *
+ * 📍 src/features/mujourney/components/MuJourneyDashboard.tsx
+ *
+ * Orchestrates the three journey tabs using the redesigned unified task list API.
+ * IG pill selection triggers a full refetch of the task list with ?ig_id=<uuid>,
+ * which replaces the become_expert section with only that IG's tasks.
+ */
+
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { LearnerTasksPage } from "@/features/home/components/learner-tasks-page";
-import {
-  BecomeExpertTab,
-  EventsTab,
-  JourneyHeader,
-  JourneyTabs,
-  StartLearningTab,
-  useInterestGroups,
-  useStartLearning,
-} from "@/features/mujourney";
-import type { GetUserLevelsResponse } from "@/features/mujourney/schemas";
-import type { PublicTaskListParams } from "@/features/tasks/types/tasks.types";
+import { BecomeExpertTab } from "./BecomeExpertTab";
+import { EventsTab } from "./EventsTab";
+import { JourneyHeader } from "./JourneyHeader";
+import { JourneyTabs } from "./JourneyTabs";
+import { StartLearningTab } from "./StartLearningTab";
+import { useInterestGroups } from "../hooks/useInterestGroups";
+import { useTaskList } from "../hooks/useTaskList";
+import { mujourneyKeys } from "../hooks/query-keys";
+import type { TaskListResponse } from "../schemas";
 
-// ─── Others tab source options ──────────────────────────────────────────────
-
-type OthersSource = PublicTaskListParams["task_source"] | "";
-
-const OTHERS_SOURCE_OPTIONS: { label: string; value: OthersSource }[] = [
-  { label: "All Tasks", value: "" },
-  { label: "Company Tasks", value: "company" },
-  { label: "Campus Tasks", value: "campus_mentor" },
-  { label: "Mentor Tasks", value: "ig_mentor" },
-];
-
-// ─── Props ──────────────────────────────────────────────────────────────────
+// ─── Props ───────────────────────────────────────────────────────────────────
 
 interface MuJourneyDashboardProps {
-  initialLevels: GetUserLevelsResponse | null;
+  /** SSR-prefetched task list (unauthenticated SSR only) */
+  initialTaskList?: TaskListResponse | null;
   isAuthenticated: boolean;
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export function MuJourneyDashboard({
-  initialLevels,
+  initialTaskList,
   isAuthenticated,
 }: MuJourneyDashboardProps) {
   const [activeTab, setActiveTab] = useState("start-learning");
   const [filter, setFilter] = useState("all");
-  const [othersSource, setOthersSource] = useState<OthersSource>("");
+  const [selectedIG, setSelectedIG] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
+
+  // ── Unified task list query ─────────────────────────────────────────────
+  // When selectedIG changes, the queryKey changes → React Query automatically
+  // fetches GET /api/v1/dashboard/task/list/?ig_id=<uuid> for that IG.
   const {
-    data: levelsData,
-    isLoading: levelsLoading,
-    error: levelsError,
-  } = useStartLearning(initialLevels);
+    data: taskListData,
+    isLoading: taskListLoading,
+    error: taskListError,
+    isFetching: taskListFetching,
+  } = useTaskList({
+    igId: selectedIG ?? undefined,
+    initialData: initialTaskList ?? undefined,
+  });
 
-  const {
-    data: igData,
-    isLoading: igLoading,
-    error: igError,
-  } = useInterestGroups();
+  // ── Interest Groups query (for pill labels + edit modal) ────────────────
+  const { data: igData, isLoading: igLoading } = useInterestGroups();
 
+  // ── Extract sections from the API response ──────────────────────────────
+  const startJourneyTasks = taskListData?.response?.start_journey ?? [];
+  const becomeExpertTasks = taskListData?.response?.become_expert ?? [];
+  const eventsTasks = taskListData?.response?.events ?? [];
+
+  // The IGs the user belongs to — used for pill rendering
+  const interestGroups = igData?.response?.aois ?? [];
+
+  // ── IG pill toggle handler ──────────────────────────────────────────────
+  // Clicking an IG pill updates selectedIG → queryKey changes → React Query
+  // fetches the task list with the new ig_id. Clicking the same pill deselects.
+  const handleIGToggle = (igId: string) => {
+    const newIG = selectedIG === igId ? null : igId;
+    setSelectedIG(newIG);
+  };
+
+  // ── Called after user saves IGs in the edit modal ──────────────────────
+  // Invalidates both the interest groups cache and the task list so everything
+  // reflects the user's new IG selection.
+  const handleIGsUpdated = () => {
+    setSelectedIG(null); // clear pill selection — old igId may no longer be valid
+    queryClient.invalidateQueries({ queryKey: mujourneyKeys.interestGroups() });
+    queryClient.invalidateQueries({ queryKey: mujourneyKeys.taskList() });
+  };
+
+  // ── Tabs ────────────────────────────────────────────────────────────────
   const tabs = [
     { id: "start-learning", label: "Start Journey" },
-    { id: "become-expert", label: "Become Expert" },
-    { id: "events", label: "Events" },
-    { id: "others", label: "Others" },
+    ...(isAuthenticated
+      ? [
+          { id: "become-expert", label: "Become Expert" },
+          { id: "events", label: "Events" },
+        ]
+      : []),
   ];
+
+  // Combined loading: task list is loading or still fetching in background
+  const isLoading = taskListLoading;
+  const isBgFetching = !taskListLoading && taskListFetching;
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <JourneyHeader
         title="µJourney"
-        subtitle="Your Learning Path - Complete tasks, earn karma, level up"
+        subtitle="Your Learning Path — Complete tasks, earn karma, level up"
       />
 
-      {/* Tab Navigation & Right-side controls */}
+      {/* Tab navigation + Filter dropdown */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <JourneyTabs
           tabs={tabs}
           defaultTab="start-learning"
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            // Reset filter when switching tabs
+            setFilter("all");
+          }}
         />
 
         {/* Filter by: dropdown — shown for Start Journey & Become Expert */}
@@ -89,80 +129,50 @@ export function MuJourneyDashboard({
               onChange={(e) => setFilter(e.target.value)}
               className="px-5 py-2.5 border border-border rounded-lg bg-card text-base font-medium text-card-foreground cursor-pointer hover:border-ring transition-colors [&>option]:cursor-pointer outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="all" className="cursor-pointer">
-                All
-              </option>
-              <option value="completed" className="cursor-pointer">
-                Completed
-              </option>
-              <option value="incomplete" className="cursor-pointer">
-                Incomplete
-              </option>
+              <option value="all">All</option>
+              <option value="completed">Completed</option>
+              <option value="incomplete">Incomplete</option>
             </select>
-          </div>
-        )}
-
-        {/* Others source dropdown — shown only on Others tab */}
-        {activeTab === "others" && (
-          <div className="flex items-center gap-3">
-            <span className="text-base font-medium text-foreground">Show:</span>
-            <div className="relative">
-              <select
-                id="others-source"
-                value={othersSource}
-                onChange={(e) =>
-                  setOthersSource(e.target.value as OthersSource)
-                }
-                className="appearance-none pl-4 pr-9 py-2.5 border border-border rounded-lg bg-card text-base font-medium text-card-foreground cursor-pointer hover:border-ring transition-colors outline-none focus:ring-2 focus:ring-ring"
-              >
-                {OTHERS_SOURCE_OPTIONS.map((opt) => (
-                  <option key={opt.value || "__all__"} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            </div>
           </div>
         )}
       </div>
 
-      {/* Tab Content with Animations */}
+      {/* Tab Content */}
       <div className="mt-8 relative min-h-[400px]">
         {activeTab === "start-learning" && (
-          <div key="start-learning">
-            <StartLearningTab
-              filter={filter}
-              levelsData={levelsData}
-              isLoading={levelsLoading}
-              error={levelsError}
-            />
-          </div>
+          <StartLearningTab
+            filter={filter}
+            tasks={startJourneyTasks}
+            isLoading={isLoading}
+            isFetching={isBgFetching}
+            error={taskListError}
+          />
         )}
 
         {activeTab === "become-expert" && (
-          <div key="become-expert">
-            <BecomeExpertTab
-              filter={filter}
-              levelsData={levelsData}
-              igData={igData}
-              isLoading={levelsLoading || igLoading}
-              error={levelsError || igError}
-              isAuthenticated={isAuthenticated}
-            />
-          </div>
+          <BecomeExpertTab
+            filter={filter}
+            tasks={becomeExpertTasks}
+            isLoading={isLoading}
+            isFetching={isBgFetching}
+            error={taskListError}
+            isAuthenticated={isAuthenticated}
+            selectedIG={selectedIG}
+            interestGroups={interestGroups}
+            igLoading={igLoading}
+            onIGToggle={handleIGToggle}
+            onIGsUpdated={handleIGsUpdated}
+          />
         )}
 
         {activeTab === "events" && (
-          <div key="events">
-            <EventsTab />
-          </div>
-        )}
-
-        {activeTab === "others" && (
-          <div key="others">
-            <LearnerTasksPage key={othersSource} taskSource={othersSource} />
-          </div>
+          <EventsTab
+            tasks={eventsTasks}
+            isLoading={isLoading}
+            isFetching={isBgFetching}
+            error={taskListError}
+            isAuthenticated={isAuthenticated}
+          />
         )}
       </div>
     </div>

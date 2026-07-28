@@ -3,7 +3,8 @@
  *
  * 📍 src/features/mujourney/components/TaskList.tsx
  *
- * Horizontal scrollable view of tasks with arrow navigation
+ * Horizontal scrollable view of tasks with arrow navigation.
+ * Uses TaskListPublic from the redesigned unified task list API.
  */
 
 "use client";
@@ -11,7 +12,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import type { Task } from "../schemas";
+import type { TaskListPublic } from "../schemas";
 import { TaskCard } from "./TaskCard";
 
 const TaskDetailPanel = dynamic(() =>
@@ -21,7 +22,7 @@ const TaskDetailPanel = dynamic(() =>
 );
 
 interface TaskListProps {
-  tasks: Task[];
+  tasks: TaskListPublic[];
   isLocked?: boolean;
   keyPrefix?: string;
 }
@@ -32,21 +33,20 @@ export function TaskList({
   keyPrefix = "",
 }: TaskListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskListPublic | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  const handleTaskClick = (task: Task) => {
+  const handleTaskClick = (task: TaskListPublic) => {
     setSelectedTask(task);
     setIsPanelOpen(true);
   };
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
-    // Delay clearing the task to allow animation to complete
     setTimeout(() => setSelectedTask(null), 500);
   };
 
-  const getTaskStatus = (task: Task) => {
+  const getTaskStatus = (task: TaskListPublic) => {
     if (isLocked) return "locked";
     if (task.completed) return "completed";
     return "pending";
@@ -54,7 +54,7 @@ export function TaskList({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 370; // Card width (350px) + gap (20px)
+      const scrollAmount = 370;
       const newScrollLeft =
         scrollContainerRef.current.scrollLeft +
         (direction === "right" ? scrollAmount : -scrollAmount);
@@ -67,7 +67,7 @@ export function TaskList({
 
   return (
     <div className="relative group">
-      {/* Arrow wrapper perfectly aligned with the cards (accounting for py-6) */}
+      {/* Arrow wrapper */}
       <div className="absolute inset-y-6 left-0 right-0 pointer-events-none z-10">
         {/* Left Arrow */}
         <button
@@ -97,13 +97,10 @@ export function TaskList({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {tasks.map((task, index) => {
-          const taskId =
-            (task as { task_id?: string; id?: string }).task_id ||
-            (task as { task_id?: string; id?: string }).id;
           const hashtagKey = task.hashtag
             ? task.hashtag.replace("#", "")
             : "task";
-          const baseKey = taskId ? `${hashtagKey}-${taskId}` : hashtagKey;
+          const baseKey = task.id ? `${hashtagKey}-${task.id}` : hashtagKey;
           const uniqueKey = keyPrefix
             ? `${keyPrefix}-${baseKey}-${index}`
             : `${baseKey}-${index}`;

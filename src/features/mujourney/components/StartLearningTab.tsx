@@ -1,60 +1,56 @@
+"use client";
+
 /**
  * Start Learning Tab Component
  *
  * 📍 src/features/mujourney/components/StartLearningTab.tsx
  *
- * Shows foundational tasks across 7 levels
+ * Displays foundational tasks from the start_journey section of the task list API.
+ * Tasks are already API-filtered (no IG tasks, no event tasks, no intern tasks).
+ * Client groups them by level.name for LevelCard display.
  */
-
-"use client";
 
 import { useMemo } from "react";
 import { StateDisplay } from "@/components/ui/state-display";
-import type { GetUserLevelsResponse, Task, UserLevelData } from "../schemas";
+import type { TaskListPublic } from "../schemas";
 import { LevelCard } from "./LevelCard";
 
 interface StartLearningTabProps {
   filter?: string;
-  levelsData?: GetUserLevelsResponse | null;
+  /** start_journey tasks from the unified task list API */
+  tasks?: TaskListPublic[];
   isLoading?: boolean;
+  isFetching?: boolean;
   error?: Error | null;
 }
 
 export function StartLearningTab({
   filter = "all",
-  levelsData,
+  tasks = [],
   isLoading,
   error,
 }: StartLearningTabProps) {
-  // Data comes from parent
-  const data = levelsData;
+  // Group tasks by level.name (e.g. "Explorer", "Intermediate") preserving API order.
+  // API already orders by level.level_order then title.
+  const groupedLevels = useMemo(() => {
+    const filtered = tasks.filter((task) => {
+      if (filter === "completed") return task.completed;
+      if (filter === "incomplete") return !task.completed;
+      return true;
+    });
 
-  // Response is directly an array of levels
-  const levels = data?.response ?? [];
+    const map = new Map<string, TaskListPublic[]>();
+    filtered.forEach((task) => {
+      const key = task.level ?? "General";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(task);
+    });
 
-  // Filter out tasks with #cl- hashtags (expert/Interest Group tasks)
-  // Start Learning Tab: EXCLUDE tasks containing #cl- in their hashtag
-  const foundationLevels = useMemo(
-    () =>
-      levels
-        .map((level: UserLevelData) => ({
-          ...level,
-          tasks: (level.tasks || []).filter((task: Task) => {
-            const hashtag = task.hashtag || "";
-            const isFoundationTask = !hashtag.includes("#cl-");
-
-            // Apply completion filter
-            if (filter === "completed") {
-              return isFoundationTask && task.completed;
-            } else if (filter === "incomplete") {
-              return isFoundationTask && !task.completed;
-            }
-            return isFoundationTask;
-          }),
-        }))
-        .filter((level: UserLevelData) => (level.tasks || []).length > 0), // Remove empty levels
-    [levels, filter],
-  );
+    return Array.from(map.entries()).map(([name, levelTasks]) => ({
+      name,
+      tasks: levelTasks,
+    }));
+  }, [tasks, filter]);
 
   if (isLoading) {
     return (
@@ -71,7 +67,7 @@ export function StartLearningTab({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <p className="text-destructive">Failed to load levels</p>
+          <p className="text-destructive">Failed to load tasks</p>
           {process.env.NODE_ENV === "development" && (
             <p className="text-sm text-muted-foreground">{error.message}</p>
           )}
@@ -80,28 +76,24 @@ export function StartLearningTab({
     );
   }
 
-  if (!data?.response) {
-    return <StateDisplay variant="no-tasks" />;
+  if (groupedLevels.length === 0) {
+    return filter !== "all" ? (
+      <StateDisplay variant="no-results" />
+    ) : (
+      <StateDisplay variant="no-tasks" />
+    );
   }
 
   return (
     <div className="space-y-10">
-      {foundationLevels.map((level, index) => {
-        // All levels are always unlocked - no locking logic needed
-        // Tasks show completed status via task.completed field
-
-        // Use level name and index for unique key
-        const uniqueKey = `${level.name}-${index}`;
-
-        return <LevelCard key={uniqueKey} level={level} isLocked={false} />;
-      })}
-
-      {foundationLevels.length === 0 &&
-        (filter === "completed" || filter === "incomplete" ? (
-          <StateDisplay variant="no-results" />
-        ) : (
-          <StateDisplay variant="no-tasks" />
-        ))}
+      {groupedLevels.map((level) => (
+        <LevelCard
+          key={level.name}
+          name={level.name}
+          tasks={level.tasks}
+          isLocked={false}
+        />
+      ))}
     </div>
   );
 }

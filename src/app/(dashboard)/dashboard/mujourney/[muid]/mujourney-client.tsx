@@ -1,16 +1,19 @@
 /**
  * Public User Journey Page (Client Component)
  *
- * View another user's public journey
+ * View another user's public journey.
+ * Maps legacy public user journey task format to the new TaskListPublic format for LevelCard compatibility.
  */
 
 "use client";
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { JourneyHeader, LevelCard } from "@/features/mujourney";
 import { useUserJourney } from "@/features/mujourney/hooks";
+import type { TaskListPublic } from "@/features/mujourney/schemas";
 
 interface PublicUserJourneyPageClientProps {
   muid: string;
@@ -20,6 +23,36 @@ export function PublicUserJourneyPageClient({
   muid,
 }: PublicUserJourneyPageClientProps) {
   const { data, isLoading, error } = useUserJourney(muid);
+
+  // Map legacy level and task fields to TaskListPublic shape expected by components
+  const mappedLevels = useMemo(() => {
+    if (!data?.response?.levels) return [];
+
+    return data.response.levels.map((level: any) => {
+      const levelName = level.name || "General";
+      const tasks: TaskListPublic[] = (level.tasks || []).map((task: any) => ({
+        id: task.id || task.task_id || "",
+        hashtag: task.hashtag || "",
+        title: task.task_name || "Untitled Task",
+        description: task.task_description || null,
+        karma: task.karma || 0,
+        channel: task.submission_channel?.name || null,
+        discord_id: task.submission_channel?.discord_id || null,
+        type: task.type || "regular",
+        variable_karma: task.variable_karma || false,
+        level: levelName,
+        ig: task.interest_group?.name || null,
+        event: task.event || null,
+        event_id: task.event_id || null,
+        completed: task.completed || false,
+      }));
+
+      return {
+        name: levelName,
+        tasks,
+      };
+    });
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -41,20 +74,20 @@ export function PublicUserJourneyPageClient({
             {error?.message || "User journey not found"}
           </p>
           <Button asChild>
-            <Link href="/mujourney">Back to MuJourney</Link>
+            <Link href="/dashboard/mujourney">Back to MuJourney</Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  const { full_name, levels } = data.response;
+  const { full_name } = data.response;
 
   return (
     <div className="space-y-8">
       {/* Back Button */}
       <Button variant="ghost" asChild>
-        <Link href="/mujourney" className="gap-2">
+        <Link href="/dashboard/mujourney" className="gap-2">
           <ArrowLeft className="size-4" />
           Back to MuJourney
         </Link>
@@ -68,10 +101,11 @@ export function PublicUserJourneyPageClient({
 
       {/* Levels */}
       <div className="space-y-8">
-        {levels.map((level, index) => (
+        {mappedLevels.map((level, index) => (
           <LevelCard
             key={level.name || `level-${index}`}
-            level={level}
+            name={level.name}
+            tasks={level.tasks}
             isLocked={false}
           />
         ))}

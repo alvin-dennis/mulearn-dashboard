@@ -3,7 +3,8 @@
  *
  * 📍 src/features/mujourney/components/TaskDetailPanel.tsx
  *
- * Side panel that displays detailed task information with markdown support
+ * Side panel with full task details using TaskListPublic from the redesigned API.
+ * Discord submit opens the task's submission channel (discord_id).
  */
 
 "use client";
@@ -19,35 +20,42 @@ import {
 } from "@/components/ui/sheet";
 import { useUserInfo } from "@/features/auth";
 import { chipColor } from "@/lib/chip-colors";
-import type { Task } from "../schemas";
+import type { TaskListPublic } from "../schemas";
 import { MarkdownRenderer } from "../utils/markdown";
 
-interface ExtendedTask extends Task {
-  skills?: string[];
-  organization?: {
-    title?: string;
-  };
-  prerequisites?: string;
+interface TaskDetailPanelProps {
+  task: TaskListPublic | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const DISCORD_GUILD_ID = "771670169691881483";
 const DEFAULT_DISCORD_CHANNEL_ID = "782353185552465951";
-
-interface TaskDetailPanelProps {
-  task: Task | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 export function TaskDetailPanel({
   task,
   isOpen,
   onClose,
 }: TaskDetailPanelProps) {
-  const extendedTask = task as ExtendedTask | null;
   const userInfo = useUserInfo();
   const discordConnected = userInfo.data?.exist_in_guild === true;
+
   if (!task) return null;
+
+  const handleSubmit = () => {
+    if (!discordConnected) {
+      toast.error(
+        "Please connect your Discord account first to submit proof of work.",
+      );
+      return;
+    }
+    // discord_id is the submission channel's Discord ID
+    const channelId = task.discord_id ?? DEFAULT_DISCORD_CHANNEL_ID;
+    window.open(
+      `https://discord.com/channels/${DISCORD_GUILD_ID}/${channelId}`,
+      "_blank",
+    );
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -70,33 +78,33 @@ export function TaskDetailPanel({
             </Button>
           </div>
 
-          {/* Task Title - with Markdown */}
+          {/* Task Title */}
           <div className="text-3xl font-bold text-foreground">
-            <MarkdownRenderer content={task.task_name} className="*:mb-0" />
+            <MarkdownRenderer content={task.title} className="*:mb-0" />
           </div>
 
-          {/* Task Description/Steps - with Markdown */}
-          {task.task_description && (
+          {/* Task Description */}
+          {task.description && (
             <div className="text-base text-foreground prose prose-sm dark:prose-invert max-w-none">
-              <MarkdownRenderer content={task.task_description} />
+              <MarkdownRenderer content={task.description} />
             </div>
           )}
 
-          {/* Metadata Sections */}
+          {/* Metadata */}
           <div className="space-y-6 pt-4">
-            {/* Interest Group */}
+            {/* Interest Group + Hashtag */}
             <div className="space-y-2">
               <h3 className="text-lg font-bold text-foreground">
                 Interest Group
               </h3>
               <p className="text-base text-muted-foreground">
-                {task.interest_group?.name || "General Tasks"}
+                {task.ig ?? "General Tasks"}
               </p>
               {task.hashtag && (
                 <div className="pt-1">
                   <span className="text-sm font-bold text-foreground">
-                    Hashtag:
-                  </span>{" "}
+                    Hashtag:{" "}
+                  </span>
                   <span className="inline-block px-3 py-1 bg-muted text-muted-foreground rounded-full font-mono text-sm">
                     {task.hashtag}
                   </span>
@@ -104,73 +112,59 @@ export function TaskDetailPanel({
               )}
             </div>
 
-            {/* Skills */}
-            {extendedTask?.skills &&
-              Array.isArray(extendedTask.skills) &&
-              extendedTask.skills.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-foreground">Skills:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {extendedTask.skills.map((skill: string) => (
-                      <span
-                        key={skill}
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${chipColor(skill)}`}
-                      >
-                        <MarkdownRenderer
-                          content={skill}
-                          className="*:inline *:mb-0"
-                        />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {/* Published Info */}
+            {/* Karma */}
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-foreground">
-                Published Info
-              </h3>
+              <h3 className="text-lg font-bold text-foreground">Karma</h3>
               <p className="text-base text-muted-foreground">
-                <span className="font-bold text-foreground">By:</span>{" "}
-                {extendedTask?.organization?.title || "μLearn Foundation"}
+                {task.variable_karma ? `${task.karma}+ (variable)` : task.karma}
               </p>
             </div>
 
-            {/* Prerequisites - with Markdown */}
-            {extendedTask?.prerequisites && (
+            {/* Level */}
+            {task.level && (
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground">
-                  Prerequisites
-                </h3>
-                <div className="text-base text-muted-foreground">
-                  <MarkdownRenderer content={extendedTask.prerequisites} />
-                </div>
+                <h3 className="text-lg font-bold text-foreground">Level</h3>
+                <p className="text-base text-muted-foreground">{task.level}</p>
+              </div>
+            )}
+
+            {/* Type + Channel */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-foreground">Details</h3>
+              <div className="flex flex-wrap gap-2">
+                {task.type && (
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${chipColor(task.type)}`}
+                  >
+                    {task.type}
+                  </span>
+                )}
+                {task.channel && (
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${chipColor(task.channel)}`}
+                  >
+                    #{task.channel}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Event */}
+            {task.event && (
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-foreground">Event</h3>
+                <p className="text-base text-muted-foreground">{task.event}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Submit Proof of Work Button - Footer */}
+        {/* Submit Proof of Work */}
         <SheetFooter className="pt-6">
           <Button
             variant="default"
             className="font-semibold px-8"
-            onClick={() => {
-              if (!discordConnected) {
-                toast.error(
-                  "Please connect your Discord account first to submit proof of work.",
-                );
-                return;
-              }
-              const channelId =
-                task.submission_channel?.discord_id ||
-                DEFAULT_DISCORD_CHANNEL_ID;
-              window.open(
-                `https://discord.com/channels/${DISCORD_GUILD_ID}/${channelId}`,
-                "_blank",
-              );
-            }}
+            onClick={handleSubmit}
           >
             Submit Proof of Work
           </Button>
