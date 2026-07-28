@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { LearnerTasksPage } from "@/features/home/components/learner-tasks-page";
@@ -66,16 +65,10 @@ export function MuJourneyDashboard({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <JourneyHeader
-          title="µJourney"
-          subtitle="Your Learning Path - Complete tasks, earn karma, level up"
-        />
-      </motion.div>
+      <JourneyHeader
+        title="µJourney"
+        subtitle="Your Learning Path - Complete tasks, earn karma, level up"
+      />
 
       {/* Tab Navigation & Right-side controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -136,67 +129,41 @@ export function MuJourneyDashboard({
 
       {/* Tab Content with Animations */}
       <div className="mt-8 relative min-h-[400px]">
-        <AnimatePresence mode="wait">
-          {activeTab === "start-learning" && (
-            <motion.div
-              key="start-learning"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <StartLearningTab
-                filter={filter}
-                levelsData={levelsData}
-                isLoading={levelsLoading}
-                error={levelsError}
-              />
-            </motion.div>
-          )}
+        {activeTab === "start-learning" && (
+          <div key="start-learning">
+            <StartLearningTab
+              filter={filter}
+              levelsData={levelsData}
+              isLoading={levelsLoading}
+              error={levelsError}
+            />
+          </div>
+        )}
 
-          {activeTab === "become-expert" && (
-            <motion.div
-              key="become-expert"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BecomeExpertTab
-                filter={filter}
-                levelsData={levelsData}
-                igData={igData}
-                isLoading={levelsLoading || igLoading}
-                error={levelsError || igError}
-                isAuthenticated={isAuthenticated}
-              />
-            </motion.div>
-          )}
+        {activeTab === "become-expert" && (
+          <div key="become-expert">
+            <BecomeExpertTab
+              filter={filter}
+              levelsData={levelsData}
+              igData={igData}
+              isLoading={levelsLoading || igLoading}
+              error={levelsError || igError}
+              isAuthenticated={isAuthenticated}
+            />
+          </div>
+        )}
 
-          {activeTab === "events" && (
-            <motion.div
-              key="events"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <EventsTab />
-            </motion.div>
-          )}
+        {activeTab === "events" && (
+          <div key="events">
+            <EventsTab />
+          </div>
+        )}
 
-          {activeTab === "others" && (
-            <motion.div
-              key="others"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <LearnerTasksPage key={othersSource} taskSource={othersSource} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {activeTab === "others" && (
+          <div key="others">
+            <LearnerTasksPage key={othersSource} taskSource={othersSource} />
+          </div>
+        )}
       </div>
     </div>
   );
