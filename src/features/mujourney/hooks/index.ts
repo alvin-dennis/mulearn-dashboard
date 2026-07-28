@@ -7,5 +7,5 @@
 export * from "./query-keys";
 export * from "./useTaskList";
 export * from "./useInterestGroups";
-export * from "./useUserJourney";
+export * from "./usePublicUserJourney";
 export * from "./useUserLevelFeed";
