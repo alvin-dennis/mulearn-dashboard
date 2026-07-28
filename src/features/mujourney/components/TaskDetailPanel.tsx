@@ -22,7 +22,6 @@ import { chipColor } from "@/lib/chip-colors";
 import type { Task } from "../schemas";
 import { MarkdownRenderer } from "../utils/markdown";
 
-// Extended Task type to include optional backend fields
 interface ExtendedTask extends Task {
   skills?: string[];
   organization?: {
@@ -78,7 +77,7 @@ export function TaskDetailPanel({
 
           {/* Task Description/Steps - with Markdown */}
           {task.task_description && (
-            <div className="text-base text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
+            <div className="text-base text-foreground prose prose-sm dark:prose-invert max-w-none">
               <MarkdownRenderer content={task.task_description} />
             </div>
           )}
