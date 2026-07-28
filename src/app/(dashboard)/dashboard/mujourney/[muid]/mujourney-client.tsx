@@ -2,7 +2,7 @@
  * Public User Journey Page (Client Component)
  *
  * View another user's public journey.
- * Maps legacy public user journey task format to the new TaskListPublic format for LevelCard compatibility.
+ *
  */
 
 "use client";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { JourneyHeader, LevelCard } from "@/features/mujourney";
+import { useTaskList } from "@/features/mujourney/hooks";
 import { useUserJourney } from "@/features/mujourney/hooks";
 import type { TaskListPublic } from "@/features/mujourney/schemas";
 
@@ -22,37 +23,83 @@ interface PublicUserJourneyPageClientProps {
 export function PublicUserJourneyPageClient({
   muid,
 }: PublicUserJourneyPageClientProps) {
-  const { data, isLoading, error } = useUserJourney(muid);
+  const {
+    data: journeyData,
+    isLoading: journeyLoading,
+    error: journeyError,
+  } = useUserJourney(muid);
+  const { data: taskListData, isLoading: taskListLoading } = useTaskList();
 
-  // Map legacy level and task fields to TaskListPublic shape expected by components
-  const mappedLevels = useMemo(() => {
-    if (!data?.response?.levels) return [];
-
-    return data.response.levels.map((level: any) => {
-      const levelName = level.name || "General";
-      const tasks: TaskListPublic[] = (level.tasks || []).map((task: any) => ({
-        id: task.id || task.task_id || "",
-        hashtag: task.hashtag || "",
-        title: task.task_name || "Untitled Task",
-        description: task.task_description || null,
-        karma: task.karma || 0,
-        channel: task.submission_channel?.name || null,
-        discord_id: task.submission_channel?.discord_id || null,
-        type: task.type || "regular",
-        variable_karma: task.variable_karma || false,
-        level: levelName,
-        ig: task.interest_group?.name || null,
-        event: task.event || null,
-        event_id: task.event_id || null,
-        completed: task.completed || false,
-      }));
-
-      return {
-        name: levelName,
-        tasks,
-      };
+  // Build a set of completed task IDs from the user's journey data
+  const completedTaskIds = useMemo(() => {
+    if (!journeyData?.response?.levels) return new Set<string>();
+    const ids = new Set<string>();
+    journeyData.response.levels.forEach((level: any) => {
+      (level.tasks || []).forEach((task: any) => {
+        if (task.completed) {
+          ids.add(task.id || task.task_id || "");
+        }
+      });
     });
-  }, [data]);
+    return ids;
+  }, [journeyData]);
+
+  // Merge start_journey tasks with completion status from journey data
+  const startJourneyTasks = useMemo(() => {
+    if (!taskListData?.response?.start_journey) return [];
+    return taskListData.response.start_journey.map((task: TaskListPublic) => ({
+      ...task,
+      completed: completedTaskIds.has(task.id),
+    }));
+  }, [taskListData, completedTaskIds]);
+
+  // Group start_journey tasks by level.name for LevelCard display
+  const groupedStartJourney = useMemo(() => {
+    const map = new Map<string, TaskListPublic[]>();
+    startJourneyTasks.forEach((task) => {
+      const key = task.level ?? "General";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(task);
+    });
+    return Array.from(map.entries()).map(([name, tasks]) => ({
+      name,
+      tasks,
+    }));
+  }, [startJourneyTasks]);
+
+  // For authenticated viewers, also show become_expert and events sections
+  const becomeExpertTasks = taskListData?.response?.become_expert ?? [];
+  const eventsTasks = taskListData?.response?.events ?? [];
+
+  // Group become_expert tasks by level
+  const groupedBecomeExpert = useMemo(() => {
+    const map = new Map<string, TaskListPublic[]>();
+    becomeExpertTasks.forEach((task) => {
+      const key = task.level ?? "General";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(task);
+    });
+    return Array.from(map.entries()).map(([name, tasks]) => ({
+      name,
+      tasks,
+    }));
+  }, [becomeExpertTasks]);
+
+  // Group events tasks by level
+  const groupedEvents = useMemo(() => {
+    const map = new Map<string, TaskListPublic[]>();
+    eventsTasks.forEach((task) => {
+      const key = task.level ?? "General";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(task);
+    });
+    return Array.from(map.entries()).map(([name, tasks]) => ({
+      name,
+      tasks,
+    }));
+  }, [eventsTasks]);
+
+  const isLoading = journeyLoading || taskListLoading;
 
   if (isLoading) {
     return (
@@ -65,13 +112,13 @@ export function PublicUserJourneyPageClient({
     );
   }
 
-  if (error || !data?.response) {
+  if (journeyError || !journeyData?.response) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <p className="text-destructive">Failed to load journey</p>
           <p className="text-sm text-muted-foreground">
-            {error?.message || "User journey not found"}
+            {journeyError?.message || "User journey not found"}
           </p>
           <Button asChild>
             <Link href="/dashboard/mujourney">Back to MuJourney</Link>
@@ -81,7 +128,9 @@ export function PublicUserJourneyPageClient({
     );
   }
 
-  const { full_name } = data.response;
+  const { full_name } = journeyData.response;
+  const decodedMuid = decodeURIComponent(muid);
+  const displayName = full_name || decodedMuid;
 
   return (
     <div className="space-y-8">
@@ -94,22 +143,60 @@ export function PublicUserJourneyPageClient({
       </Button>
 
       {/* Header */}
-      <JourneyHeader
-        title={`${full_name}'s Journey`}
-        subtitle={`MUID: ${muid}`}
-      />
+      <JourneyHeader title={`${displayName}'s Journey`} subtitle={``} />
 
-      {/* Levels */}
+      {/* Start Journey — available tasks with completion status */}
       <div className="space-y-8">
-        {mappedLevels.map((level, index) => (
-          <LevelCard
-            key={level.name || `level-${index}`}
-            name={level.name}
-            tasks={level.tasks}
-            isLocked={false}
-          />
-        ))}
+        <JourneyHeader
+          title="Available Tasks"
+          subtitle="Tasks available to start"
+        />
+        {groupedStartJourney.length > 0 ? (
+          groupedStartJourney.map((level) => (
+            <LevelCard
+              key={level.name}
+              name={level.name}
+              tasks={level.tasks}
+              isLocked={false}
+            />
+          ))
+        ) : (
+          <p className="text-muted-foreground">No tasks available yet.</p>
+        )}
       </div>
+
+      {/* Become Expert — shown if non-empty (API returns empty for unauthenticated) */}
+      {groupedBecomeExpert.length > 0 && (
+        <div className="space-y-8">
+          <JourneyHeader
+            title="Advanced Tasks"
+            subtitle="Interest group and company tasks"
+          />
+          {groupedBecomeExpert.map((level) => (
+            <LevelCard
+              key={level.name}
+              name={level.name}
+              tasks={level.tasks}
+              isLocked={false}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Events — shown if non-empty (API returns empty for unauthenticated) */}
+      {groupedEvents.length > 0 && (
+        <div className="space-y-8">
+          <JourneyHeader title="Event Tasks" subtitle="Event-linked tasks" />
+          {groupedEvents.map((level) => (
+            <LevelCard
+              key={level.name}
+              name={level.name}
+              tasks={level.tasks}
+              isLocked={false}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

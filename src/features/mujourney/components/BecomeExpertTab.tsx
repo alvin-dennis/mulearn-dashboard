@@ -7,24 +7,26 @@
  *
  * Displays IG + company tasks from the become_expert section of the task list API.
  * - IG pills: clicking one sets selectedIG → parent fetches ?ig_id=<uuid>
- * - Client-side filter: ensures only tasks belonging to the clicked IG's name are displayed.
+ * - Client-side search filtering on tasks
  * - Edit button: opens EditInterestGroupsModal so user can change their IGs
  * - After edit save: parent invalidates both IG cache and task list cache
  */
 
+import { Loader2, Pencil, Search, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { updateInterestGroups } from "@/features/profile/api/profile.api";
 import { EditInterestGroupsModal } from "@/features/profile/components/edit-interest-groups-modal";
 import { mujourneyKeys } from "../hooks/query-keys";
+import { useDebounce } from "@/hooks/use-debounce";
 import type {
   InterestGroup,
   TaskListPublic,
 } from "../schemas/mujourney.schemas";
 import { LevelCard } from "./LevelCard";
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+// ─── Props ────────────────────────────────────────────────────────────
 
 interface BecomeExpertTabProps {
   filter?: string;
@@ -46,7 +48,7 @@ interface BecomeExpertTabProps {
   onIGsUpdated?: () => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────
 
 export function BecomeExpertTab({
   filter = "all",
@@ -62,9 +64,11 @@ export function BecomeExpertTab({
   onIGsUpdated,
 }: BecomeExpertTabProps) {
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 400);
   const queryClient = useQueryClient();
 
-  // ── Handle IG modal save ─────────────────────────────────────────────────
+  // ── Handle IG modal save ─────────────────────────────────────────
   const handleSaveIGs = async (groupIds: string[]) => {
     await updateInterestGroups(groupIds);
 
@@ -84,32 +88,32 @@ export function BecomeExpertTab({
     onIGsUpdated?.();
   };
 
-  // ── Group tasks by level for LevelCard display ────────────────────────────
-  const groupedLevels = useMemo(() => {
-    // Find active IG display name to filter tasks client-side
-    const activeIG = selectedIG
-      ? interestGroups.find((g) => g.id === selectedIG)
-      : null;
-
-    // Apply completed/incomplete filter and Interest Group filter
-    const filtered = tasks.filter((task) => {
-      // 1. Completion filter
+  // ── Apply completion filter + search filtering ──────────────────
+  const filteredTasks = useMemo(() => {
+    const byCompletion = tasks.filter((task) => {
       if (filter === "completed" && !task.completed) return false;
       if (filter === "incomplete" && task.completed) return false;
-
-      // 2. IG pill filter: if selectedIG is active, ONLY show tasks matching this IG's name
-      if (selectedIG && activeIG) {
-        if (task.ig !== activeIG.name) {
-          return false;
-        }
-      }
-
       return true;
     });
 
-    // Group by level name string (e.g. "Explorer", "Intermediate")
+    if (!debouncedSearch) return byCompletion;
+    const q = debouncedSearch.toLowerCase();
+    return byCompletion.filter(
+      (task) =>
+        task.title.toLowerCase().includes(q) ||
+        task.hashtag?.toLowerCase().includes(q) ||
+        task.type?.toLowerCase().includes(q) ||
+        task.ig?.toLowerCase().includes(q) ||
+        task.channel?.toLowerCase().includes(q) ||
+        task.level?.toLowerCase().includes(q) ||
+        task.event?.toLowerCase().includes(q),
+    );
+  }, [tasks, filter, debouncedSearch]);
+
+  // ── Group tasks by level for LevelCard display ────────────────────
+  const groupedLevels = useMemo(() => {
     const map = new Map<string, TaskListPublic[]>();
-    filtered.forEach((task) => {
+    filteredTasks.forEach((task) => {
       const key = task.level ?? "General";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(task);
@@ -119,7 +123,9 @@ export function BecomeExpertTab({
       name,
       tasks: levelTasks,
     }));
-  }, [tasks, filter, selectedIG, interestGroups]);
+  }, [filteredTasks]);
+
+  const clearSearch = () => setSearchInput("");
 
   // Adapt IGs for the modal
   const currentGroupsForModal = interestGroups.map((ig) => ({
@@ -162,7 +168,7 @@ export function BecomeExpertTab({
         )}
       </div>
 
-      {/* ── IG Pills ───────────────────────────────────────────────────── */}
+      {/* ── IG Pills ───────────────────────────────────────────────── */}
       {!igLoading && interestGroups.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {interestGroups.map((ig: InterestGroup) => {
@@ -206,7 +212,7 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* ── Loading State ─────────────────────────────────────────────── */}
+      {/* ── Loading State ───────────────────────────────────────────── */}
       {isAuthenticated && isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
@@ -216,7 +222,7 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* ── Error State ───────────────────────────────────────────────── */}
+      {/* ── Error State ───────────────────────────────────────────── */}
       {isAuthenticated && !isLoading && error && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
@@ -228,7 +234,31 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* ── Task Levels Display ───────────────────────────────────────── */}
+      {/* ── Search ─────────────────────────────────────────────────── */}
+      {isAuthenticated && !isLoading && !error && (
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+          <Input
+            id="become-expert-search"
+            placeholder="Search by title, hashtag, type, IG, channel, level, event..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-9 pr-8 h-9 text-sm"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Task Levels Display ───────────────────────────────────── */}
       {isAuthenticated &&
         !isLoading &&
         !error &&
@@ -246,18 +276,20 @@ export function BecomeExpertTab({
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
-              {interestGroups.length === 0
-                ? "You haven't joined any interest groups yet. Click the pencil icon to add some."
-                : selectedIG
-                  ? "No expert tasks available for this interest group"
-                  : filter !== "all"
-                    ? "No tasks match this filter"
-                    : "No expert tasks available"}
+              {searchInput
+                ? `No expert tasks match "${searchInput}". Try a different search.`
+                : interestGroups.length === 0
+                  ? "You haven't joined any interest groups yet. Click the pencil icon to add some."
+                  : selectedIG
+                    ? "No expert tasks available for this interest group"
+                    : filter !== "all"
+                      ? "No tasks match this filter"
+                      : "No expert tasks available"}
             </p>
           </div>
         ))}
 
-      {/* ── Edit Interest Groups Modal ─────────────────────────────────── */}
+      {/* ── Edit Interest Groups Modal ─────────────────────────────── */}
       <EditInterestGroupsModal
         open={editModalOpen}
         onOpenChange={setEditModalOpen}
