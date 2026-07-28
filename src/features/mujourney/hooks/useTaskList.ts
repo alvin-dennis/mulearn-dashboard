@@ -22,21 +22,25 @@ import type { TaskListResponse } from "../schemas";
 interface UseTaskListOptions {
   igId?: string;
   initialData?: TaskListResponse | null;
+  /** When true, sends Bearer token via apiClient. When false, uses publicApiClient. */
+  authenticated?: boolean;
 }
 
 /**
  * Hook for fetching the unified grouped task list.
  * @param igId - Optional IG UUID to filter become_expert tasks to a specific IG
  * @param initialData - Optional SSR pre-fetched data
+ * @param authenticated - Whether to send Bearer token. Default true.
  */
-export function useTaskList({ igId, initialData }: UseTaskListOptions = {}) {
-  const isAuthenticated = authStore.isAuthenticated();
-
+export function useTaskList({
+  igId,
+  initialData,
+  authenticated = true,
+}: UseTaskListOptions = {}) {
   return useQuery({
     queryKey: mujourneyKeys.taskList(igId),
-    queryFn: () => fetchTaskList(igId),
+    queryFn: () => fetchTaskList(igId, authenticated),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    // Allow both authenticated and unauthenticated fetches
     enabled: true,
     placeholderData: (prev) => prev, // keep showing previous data while refetching (IG switch)
     initialData: initialData ?? undefined,

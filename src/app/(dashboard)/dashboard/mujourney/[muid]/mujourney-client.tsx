@@ -3,6 +3,8 @@
  *
  * View another user's public journey.
  *
+ * Uses redesigned task list API (useTaskList) for available tasks,
+ * merged with user's journey progress (completed status) from useUserJourney.
  */
 
 "use client";
@@ -28,30 +30,34 @@ export function PublicUserJourneyPageClient({
     isLoading: journeyLoading,
     error: journeyError,
   } = useUserJourney(muid);
-  const { data: taskListData, isLoading: taskListLoading } = useTaskList();
+  const { data: taskListData, isLoading: taskListLoading } = useTaskList({
+    authenticated: false,
+  });
 
-  // Build a set of completed task IDs from the user's journey data
-  const completedTaskIds = useMemo(() => {
-    if (!journeyData?.response?.levels) return new Set<string>();
-    const ids = new Set<string>();
-    journeyData.response.levels.forEach((level: any) => {
+  // New format: response is an array of JourneyLevelSchema directly
+  const levels = journeyData?.response ?? [];
+
+  // Build a set of completed task hashtags from the user's journey data
+  const completedTaskHashtags = useMemo(() => {
+    const hashtags = new Set<string>();
+    levels.forEach((level: any) => {
       (level.tasks || []).forEach((task: any) => {
-        if (task.completed) {
-          ids.add(task.id || task.task_id || "");
+        if (task.completed && task.hashtag) {
+          hashtags.add(task.hashtag);
         }
       });
     });
-    return ids;
-  }, [journeyData]);
+    return hashtags;
+  }, [levels]);
 
   // Merge start_journey tasks with completion status from journey data
   const startJourneyTasks = useMemo(() => {
     if (!taskListData?.response?.start_journey) return [];
     return taskListData.response.start_journey.map((task: TaskListPublic) => ({
       ...task,
-      completed: completedTaskIds.has(task.id),
+      completed: completedTaskHashtags.has(task.hashtag || ""),
     }));
-  }, [taskListData, completedTaskIds]);
+  }, [taskListData, completedTaskHashtags]);
 
   // Group start_journey tasks by level.name for LevelCard display
   const groupedStartJourney = useMemo(() => {
@@ -128,9 +134,8 @@ export function PublicUserJourneyPageClient({
     );
   }
 
-  const { full_name } = journeyData.response;
-  const decodedMuid = decodeURIComponent(muid);
-  const displayName = full_name || decodedMuid;
+  // Use muid prop as display name (full_name no longer in API response)
+  const displayName = decodeURIComponent(muid) || muid;
 
   return (
     <div className="space-y-8">

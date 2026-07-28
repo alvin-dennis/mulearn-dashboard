@@ -154,16 +154,7 @@ export const PublicUserJourneyResponseSchema = z
     hasError: z.boolean().optional().default(false),
     statusCode: z.number().optional().default(200),
     message: DjangoMessageSchema,
-    response: z
-      .object({
-        muid: z.string(),
-        full_name: z.string(),
-        profile_pic: z.string().nullable().optional(),
-        current_level: z.number().default(1),
-        total_karma: z.number().default(0),
-        levels: z.array(JourneyLevelSchema).default([]),
-      })
-      .passthrough(),
+    response: z.array(JourneyLevelSchema).default([]),
   })
   .passthrough();
 

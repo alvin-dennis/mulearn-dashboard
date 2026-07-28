@@ -7,7 +7,7 @@
  * Uses the redesigned unified task list API: GET /api/v1/dashboard/task/list/
  */
 
-import { apiClient } from "@/api/client";
+import { apiClient, publicApiClient } from "@/api/client";
 import { endpoints } from "@/api/endpoints";
 import {
   PublicUserJourneyResponseSchema,
@@ -28,9 +28,10 @@ import {
  *
  * @param igId - Optional IG UUID — overrides which IG's tasks appear in become_expert
  */
-export async function fetchTaskList(igId?: string) {
+export async function fetchTaskList(igId?: string, authenticated = true) {
   const qs = igId ? `?ig_id=${igId}` : "";
-  return await apiClient.get(
+  const client = authenticated ? apiClient : publicApiClient;
+  return await client.get(
     `${endpoints.mujourney.taskList}${qs}`,
     TaskListResponseSchema,
   );
@@ -46,7 +47,7 @@ export async function fetchTaskList(igId?: string) {
  * @param muid - User's MUID
  */
 export async function fetchPublicUserJourney(muid: string) {
-  return await apiClient.get(
+  return await publicApiClient.get(
     endpoints.mujourney.getPublicUserLevels(muid),
     PublicUserJourneyResponseSchema,
   );
