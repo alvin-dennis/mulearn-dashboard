@@ -30,9 +30,7 @@ export function PublicUserJourneyPageClient({
     isLoading: journeyLoading,
     error: journeyError,
   } = useUserJourney(muid);
-  const { data: taskListData, isLoading: taskListLoading } = useTaskList({
-    authenticated: false,
-  });
+  const { data: taskListData, isLoading: taskListLoading } = useTaskList();
 
   // New format: response is an array of JourneyLevelSchema directly
   const levels = journeyData?.response ?? [];

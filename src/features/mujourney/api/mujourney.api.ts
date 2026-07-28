@@ -28,10 +28,9 @@ import {
  *
  * @param igId - Optional IG UUID — overrides which IG's tasks appear in become_expert
  */
-export async function fetchTaskList(igId?: string, authenticated = true) {
+export async function fetchTaskList(igId?: string) {
   const qs = igId ? `?ig_id=${igId}` : "";
-  const client = authenticated ? apiClient : publicApiClient;
-  return await client.get(
+  return await apiClient.get(
     `${endpoints.mujourney.taskList}${qs}`,
     TaskListResponseSchema,
   );
