@@ -61,24 +61,18 @@ export function KarmaDistribution({ profile }: KarmaDistributionProps) {
   const chartData = useMemo(() => {
     const kd = profile.karma_distribution;
 
-    const capitalize = (s: string) =>
-      s
-        .split(" ")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(" ");
-
     const slices = [
       ...kd.ig.map((ig) => ({
-        name: capitalize(ig.ig_name),
+        name: ig.ig_name,
         value: ig.karma,
       })),
       ...kd.events.map((event) => ({
-        name: capitalize(event.event_title),
+        name: event.event_title,
         value: event.karma,
       })),
       { name: "Intern Task", value: kd.intern.karma },
       ...kd.general.map((g) => ({
-        name: capitalize(g.category),
+        name: g.category,
         value: g.karma,
       })),
     ];
