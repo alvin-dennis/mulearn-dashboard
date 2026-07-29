@@ -20,6 +20,8 @@ export {
   isDurationUnitValue,
   isJobTypeValue,
   JOB_FIELD_LIMITS,
+  JOB_SORT_DEFAULT,
+  JOB_SORT_OPTIONS,
   JOB_STATUS_CONFIG,
   JOB_STEPPER_STEPS,
   JOB_TYPE_FIELD_MODEL,

@@ -6,7 +6,19 @@
  * Static option sets and configuration values used across the feature.
  */
 
-import type { StepDefinition } from "../types";
+import type { JobSortValue, StepDefinition } from "../types";
+
+export const JOB_SORT_DEFAULT: JobSortValue = "-created_at";
+
+export const JOB_SORT_OPTIONS: readonly {
+  value: JobSortValue;
+  label: string;
+}[] = [
+  { value: "-created_at", label: "Latest first" },
+  { value: "created_at", label: "Oldest first" },
+  { value: "title", label: "Title (A–Z)" },
+  { value: "-title", label: "Title (Z–A)" },
+] as const;
 
 // ─── Backend column limits ──────────────────────────────────
 // Mirrors db/job.py :: CompanyJob exactly. A form rule may be stricter than
