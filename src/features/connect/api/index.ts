@@ -1,1 +1,1 @@
-export { fetchQseverseInfo, connectDiscord } from "./connect.api";
+export { connectDiscord, fetchQseverseInfo } from "./connect.api";
