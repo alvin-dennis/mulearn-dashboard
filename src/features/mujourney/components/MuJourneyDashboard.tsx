@@ -79,12 +79,8 @@ export function MuJourneyDashboard({
   // ── Tabs ────────────────────────────────────────────────────────────────
   const tabs = [
     { id: "start-learning", label: "Start Journey" },
-    ...(isAuthenticated
-      ? [
-          { id: "become-expert", label: "Become Expert" },
-          { id: "events", label: "Events" },
-        ]
-      : []),
+    { id: "become-expert", label: "Become Expert" },
+    { id: "events", label: "Events" },
   ];
 
   const isLoading = taskListLoading;
@@ -162,7 +158,6 @@ export function MuJourneyDashboard({
             isLoading={isLoading}
             isFetching={isBgFetching}
             error={taskListError}
-            isAuthenticated={isAuthenticated}
           />
         )}
       </div>

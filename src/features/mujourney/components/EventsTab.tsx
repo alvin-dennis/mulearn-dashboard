@@ -7,7 +7,6 @@
  *
  * Displays event-linked tasks from the events section of the task list API.
  * No pagination (API returns full list). Client-side search + level grouping.
- * Authenticated only — unauthenticated callers receive an empty events array.
  */
 
 import { Calendar, Loader2, Search, X } from "lucide-react";
@@ -24,7 +23,6 @@ interface EventsTabProps {
   isLoading?: boolean;
   isFetching?: boolean;
   error?: Error | null;
-  isAuthenticated?: boolean;
 }
 
 export function EventsTab({
@@ -32,7 +30,6 @@ export function EventsTab({
   isLoading,
   isFetching,
   error,
-  isAuthenticated,
 }: EventsTabProps) {
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
@@ -83,79 +80,65 @@ export function EventsTab({
         )}
       </div>
 
-      {/* ── Unauthenticated prompt ─────────────────────────────────────── */}
-      {!isAuthenticated && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            Please log in to view event tasks
-          </p>
-        </div>
-      )}
+      {/* ── Search ────────────────────────────────────────────────────── */}
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <Input
+          id="event-task-search"
+          placeholder="Search by title, hashtag, type, IG, channel, level..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="pl-9 pr-8 h-9 text-sm"
+        />
+        {searchInput && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
+      </div>
 
-      {/* ── Authenticated view ────────────────────────────────────────── */}
-      {isAuthenticated && (
-        <>
-          {/* Search */}
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-            <Input
-              id="event-task-search"
-              placeholder="Search by title, hashtag, type, IG, channel, level..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8 h-9 text-sm"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
+      {/* ── Loading */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+            <p className="text-muted-foreground">Loading event tasks...</p>
           </div>
-
-          {/* Loading */}
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-                <p className="text-muted-foreground">Loading event tasks...</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center py-12">
-              <p className="text-destructive">Failed to load event tasks</p>
-            </div>
-          ) : groupedLevels.length === 0 ? (
-            searchInput ? (
-              <StateDisplay
-                variant="no-results"
-                description={`No event tasks match "${searchInput}". Try a different search.`}
-                action={
-                  <Button variant="outline" size="sm" onClick={clearSearch}>
-                    Clear search
-                  </Button>
-                }
-              />
-            ) : (
-              <StateDisplay variant="no-tasks" />
-            )
-          ) : (
-            <div className="space-y-10">
-              {groupedLevels.map((level) => (
-                <LevelCard
-                  key={level.name}
-                  name={level.name}
-                  tasks={level.tasks}
-                  isLocked={false}
-                />
-              ))}
-            </div>
-          )}
-        </>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-destructive">Failed to load event tasks</p>
+        </div>
+      ) : groupedLevels.length === 0 ? (
+        searchInput ? (
+          <StateDisplay
+            variant="no-results"
+            description={`No event tasks match "${searchInput}". Try a different search.`}
+            action={
+              <Button variant="outline" size="sm" onClick={clearSearch}>
+                Clear search
+              </Button>
+            }
+          />
+        ) : (
+          <StateDisplay variant="no-tasks" />
+        )
+      ) : (
+        <div className="space-y-10">
+          {groupedLevels.map((level) => (
+            <LevelCard
+              key={level.name}
+              name={level.name}
+              tasks={level.tasks}
+              isLocked={false}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

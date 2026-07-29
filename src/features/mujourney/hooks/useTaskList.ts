@@ -14,7 +14,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { authStore } from "@/lib/auth";
 import { fetchTaskList } from "../api";
 import type { TaskListResponse } from "../schemas";
 import { mujourneyKeys } from "./query-keys";
@@ -31,14 +30,10 @@ interface UseTaskListOptions {
  * @param initialData - Optional SSR pre-fetched data
  * @param authenticated - Whether to send Bearer token. Defaults to authStore check.
  */
-export function useTaskList({
-  igId,
-  initialData,
-  authenticated = authStore.isAuthenticated(),
-}: UseTaskListOptions = {}) {
+export function useTaskList({ igId, initialData }: UseTaskListOptions = {}) {
   return useQuery({
     queryKey: mujourneyKeys.taskList(igId),
-    queryFn: () => fetchTaskList(igId, authenticated),
+    queryFn: () => fetchTaskList(igId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: true,
     placeholderData: (prev) => prev, // keep showing previous data while refetching (IG switch)
