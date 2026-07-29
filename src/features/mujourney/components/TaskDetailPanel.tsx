@@ -7,8 +7,6 @@
  * Discord submit opens the task's submission channel (discord_id).
  */
 
-"use client";
-
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -49,13 +47,14 @@ export function TaskDetailPanel({
       );
       return;
     }
-    // discord_id is the submission channel's Discord ID
     const channelId = task.discord_id ?? DEFAULT_DISCORD_CHANNEL_ID;
     window.open(
       `https://discord.com/channels/${DISCORD_GUILD_ID}/${channelId}`,
       "_blank",
     );
   };
+
+  const publishedBy = task.company ?? "μLearn Foundation";
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -112,38 +111,15 @@ export function TaskDetailPanel({
               )}
             </div>
 
-            {/* Karma */}
+            {/* Task Type */}
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-foreground">Karma</h3>
-              <p className="text-base text-muted-foreground">
-                {task.variable_karma ? `${task.karma}+ (variable)` : task.karma}
-              </p>
-            </div>
-
-            {/* Level */}
-            {task.level && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground">Level</h3>
-                <p className="text-base text-muted-foreground">{task.level}</p>
-              </div>
-            )}
-
-            {/* Type + Channel */}
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-foreground">Details</h3>
+              <h3 className="text-lg font-bold text-foreground">Task Type</h3>
               <div className="flex flex-wrap gap-2">
                 {task.type && (
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${chipColor(task.type)}`}
                   >
                     {task.type}
-                  </span>
-                )}
-                {task.channel && (
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${chipColor(task.channel)}`}
-                  >
-                    #{task.channel}
                   </span>
                 )}
               </div>
@@ -156,6 +132,17 @@ export function TaskDetailPanel({
                 <p className="text-base text-muted-foreground">{task.event}</p>
               </div>
             )}
+
+            {/* Published Info */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-foreground">
+                Published Info
+              </h3>
+              <p className="text-base text-muted-foreground">
+                <span className="font-bold text-foreground">By:</span>{" "}
+                {publishedBy}
+              </p>
+            </div>
           </div>
         </div>
 
