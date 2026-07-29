@@ -8,13 +8,21 @@
 
 // ─── Enums / Unions ─────────────────────────────────────────
 
+/** Mirrors db/job.py :: CompanyJob.job_type (# Enum: Hybrid, Full-Time, Remote, Part-Time, Internship, Gig). */
 export type JobType =
   | "Full-Time"
   | "Part-Time"
+  | "Remote"
+  | "Hybrid"
   | "Internship"
-  | "Contract"
-  | "Freelance"
   | "Gig";
+
+/**
+ * Wire format for CompanyJob.certificate_provided — CharField(max_length=3)
+ * with enum Yes/No. DRF's CharField rejects booleans ("Not a valid string."),
+ * so this must never widen to include `boolean`.
+ */
+export type CertificateProvided = "Yes" | "No";
 
 export type JobStatus = "Active" | "Inactive" | "Draft";
 
@@ -170,10 +178,11 @@ export interface CreateJobPayload {
 
   duration_value?: number;
   duration_unit?: string;
-  hourly_rate?: string | number;
-  deliverables?: string[] | string;
-  stipend?: string | number;
-  certificate_provided?: boolean | string;
+  /** DecimalField(10, 2) — digits only, e.g. "499.50". */
+  hourly_rate?: string;
+  deliverables?: string[];
+  stipend?: string;
+  certificate_provided?: CertificateProvided;
   rules?: { rule_type: string; rule_value: string | number }[];
 }
 
@@ -189,10 +198,11 @@ export interface UpdateJobPayload {
 
   duration_value?: number | null;
   duration_unit?: string | null;
-  hourly_rate?: string | number | null;
-  deliverables?: string[] | string | null;
-  stipend?: string | number | null;
-  certificate_provided?: boolean | string | null;
+  /** DecimalField(10, 2) — digits only. `null` clears it; "" is rejected. */
+  hourly_rate?: string | null;
+  deliverables?: string[] | null;
+  stipend?: string | null;
+  certificate_provided?: CertificateProvided | null;
   rules?: { rule_type: string; rule_value: string | number }[];
 }
 
