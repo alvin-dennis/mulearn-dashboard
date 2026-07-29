@@ -16,8 +16,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authStore } from "@/lib/auth";
 import { fetchTaskList } from "../api";
-import { mujourneyKeys } from "./query-keys";
 import type { TaskListResponse } from "../schemas";
+import { mujourneyKeys } from "./query-keys";
 
 interface UseTaskListOptions {
   igId?: string;

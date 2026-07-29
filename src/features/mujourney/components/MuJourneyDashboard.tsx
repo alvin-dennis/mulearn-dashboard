@@ -12,15 +12,15 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { mujourneyKeys } from "../hooks/query-keys";
+import { useInterestGroups } from "../hooks/useInterestGroups";
+import { useTaskList } from "../hooks/useTaskList";
+import type { TaskListResponse } from "../schemas";
 import { BecomeExpertTab } from "./BecomeExpertTab";
 import { EventsTab } from "./EventsTab";
 import { JourneyHeader } from "./JourneyHeader";
 import { JourneyTabs } from "./JourneyTabs";
 import { StartLearningTab } from "./StartLearningTab";
-import { useInterestGroups } from "../hooks/useInterestGroups";
-import { useTaskList } from "../hooks/useTaskList";
-import { mujourneyKeys } from "../hooks/query-keys";
-import type { TaskListResponse } from "../schemas";
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 

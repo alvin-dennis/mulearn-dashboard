@@ -12,15 +12,15 @@
  * - After edit save: parent invalidates both IG cache and task list cache
  */
 
-import { Loader2, Pencil, Search, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Loader2, Pencil, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { StateDisplay } from "@/components/ui/state-display";
 import { updateInterestGroups } from "@/features/profile/api/profile.api";
 import { EditInterestGroupsModal } from "@/features/profile/components/edit-interest-groups-modal";
-import { mujourneyKeys } from "../hooks/query-keys";
 import { useDebounce } from "@/hooks/use-debounce";
+import { mujourneyKeys } from "../hooks/query-keys";
 import type {
   InterestGroup,
   TaskListPublic,
