@@ -1,53 +1,83 @@
 "use client";
 
+/**
+ * BecomeExpert Tab Component
+ *
+ * 📍 src/features/mujourney/components/BecomeExpertTab.tsx
+ *
+ * Displays IG + company tasks from the become_expert section of the task list API.
+ * - IG pills: clicking one sets selectedIG → parent fetches ?ig_id=<uuid>
+ * - Client-side search filtering on tasks
+ * - Edit button: opens EditInterestGroupsModal so user can change their IGs
+ * - After edit save: parent invalidates both IG cache and task list cache
+ */
+
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { StateDisplay } from "@/components/ui/state-display";
 import { updateInterestGroups } from "@/features/profile/api/profile.api";
 import { EditInterestGroupsModal } from "@/features/profile/components/edit-interest-groups-modal";
+import { useDebounce } from "@/hooks/use-debounce";
 import { mujourneyKeys } from "../hooks/query-keys";
 import type {
-  GetUserLevelsResponse,
   InterestGroup,
-  InterestGroupsResponse,
-  Task,
-  UserLevelData,
+  TaskListPublic,
 } from "../schemas/mujourney.schemas";
 import { LevelCard } from "./LevelCard";
 
+// ─── Props ────────────────────────────────────────────────────────────
+
 interface BecomeExpertTabProps {
   filter?: string;
-  levelsData?: GetUserLevelsResponse | null;
-  igData?: InterestGroupsResponse | null;
+  /** become_expert tasks from the unified task list API */
+  tasks?: TaskListPublic[];
   isLoading?: boolean;
+  /** background refetch in progress (IG switch) */
+  isFetching?: boolean;
   error?: Error | null;
   isAuthenticated?: boolean;
+  /** Currently selected IG UUID (null = show all) */
+  selectedIG?: string | null;
+  /** User's joined interest groups — for pill labels */
+  interestGroups?: InterestGroup[];
+  igLoading?: boolean;
+  /** Called when user clicks an IG pill */
+  onIGToggle?: (igId: string) => void;
+  /** Called after user successfully saves IG edits in the modal */
+  onIGsUpdated?: () => void;
 }
+
+// ─── Component ────────────────────────────────────────────────────────
 
 export function BecomeExpertTab({
   filter = "all",
-  levelsData,
-  igData,
+  tasks = [],
   isLoading,
+  isFetching,
   error,
   isAuthenticated,
+  selectedIG,
+  interestGroups = [],
+  igLoading,
+  onIGToggle,
+  onIGsUpdated,
 }: BecomeExpertTabProps) {
-  const [selectedIG, setSelectedIG] = useState<string | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 400);
   const queryClient = useQueryClient();
 
-  const interestGroups = igData?.response?.aois || [];
-
-  const handleToggleIG = (igId: string) => {
-    setSelectedIG((prev) => (prev === igId ? null : igId));
-  };
-
+  // ── Handle IG modal save ─────────────────────────────────────────
   const handleSaveIGs = async (groupIds: string[]) => {
     await updateInterestGroups(groupIds);
 
-    // Immediately reflect the saved selection in the cache so the pills
-    // update without waiting for a round-trip.
-    const savedAois = interestGroups.filter((ig) => groupIds.includes(ig.id));
+    // Optimistic update: reflect the newly saved IGs immediately in the cache
+    const savedAois = groupIds.map((id) => {
+      const existing = interestGroups.find((ig) => ig.id === id);
+      return existing ?? { id, name: id };
+    });
     queryClient.setQueryData(mujourneyKeys.interestGroups(), {
       hasError: false,
       statusCode: 200,
@@ -55,54 +85,59 @@ export function BecomeExpertTab({
       response: { aois: savedAois },
     });
 
-    // Force an immediate background refetch to sync with the server.
-    queryClient.refetchQueries({ queryKey: mujourneyKeys.interestGroups() });
-
-    // Clear any active pill filter so it can't point at a removed IG.
-    setSelectedIG(null);
+    // Delegate full invalidation + task list refetch to parent
+    onIGsUpdated?.();
   };
 
-  // Adapt mujourney IGs to the shape EditInterestGroupsModal expects
-  const currentGroupsForModal = interestGroups.map((ig: InterestGroup) => ({
+  // ── Apply completion filter + search filtering ──────────────────
+  const filteredTasks = useMemo(() => {
+    const byCompletion = tasks.filter((task) => {
+      if (filter === "completed" && !task.completed) return false;
+      if (filter === "incomplete" && task.completed) return false;
+      return true;
+    });
+
+    if (!debouncedSearch) return byCompletion;
+    const q = debouncedSearch.toLowerCase();
+    return byCompletion.filter(
+      (task) =>
+        task.title.toLowerCase().includes(q) ||
+        task.hashtag?.toLowerCase().includes(q) ||
+        task.type?.toLowerCase().includes(q) ||
+        task.ig?.toLowerCase().includes(q) ||
+        task.channel?.toLowerCase().includes(q) ||
+        task.level?.toLowerCase().includes(q) ||
+        task.event?.toLowerCase().includes(q),
+    );
+  }, [tasks, filter, debouncedSearch]);
+
+  // ── Group tasks by level for LevelCard display ────────────────────
+  const groupedLevels = useMemo(() => {
+    const map = new Map<string, TaskListPublic[]>();
+    filteredTasks.forEach((task) => {
+      const key = task.level ?? "General";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(task);
+    });
+
+    return Array.from(map.entries()).map(([name, levelTasks]) => ({
+      name,
+      tasks: levelTasks,
+    }));
+  }, [filteredTasks]);
+
+  const clearSearch = () => setSearchInput("");
+
+  // Adapt IGs for the modal
+  const currentGroupsForModal = interestGroups.map((ig) => ({
     id: ig.id,
     name: ig.name,
-    karma: 0,
-    level: { unit: "level", count: 1 } as { unit: string; count: number },
+    level: { unit: "level", count: 1 },
   }));
-
-  const expertLevels = useMemo(() => {
-    if (!levelsData?.response) return [];
-
-    return levelsData.response
-      .map((level: UserLevelData) => {
-        const filteredTasks = (level.tasks || []).filter((task: Task) => {
-          const isExpertTask = (task.hashtag || "").includes("#cl-");
-
-          const matchesIG = selectedIG
-            ? task.interest_group?.id === selectedIG
-            : true;
-
-          if (filter === "completed")
-            return isExpertTask && matchesIG && task.completed;
-          if (filter === "incomplete")
-            return isExpertTask && matchesIG && !task.completed;
-          return isExpertTask && matchesIG;
-        });
-
-        const uniqueTasks = Array.from(
-          new Map(
-            filteredTasks.map((task: Task) => [task.hashtag, task]),
-          ).values(),
-        );
-
-        return { ...level, tasks: uniqueTasks };
-      })
-      .filter((level: UserLevelData) => (level.tasks || []).length > 0);
-  }, [levelsData, selectedIG, filter]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <div>
@@ -113,21 +148,29 @@ export function BecomeExpertTab({
               Complete specialized tasks in your interest groups
             </p>
           </div>
-          {isAuthenticated && !isLoading && (
+
+          {/* Edit IGs button */}
+          {isAuthenticated && !igLoading && (
             <button
               type="button"
               onClick={() => setEditModalOpen(true)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 shrink-0"
               title="Edit interest groups"
+              aria-label="Edit interest groups"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
+
+        {/* Background-refetch spinner */}
+        {isFetching && !isLoading && (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0 mt-1" />
+        )}
       </div>
 
-      {/* IG Pills */}
-      {!isLoading && interestGroups.length > 0 && (
+      {/* ── IG Pills ───────────────────────────────────────────────── */}
+      {!igLoading && interestGroups.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {interestGroups.map((ig: InterestGroup) => {
             const isActive = selectedIG === ig.id;
@@ -135,10 +178,11 @@ export function BecomeExpertTab({
               <button
                 key={ig.id}
                 type="button"
-                onClick={() => handleToggleIG(ig.id)}
+                onClick={() => onIGToggle?.(ig.id)}
+                aria-pressed={isActive}
                 className={`rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-all ${
                   isActive
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "border-primary bg-primary text-primary-foreground shadow-md"
                     : "border-primary/40 bg-primary/5 text-foreground hover:border-primary hover:bg-primary/10"
                 }`}
               >
@@ -146,11 +190,31 @@ export function BecomeExpertTab({
               </button>
             );
           })}
+
+          {/* "All IGs" clear pill */}
+          {selectedIG && (
+            <button
+              type="button"
+              onClick={() => onIGToggle?.(selectedIG)}
+              className="rounded-full border-2 border-muted-foreground/30 bg-muted/40 px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:bg-muted"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
       )}
 
-      {/* Loading State */}
-      {isLoading && (
+      {/* ── Unauthenticated prompt ─────────────────────────────────────── */}
+      {!isAuthenticated && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            Please log in to view interest group tasks
+          </p>
+        </div>
+      )}
+
+      {/* ── Loading State ───────────────────────────────────────────── */}
+      {isAuthenticated && isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
@@ -159,8 +223,8 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* Error State */}
-      {error && (
+      {/* ── Error State ───────────────────────────────────────────── */}
+      {isAuthenticated && !isLoading && error && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
             <p className="text-destructive">Failed to load tasks</p>
@@ -171,28 +235,63 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* Levels Display */}
-      {!isLoading &&
+      {/* ── Search ─────────────────────────────────────────────────── */}
+      {isAuthenticated && !isLoading && !error && (
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+          <Input
+            id="become-expert-search"
+            placeholder="Search by title, hashtag, type, IG, channel, level, event..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-9 pr-8 h-9 text-sm"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Task Levels Display ───────────────────────────────────── */}
+      {isAuthenticated &&
+        !isLoading &&
         !error &&
-        (expertLevels.length > 0 ? (
+        (groupedLevels.length > 0 ? (
           <div className="space-y-10">
-            {expertLevels.map((level: UserLevelData) => (
-              <LevelCard key={level.name} level={level} isLocked={false} />
+            {groupedLevels.map((level) => (
+              <LevelCard
+                key={level.name}
+                name={level.name}
+                tasks={level.tasks}
+                isLocked={false}
+              />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {interestGroups.length === 0
-                ? isAuthenticated
-                  ? "You haven't joined any interest groups yet"
-                  : "Please log in to view interest group tasks"
-                : "No expert tasks available for this interest group"}
-            </p>
-          </div>
+          <StateDisplay
+            variant="no-tasks"
+            description={
+              searchInput
+                ? `No expert tasks match "${searchInput}". Try a different search.`
+                : interestGroups.length === 0
+                  ? "You haven't joined any interest groups yet. Click the pencil icon to add some."
+                  : selectedIG
+                    ? "No expert tasks available for this interest group"
+                    : filter !== "all"
+                      ? "No tasks match this filter"
+                      : "No expert tasks available"
+            }
+          />
         ))}
 
-      {/* Edit Modal */}
+      {/* ── Edit Interest Groups Modal ─────────────────────────────── */}
       <EditInterestGroupsModal
         open={editModalOpen}
         onOpenChange={setEditModalOpen}

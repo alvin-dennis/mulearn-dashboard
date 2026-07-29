@@ -3,12 +3,13 @@
  *
  * 📍 src/app/(dashboard)/mujourney/page.tsx
  *
- * Main MuJourney interface with tabs
+ * Server component: prefetches the unified task list for unauthenticated users (SSR).
+ * Authenticated users get all three sections client-side via useTaskList.
  */
 
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import { fetchPublicLevels } from "@/features/mujourney/api";
+import { fetchTaskList } from "@/features/mujourney/api";
 import { isAuthenticated } from "@/lib/auth/server";
 
 const MuJourneyDashboard = dynamic(() =>
@@ -25,26 +26,24 @@ export const metadata: Metadata = {
 export default async function MuJourneyPage() {
   const authenticated = await isAuthenticated();
 
-  // Hybrid Approach:
-  // 1. If NOT authenticated (Public), fetch public levels on server (SSR for SEO).
-  // 2. If authenticated (Private), skip server fetch. Client component will fetch user data (CSR).
-  let initialLevels = null;
+  // SSR: fetch the task list on the server for both authenticated and
+  // unauthenticated users. The API handles auth internally:
+  //   - Unauthenticated → start_journey only; become_expert & events are []
+  //   - Authenticated   → all three sections
+  let initialTaskList = null;
 
-  if (!authenticated) {
-    try {
-      const publicData = await fetchPublicLevels();
-      // Ensure the structure matches what MuJourneyDashboard expects
-      if (publicData) {
-        initialLevels = publicData;
-      }
-    } catch {
-      // Non-fatal: authenticated users get their data client-side anyway.
+  try {
+    const data = await fetchTaskList();
+    if (data) {
+      initialTaskList = data;
     }
+  } catch {
+    // Non-fatal: client will refetch via useTaskList on mount
   }
 
   return (
     <MuJourneyDashboard
-      initialLevels={initialLevels}
+      initialTaskList={initialTaskList}
       isAuthenticated={authenticated}
     />
   );
