@@ -131,7 +131,6 @@ export {
   useWithdrawApplication,
 } from "./hooks";
 export type {
-  BasicInfoStepValues,
   CompanyTask,
   CompanyTaskApprovalStatus,
   CompanyTaskFormValues,
@@ -140,15 +139,12 @@ export type {
   PublicCompanyProfile,
   PublicJobBySlug,
   PublicJobsBySlugData,
-  RequirementsStepValues,
   RuleFormValues,
 } from "./schemas";
 export {
   AdminSummaryResponseSchema,
   AdminSummarySchema,
   ApplyJobResponseSchema,
-  BasicInfoStepObjectSchema,
-  BasicInfoStepSchema,
   COMPANY_TASK_APPROVAL_STATUSES,
   CompanyDashboardSummaryResponseSchema,
   CompanyDashboardSummarySchema,
@@ -200,7 +196,6 @@ export {
   PublicJobsBySlugDataSchema,
   PublicJobsBySlugResponseSchema,
   PublicJobsResponseSchema,
-  RequirementsStepSchema,
   RuleFormSchema,
   SkillSchema,
   TalentPoolAnalyticsResponseSchema,
