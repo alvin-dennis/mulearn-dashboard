@@ -298,6 +298,28 @@ export default function ManageEventsDashboard() {
           </SelectContent>
         </Select>
 
+        <Select
+          value={sortBy}
+          onValueChange={(value) => {
+            setSortBy(value);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger
+            className="w-full rounded-full md:w-44"
+            aria-label="Sort events"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {EVENT_SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <SearchBar
           onSearch={(val) => {
             setSearch(val);
