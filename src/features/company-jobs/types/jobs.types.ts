@@ -328,16 +328,15 @@ export interface StepDefinition {
 }
 
 // ─── Query Parameter Types ──────────────────────────────────
+export type JobSortValue = "-created_at" | "created_at" | "title" | "-title";
 
 export interface JobsListParams {
   pageIndex?: number;
   perPage?: number;
   search?: string;
-  sortBy?: string;
+  sortBy?: JobSortValue;
   page?: number;
   per_page?: number;
-  sort_by?: string;
-  sort_order?: "asc" | "desc";
 }
 
 export interface LearnerDiscoveryParams {
