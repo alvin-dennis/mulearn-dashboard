@@ -16,6 +16,7 @@ import { Loader2, Pencil, Search, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { StateDisplay } from "@/components/ui/state-display";
 import { updateInterestGroups } from "@/features/profile/api/profile.api";
 import { EditInterestGroupsModal } from "@/features/profile/components/edit-interest-groups-modal";
 import { mujourneyKeys } from "../hooks/query-keys";
@@ -274,9 +275,10 @@ export function BecomeExpertTab({
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {searchInput
+          <StateDisplay
+            variant="no-tasks"
+            description={
+              searchInput
                 ? `No expert tasks match "${searchInput}". Try a different search.`
                 : interestGroups.length === 0
                   ? "You haven't joined any interest groups yet. Click the pencil icon to add some."
@@ -284,9 +286,9 @@ export function BecomeExpertTab({
                     ? "No expert tasks available for this interest group"
                     : filter !== "all"
                       ? "No tasks match this filter"
-                      : "No expert tasks available"}
-            </p>
-          </div>
+                      : "No expert tasks available"
+            }
+          />
         ))}
 
       {/* ── Edit Interest Groups Modal ─────────────────────────────── */}
