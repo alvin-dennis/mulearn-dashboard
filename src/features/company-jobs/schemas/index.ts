@@ -16,20 +16,16 @@ export {
   CompanyTaskSkillSchema,
 } from "./company-tasks.schema";
 export type {
-  BasicInfoStepValues,
   JobFormValues,
   PublicCompanyProfile,
   PublicJobBySlug,
   PublicJobsBySlugData,
-  RequirementsStepValues,
   RuleFormValues,
 } from "./jobs.schema";
 export {
   AdminSummaryResponseSchema,
   AdminSummarySchema,
   ApplyJobResponseSchema,
-  BasicInfoStepObjectSchema,
-  BasicInfoStepSchema,
   CompanyDashboardSummaryResponseSchema,
   CompanyDashboardSummarySchema,
   CompanyGalleryItemSchema,
@@ -72,7 +68,6 @@ export {
   PublicJobsBySlugDataSchema,
   PublicJobsBySlugResponseSchema,
   PublicJobsResponseSchema,
-  RequirementsStepSchema,
   RuleFormSchema,
   SkillSchema,
   TalentPoolAnalyticsResponseSchema,
