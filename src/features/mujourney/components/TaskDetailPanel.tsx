@@ -97,7 +97,7 @@ export function TaskDetailPanel({
                 Interest Group
               </h3>
               <p className="text-base text-muted-foreground">
-                {task.ig ?? "General Tasks"}
+                {task.ig ?? "General Task"}
               </p>
               {task.hashtag && (
                 <div className="pt-1">

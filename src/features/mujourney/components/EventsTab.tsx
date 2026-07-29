@@ -20,7 +20,6 @@ import type { TaskListPublic } from "../schemas";
 import { LevelCard } from "./LevelCard";
 
 interface EventsTabProps {
-  /** events tasks from the unified task list API */
   tasks?: TaskListPublic[];
   isLoading?: boolean;
   isFetching?: boolean;

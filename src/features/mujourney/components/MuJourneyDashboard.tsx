@@ -43,8 +43,6 @@ export function MuJourneyDashboard({
   const queryClient = useQueryClient();
 
   // ── Unified task list query ─────────────────────────────────────────────
-  // When selectedIG changes, the queryKey changes → React Query automatically
-  // fetches GET /api/v1/dashboard/task/list/?ig_id=<uuid> for that IG.
   const {
     data: taskListData,
     isLoading: taskListLoading,
@@ -63,20 +61,15 @@ export function MuJourneyDashboard({
   const becomeExpertTasks = taskListData?.response?.become_expert ?? [];
   const eventsTasks = taskListData?.response?.events ?? [];
 
-  // The IGs the user belongs to — used for pill rendering
   const interestGroups = igData?.response?.aois ?? [];
 
   // ── IG pill toggle handler ──────────────────────────────────────────────
-  // Clicking an IG pill updates selectedIG → queryKey changes → React Query
-  // fetches the task list with the new ig_id. Clicking the same pill deselects.
   const handleIGToggle = (igId: string) => {
     const newIG = selectedIG === igId ? null : igId;
     setSelectedIG(newIG);
   };
 
   // ── Called after user saves IGs in the edit modal ──────────────────────
-  // Invalidates both the interest groups cache and the task list so everything
-  // reflects the user's new IG selection.
   const handleIGsUpdated = () => {
     setSelectedIG(null); // clear pill selection — old igId may no longer be valid
     queryClient.invalidateQueries({ queryKey: mujourneyKeys.interestGroups() });
@@ -94,7 +87,6 @@ export function MuJourneyDashboard({
       : []),
   ];
 
-  // Combined loading: task list is loading or still fetching in background
   const isLoading = taskListLoading;
   const isBgFetching = !taskListLoading && taskListFetching;
 
@@ -113,7 +105,6 @@ export function MuJourneyDashboard({
           defaultTab="start-learning"
           onTabChange={(tab) => {
             setActiveTab(tab);
-            // Reset filter when switching tabs
             setFilter("all");
           }}
         />

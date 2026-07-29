@@ -22,7 +22,6 @@ import { LevelCard } from "./LevelCard";
 
 interface StartLearningTabProps {
   filter?: string;
-  /** start_journey tasks from the unified task list API */
   tasks?: TaskListPublic[];
   isLoading?: boolean;
   isFetching?: boolean;
