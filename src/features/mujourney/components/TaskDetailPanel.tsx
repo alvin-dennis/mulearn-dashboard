@@ -54,7 +54,7 @@ export function TaskDetailPanel({
     );
   };
 
-  const publishedBy = task.company ?? "μLearn Foundation";
+  const publishedBy = task.company_name ?? "μLearn Foundation";
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

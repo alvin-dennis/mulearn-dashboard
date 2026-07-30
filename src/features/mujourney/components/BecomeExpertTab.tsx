@@ -204,17 +204,8 @@ export function BecomeExpertTab({
         </div>
       )}
 
-      {/* ── Unauthenticated prompt ─────────────────────────────────────── */}
-      {!isAuthenticated && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            Please log in to view interest group tasks
-          </p>
-        </div>
-      )}
-
       {/* ── Loading State ───────────────────────────────────────────── */}
-      {isAuthenticated && isLoading && (
+      {isLoading && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
@@ -224,7 +215,7 @@ export function BecomeExpertTab({
       )}
 
       {/* ── Error State ───────────────────────────────────────────── */}
-      {isAuthenticated && !isLoading && error && (
+      {!isLoading && error && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center space-y-4">
             <p className="text-destructive">Failed to load tasks</p>
@@ -236,7 +227,7 @@ export function BecomeExpertTab({
       )}
 
       {/* ── Search ─────────────────────────────────────────────────── */}
-      {isAuthenticated && !isLoading && !error && (
+      {!isLoading && !error && (
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -260,8 +251,7 @@ export function BecomeExpertTab({
       )}
 
       {/* ── Task Levels Display ───────────────────────────────────── */}
-      {isAuthenticated &&
-        !isLoading &&
+      {!isLoading &&
         !error &&
         (groupedLevels.length > 0 ? (
           <div className="space-y-10">

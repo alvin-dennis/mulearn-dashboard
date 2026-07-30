@@ -10,8 +10,18 @@ export const mujourneyKeys = {
   all: ["mujourney"] as const,
 
   // Unified task list (redesigned API)
-  taskList: (igId?: string) =>
-    [...mujourneyKeys.all, "task-list", igId ?? "public"] as const,
+  // authenticated is part of the key so an authed "no IG selected" fetch never
+  // shares a cache slot with an actual unauthenticated visitor's fetch.
+  taskList: (igId?: string, authenticated?: boolean) =>
+    [
+      ...mujourneyKeys.all,
+      "task-list",
+      authenticated ? "auth" : "public",
+      igId ?? "all",
+    ] as const,
+
+  // Prefix key matching ALL task-list queries regardless of igId/auth — use for invalidation
+  taskListAll: () => [...mujourneyKeys.all, "task-list"] as const,
 
   // Public journey (for [muid] page)
   publicUserJourney: (muid: string) =>

@@ -36,7 +36,6 @@ export async function fetchTaskList(igId?: string, authenticated?: boolean) {
     TaskListResponseSchema,
   );
 }
-
 // ============================================
 // Public Journey
 // ============================================
