@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Pagination from "@/components/dashboard/table/pagination";
-import { StateDisplay } from "@/components/ui/state-display";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { StateDisplay } from "@/components/ui/state-display";
 import { useGysList } from "../hooks";
 import type { GysItem } from "../schemas";
 import { GysDetailDialog } from "./gys-detail-dialog";
