@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Pagination from "@/components/dashboard/table/pagination";
+import { StateDisplay } from "@/components/ui/state-display";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,42 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StateDisplay } from "@/components/ui/state-display";
-import { useIsList, useSmtList } from "../hooks";
-import type { CampusContentItem, CampusContentType } from "../schemas";
-import { CampusContentDetailDialog } from "./campus-content-detail-dialog";
+import { useGysList } from "../hooks";
+import type { GysItem } from "../schemas";
+import { GysDetailDialog } from "./gys-detail-dialog";
 import { MediaCard, MediaCardSkeleton } from "./media-card";
 
 const SKELETONS = Array.from({ length: 6 }, (_, i) => `skeleton-${i}`);
 
-const LABELS: Record<CampusContentType, string> = {
-  smt: "Salt Mango Tree",
-  isr: "Inspiration Station Radio",
-};
-
-interface Props {
-  contentType: CampusContentType;
-}
-
-export function CampusContentCards({ contentType }: Props) {
+export function GysCards() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [zone, setZone] = useState("");
-  const [sheetItem, setSheetItem] = useState<CampusContentItem | null>(null);
+  const [sheetItem, setSheetItem] = useState<GysItem | null>(null);
 
-  const params = {
+  const { data, isLoading, isError } = useGysList({
     pageIndex: page,
     perPage: 12,
     search,
     status: status || undefined,
-    zone: zone || undefined,
-  };
-
-  const smtQuery = useSmtList(params, contentType === "smt");
-  const isQuery = useIsList(params, contentType === "isr");
-  const { data, isLoading, isError } =
-    contentType === "smt" ? smtQuery : isQuery;
+  });
 
   const items = data?.data ?? [];
   const totalPages = data?.pagination.totalPages ?? 0;
@@ -54,9 +38,9 @@ export function CampusContentCards({ contentType }: Props) {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap gap-2">
+        <div className="flex flex-1 gap-2">
           <Input
-            placeholder="Search episodes..."
+            placeholder="Search sessions..."
             value={search}
             onChange={(e) => {
               setPage(1);
@@ -81,23 +65,6 @@ export function CampusContentCards({ contentType }: Props) {
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
-          <Select
-            value={zone || "all"}
-            onValueChange={(v) => {
-              setPage(1);
-              setZone(v === "all" ? "" : v);
-            }}
-          >
-            <SelectTrigger className="w-[120px] rounded-xl border-border bg-background">
-              <SelectValue placeholder="Zone" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All zones</SelectItem>
-              <SelectItem value="north">North</SelectItem>
-              <SelectItem value="central">Central</SelectItem>
-              <SelectItem value="south">South</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -112,15 +79,15 @@ export function CampusContentCards({ contentType }: Props) {
         <StateDisplay
           variant="no-results"
           className="rounded-2xl border border-dashed border-border bg-muted/40"
-          title="Failed to load episodes"
-          description={`Something went wrong while fetching ${LABELS[contentType]} episodes. Please try again.`}
+          title="Failed to load sessions"
+          description="Something went wrong while fetching Grab Your Superpowers sessions. Please try again."
         />
       ) : items.length === 0 ? (
         <StateDisplay
           variant="no-results"
           className="rounded-2xl border border-dashed border-border bg-muted/40"
-          title="No episodes found"
-          description={`There are currently no ${LABELS[contentType]} episodes listed here.`}
+          title="No sessions found"
+          description="There are currently no Grab Your Superpowers sessions listed here."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -128,7 +95,7 @@ export function CampusContentCards({ contentType }: Props) {
             <MediaCard
               key={item.id}
               id={item.id}
-              title={item.topic}
+              title={item.title}
               subtitle={item.campus}
               date={item.date}
               status={item.status}
@@ -150,11 +117,7 @@ export function CampusContentCards({ contentType }: Props) {
       />
 
       {/* Detail dialog */}
-      <CampusContentDetailDialog
-        item={sheetItem}
-        contentType={contentType}
-        onClose={() => setSheetItem(null)}
-      />
+      <GysDetailDialog item={sheetItem} onClose={() => setSheetItem(null)} />
     </div>
   );
 }

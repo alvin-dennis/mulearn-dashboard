@@ -6,6 +6,11 @@ import {
   type CampusContentListData,
   CampusContentListResponseSchema,
   type CampusContentWrite,
+  GysDetailResponseSchema,
+  type GysItem,
+  type GysListData,
+  GysListResponseSchema,
+  type GysWrite,
   MutationResponseSchema,
   OfficeHoursDetailResponseSchema,
   type OfficeHoursItem,
@@ -70,6 +75,7 @@ function buildOfficeHoursFormData(
   const fd = new FormData();
   if (payload.title !== undefined) fd.append("title", payload.title);
   if (payload.date) fd.append("date", toOfficeHoursDate(payload.date));
+  if (payload.time !== undefined) fd.append("time", payload.time);
   if (payload.performer !== undefined)
     fd.append("performer", payload.performer);
   if (payload.designation !== undefined)
@@ -236,6 +242,63 @@ export async function updateIs(
 export async function deleteIs(id: string): Promise<void> {
   await apiClient.delete(
     endpoints.weeklyTwitches.inspirationStation.delete(id),
+    undefined,
+    MutationResponseSchema,
+  );
+}
+
+// ─── Grab Your Superpowers ──────────────────────────────────────
+
+export async function fetchGysList(params: ListParams): Promise<GysListData> {
+  const res = await apiClient.get(
+    `${endpoints.weeklyTwitches.grabYourSuperpowers.list}?${buildQuery(params)}`,
+    GysListResponseSchema,
+  );
+  return res.response;
+}
+
+export async function fetchGysDetail(id: string): Promise<GysItem> {
+  const res = await apiClient.get(
+    endpoints.weeklyTwitches.grabYourSuperpowers.detail(id),
+    GysDetailResponseSchema,
+  );
+  return res.response;
+}
+
+export async function createGys(payload: GysWrite): Promise<void> {
+  await apiClient.post(
+    endpoints.weeklyTwitches.grabYourSuperpowers.create,
+    {
+      ...payload,
+      time: payload.time || undefined,
+      link: payload.link || undefined,
+      performer: payload.performer || undefined,
+      designation: payload.designation || undefined,
+    },
+    MutationResponseSchema,
+  );
+}
+
+export async function updateGys(
+  id: string,
+  payload: Partial<GysWrite>,
+): Promise<void> {
+  await apiClient.patch(
+    endpoints.weeklyTwitches.grabYourSuperpowers.update(id),
+    {
+      ...payload,
+      time: payload.time || undefined,
+      link: payload.link || undefined,
+      performer: payload.performer || undefined,
+      designation: payload.designation || undefined,
+    },
+    MutationResponseSchema,
+  );
+}
+
+export async function deleteGys(id: string): Promise<void> {
+  await apiClient.delete(
+    endpoints.weeklyTwitches.grabYourSuperpowers.delete(id),
     undefined,
     MutationResponseSchema,
   );
