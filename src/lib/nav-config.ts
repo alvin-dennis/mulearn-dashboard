@@ -368,7 +368,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
     dynamicCheck: (roles) =>
       roles.includes(ROLES.ADMIN) ||
       roles.includes(ROLES.ASSOCIATE) ||
-      roles.includes(ROLES.IG_LEAD),
+      roles.includes(ROLES.IG_LEAD) ||
+      roles.includes(ROLES.ZONAL_CAMPUS_LEAD) ||
+      roles.includes(ROLES.DISTRICT_CAMPUS_LEAD),
   },
 
   // ── Bottom Section (all authenticated users) ──────────────

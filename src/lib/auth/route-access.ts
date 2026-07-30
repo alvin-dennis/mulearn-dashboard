@@ -194,7 +194,13 @@ export const routeAccessMap: Record<string, RouteConfig> = {
 
   // ── Weekly Twitches (Admin + Associate + IG Leads) ───────
   "/dashboard/management/weekly-twitches": {
-    roles: [ROLES.ADMIN, ROLES.ASSOCIATE, ROLES.IG_LEAD],
+    roles: [
+      ROLES.ADMIN,
+      ROLES.ASSOCIATE,
+      ROLES.IG_LEAD,
+      ROLES.ZONAL_CAMPUS_LEAD,
+      ROLES.DISTRICT_CAMPUS_LEAD,
+    ],
   },
 
   // ── URL Shortener (broader access) ───────────────────────
