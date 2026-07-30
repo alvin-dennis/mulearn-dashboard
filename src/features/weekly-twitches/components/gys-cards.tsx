@@ -98,6 +98,7 @@ export function GysCards() {
               title={item.title}
               subtitle={item.campus}
               date={item.date}
+              time={item.time}
               status={item.status}
               onClick={() => setSheetItem(item)}
             />

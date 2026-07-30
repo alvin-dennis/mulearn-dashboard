@@ -131,6 +131,7 @@ export function CampusContentCards({ contentType }: Props) {
               title={item.topic}
               subtitle={item.campus}
               date={item.date}
+              time={item.time}
               status={item.status}
               onClick={() => setSheetItem(item)}
             />

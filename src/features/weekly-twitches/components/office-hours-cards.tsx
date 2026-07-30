@@ -97,6 +97,7 @@ export function OfficeHoursCards() {
               title={item.title}
               subtitle={item.performer ?? undefined}
               date={item.date}
+              time={item.time}
               status={item.status}
               imageSrc={item.poster_thumbnail}
               onClick={() => setSheetItem(item)}
