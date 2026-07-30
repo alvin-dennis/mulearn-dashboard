@@ -15,7 +15,6 @@ import { useState } from "react";
 import { mujourneyKeys } from "../hooks/query-keys";
 import { useInterestGroups } from "../hooks/useInterestGroups";
 import { useTaskList } from "../hooks/useTaskList";
-import type { TaskListResponse } from "../schemas";
 import { BecomeExpertTab } from "./BecomeExpertTab";
 import { EventsTab } from "./EventsTab";
 import { JourneyHeader } from "./JourneyHeader";
@@ -25,15 +24,12 @@ import { StartLearningTab } from "./StartLearningTab";
 // ─── Props ───────────────────────────────────────────────────────────────────
 
 interface MuJourneyDashboardProps {
-  /** SSR-prefetched task list (unauthenticated SSR only) */
-  initialTaskList?: TaskListResponse | null;
   isAuthenticated: boolean;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function MuJourneyDashboard({
-  initialTaskList,
   isAuthenticated,
 }: MuJourneyDashboardProps) {
   const [activeTab, setActiveTab] = useState("start-learning");
@@ -50,7 +46,6 @@ export function MuJourneyDashboard({
     isFetching: taskListFetching,
   } = useTaskList({
     igId: selectedIG ?? undefined,
-    initialData: initialTaskList ?? undefined,
   });
 
   // ── Interest Groups query (for pill labels + edit modal) ────────────────
@@ -73,7 +68,7 @@ export function MuJourneyDashboard({
   const handleIGsUpdated = () => {
     setSelectedIG(null); // clear pill selection — old igId may no longer be valid
     queryClient.invalidateQueries({ queryKey: mujourneyKeys.interestGroups() });
-    queryClient.invalidateQueries({ queryKey: mujourneyKeys.taskList() });
+    queryClient.invalidateQueries({ queryKey: mujourneyKeys.taskListAll() });
   };
 
   // ── Tabs ────────────────────────────────────────────────────────────────
