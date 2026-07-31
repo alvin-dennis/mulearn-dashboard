@@ -354,8 +354,11 @@ export function RegisterClient({
 
     // 5. Navigate to interests onboarding → role-based dashboard redirect
     //    happens inside interests-client.tsx after domains are selected.
+    //    encodeURIComponent is required: a ruri can carry its own query string
+    //    (e.g. dashboard/connect-discord?code=…) which would otherwise be
+    //    parsed as sibling params here and lost.
     const redirectPath = redirectUri
-      ? `/onboarding/interests?ruri=${redirectUri}`
+      ? `/onboarding/interests?ruri=${encodeURIComponent(redirectUri)}`
       : "/onboarding/interests";
     router.push(redirectPath);
 

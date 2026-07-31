@@ -342,21 +342,19 @@ export function InterestGroupFormDialog({
         }
         // PUT/PATCH never carry images — replace via the standalone endpoints.
         // Silenced so the save only shows one "Interest Group updated" toast.
-        if (coverImageFile) {
-          await uploadCoverImage(initialData.id, coverImageFile, {
-            silent: true,
-          });
-        }
-        if (iconImageFile) {
-          await uploadIconImage(initialData.id, iconImageFile, {
-            silent: true,
-          });
-        }
+        // TODO: Cover/Icon image uploading disabled — backend conflict
+        // if (coverImageFile) {
+        //   await uploadCoverImage(initialData.id, coverImageFile, {
+        //     silent: true,
+        //   });
+        // }
+        // if (iconImageFile) {
+        //   await uploadIconImage(initialData.id, iconImageFile, {
+        //     silent: true,
+        //   });
+        // }
       } else {
-        await createInterestGroup(payload, {
-          coverImage: coverImageFile,
-          iconImage: iconImageFile,
-        });
+        await createInterestGroup(payload);
       }
 
       setCurrentStep(1);
@@ -538,7 +536,8 @@ export function InterestGroupFormDialog({
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
+                  {/* TODO: Cover/Icon image upload fields disabled — backend conflict */}
+                  {/* <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
                         Cover image
@@ -564,7 +563,7 @@ export function InterestGroupFormDialog({
                         cropShape="round"
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </section>
               ) : null}
 
@@ -883,15 +882,7 @@ export function InterestGroupFormDialog({
                           (initialData?.icon_image ? "Already set" : "Not set"),
                         false,
                       ],
-                      [
-                        "About",
-                        values.about
-                          ? values.about.length > 120
-                            ? `${values.about.slice(0, 120)}…`
-                            : values.about
-                          : "Not set",
-                        false,
-                      ],
+                      ["About", values.about || "Not set", false],
                       [
                         "Prerequisites",
                         Array.isArray(values.prerequisites) &&
@@ -952,16 +943,16 @@ export function InterestGroupFormDialog({
                     ].map(([label, value, required]) => (
                       <div
                         key={label as string}
-                        className="flex items-start justify-between gap-4 px-4 py-3"
+                        className="flex items-start justify-between gap-3 px-4 py-3 sm:gap-4"
                       >
-                        <p className="w-40 shrink-0 text-xs font-medium text-muted-foreground">
+                        <p className="w-32 shrink-0 text-xs font-medium text-muted-foreground sm:w-40">
                           {label}
                           {required ? (
                             <span className="ml-0.5 text-destructive">*</span>
                           ) : null}
                         </p>
                         <p
-                          className={`flex-1 text-right text-sm ${
+                          className={`min-w-0 flex-1 whitespace-pre-wrap text-right text-sm break-words [overflow-wrap:anywhere] ${
                             value === "Not set"
                               ? "italic text-muted-foreground/60"
                               : "text-foreground"

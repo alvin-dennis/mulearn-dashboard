@@ -64,13 +64,6 @@ const ORG_ITEMS: OrgItem[] = [
     icon: CheckCircle,
     iconBg: "bg-destructive/15 text-destructive",
   },
-  {
-    title: "Company Verification",
-    description: "Review and verify company registration requests.",
-    href: "/dashboard/management/manage-companies",
-    icon: Briefcase,
-    iconBg: "bg-slate-500/15 text-slate-600 dark:text-slate-400",
-  },
 ];
 
 export default async function OrganizationHubPage() {

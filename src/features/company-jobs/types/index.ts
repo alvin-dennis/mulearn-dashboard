@@ -19,6 +19,7 @@ export type {
   JobDetailResponse,
   JobEngagementAnalytics,
   JobRule,
+  JobSortValue,
   JobStatus,
   JobsListParams,
   JobsListResponse,

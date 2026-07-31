@@ -200,15 +200,15 @@ export const NAV_ITEMS: readonly NavItem[] = [
   //   dynamicCheck: (roles) =>
   //     !roles.some((r) => r === ROLES.MENTOR || r === ROLES.COMPANY),
   // },
-  {
-    id: "talent-pool",
-    title: "Talent Pool",
-    href: "/dashboard/talent-pool",
-    icon: UserCheck,
-    section: "main",
-    dynamicCheck: (roles) =>
-      roles.some((r) => r === ROLES.MENTOR || r === ROLES.COMPANY),
-  },
+  // {
+  //   id: "talent-pool",
+  //   title: "Talent Pool",
+  //   href: "/dashboard/talent-pool",
+  //   icon: UserCheck,
+  //   section: "main",
+  //   dynamicCheck: (roles) =>
+  //     roles.some((r) => r === ROLES.MENTOR || r === ROLES.COMPANY),
+  // },
   {
     id: "intern-dashboard",
     title: "Intern",
@@ -327,14 +327,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
       hasIgLeadRole(userRoles),
   },
   {
-    id: "mentor-verification",
-    title: "Mentor Verification",
-    href: "/dashboard/management/mentor-verification",
-    icon: UserCheck,
-    section: "management",
-    roles: MANAGEMENT_ROLES,
-  },
-  {
     id: "management",
     title: "Management",
     href: "/dashboard/management",
@@ -376,7 +368,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
     dynamicCheck: (roles) =>
       roles.includes(ROLES.ADMIN) ||
       roles.includes(ROLES.ASSOCIATE) ||
-      roles.includes(ROLES.IG_LEAD),
+      roles.includes(ROLES.IG_LEAD) ||
+      roles.includes(ROLES.ZONAL_CAMPUS_LEAD) ||
+      roles.includes(ROLES.DISTRICT_CAMPUS_LEAD),
   },
 
   // ── Bottom Section (all authenticated users) ──────────────
