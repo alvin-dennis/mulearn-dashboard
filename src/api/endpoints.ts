@@ -1371,6 +1371,21 @@ export const endpoints = {
       delete: (id: string) =>
         `/api/v1/dashboard/media-content/inspiration-station/${id}/`,
     },
+    grabYourSuperpowers: {
+      /** GET - List Grab Your Superpowers sessions (public) */
+      list: "/api/v1/dashboard/media-content/grab-your-superpowers/",
+      /** GET - Single Grab Your Superpowers session (public) */
+      detail: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
+      /** POST - Create Grab Your Superpowers session (admin) */
+      create: "/api/v1/dashboard/media-content/grab-your-superpowers/",
+      /** PATCH - Update Grab Your Superpowers session (admin) */
+      update: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
+      /** DELETE - Soft-delete Grab Your Superpowers session (admin) */
+      delete: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
+    },
   },
 
   // ============================================

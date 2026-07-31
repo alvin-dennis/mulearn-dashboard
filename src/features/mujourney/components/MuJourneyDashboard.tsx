@@ -10,9 +10,7 @@
  * which replaces the become_expert section with only that IG's tasks.
  */
 
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { mujourneyKeys } from "../hooks/query-keys";
 import { useInterestGroups } from "../hooks/useInterestGroups";
 import { useTaskList } from "../hooks/useTaskList";
 import { BecomeExpertTab } from "./BecomeExpertTab";
@@ -21,22 +19,12 @@ import { JourneyHeader } from "./JourneyHeader";
 import { JourneyTabs } from "./JourneyTabs";
 import { StartLearningTab } from "./StartLearningTab";
 
-// ─── Props ───────────────────────────────────────────────────────────────────
-
-interface MuJourneyDashboardProps {
-  isAuthenticated: boolean;
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function MuJourneyDashboard({
-  isAuthenticated,
-}: MuJourneyDashboardProps) {
+export function MuJourneyDashboard() {
   const [activeTab, setActiveTab] = useState("start-learning");
   const [filter, setFilter] = useState("all");
   const [selectedIG, setSelectedIG] = useState<string | null>(null);
-
-  const queryClient = useQueryClient();
 
   // ── Unified task list query ─────────────────────────────────────────────
   const {
@@ -62,13 +50,6 @@ export function MuJourneyDashboard({
   const handleIGToggle = (igId: string) => {
     const newIG = selectedIG === igId ? null : igId;
     setSelectedIG(newIG);
-  };
-
-  // ── Called after user saves IGs in the edit modal ──────────────────────
-  const handleIGsUpdated = () => {
-    setSelectedIG(null); // clear pill selection — old igId may no longer be valid
-    queryClient.invalidateQueries({ queryKey: mujourneyKeys.interestGroups() });
-    queryClient.invalidateQueries({ queryKey: mujourneyKeys.taskListAll() });
   };
 
   // ── Tabs ────────────────────────────────────────────────────────────────
@@ -136,14 +117,11 @@ export function MuJourneyDashboard({
             filter={filter}
             tasks={becomeExpertTasks}
             isLoading={isLoading}
-            isFetching={isBgFetching}
             error={taskListError}
-            isAuthenticated={isAuthenticated}
             selectedIG={selectedIG}
             interestGroups={interestGroups}
             igLoading={igLoading}
             onIGToggle={handleIGToggle}
-            onIGsUpdated={handleIGsUpdated}
           />
         )}
 

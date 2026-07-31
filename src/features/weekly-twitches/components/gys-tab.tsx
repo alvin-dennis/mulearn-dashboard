@@ -6,7 +6,6 @@ import Pagination from "@/components/dashboard/table/pagination";
 import Table, { type Data } from "@/components/dashboard/table/Table";
 import TableTop from "@/components/dashboard/table/TableTop";
 import THead from "@/components/dashboard/table/Thead";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -16,11 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useOfficeHoursList, useOfficeHoursMutations } from "../hooks";
+import { useGysList, useGysMutations } from "../hooks";
 import { formatTime } from "../lib/format-time";
-import type { OfficeHoursItem } from "../schemas";
-import { OfficeHoursDetailDialog } from "./office-hours-detail-dialog";
-import { OfficeHoursForm } from "./office-hours-form";
+import type { GysItem } from "../schemas";
+import { GysDetailDialog } from "./gys-detail-dialog";
+import { GysForm } from "./gys-form";
 
 const STATUS_COLORS: Record<string, string> = {
   upcoming: "app-status-applied",
@@ -30,38 +29,31 @@ const STATUS_COLORS: Record<string, string> = {
 
 const COLUMNS = [
   { column: "title", Label: "Title", isSortable: false, width: "w-52" },
+  { column: "campus", Label: "Campus", isSortable: false, width: "w-40" },
   { column: "performer", Label: "Performer", isSortable: false, width: "w-36" },
   { column: "date", Label: "Date", isSortable: false, width: "w-28" },
   { column: "time", Label: "Time", isSortable: false, width: "w-20" },
   { column: "status", Label: "Status", isSortable: false, width: "w-28" },
-  {
-    column: "interest_groups",
-    Label: "Interest Groups",
-    isSortable: false,
-    width: "w-44",
-  },
 ];
 
-export function OfficeHoursTab() {
+export function GysTab() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [viewTarget, setViewTarget] = useState<OfficeHoursItem | null>(null);
-  const [editTarget, setEditTarget] = useState<OfficeHoursItem | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<OfficeHoursItem | null>(
-    null,
-  );
+  const [viewTarget, setViewTarget] = useState<GysItem | null>(null);
+  const [editTarget, setEditTarget] = useState<GysItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<GysItem | null>(null);
 
-  const { data, isLoading } = useOfficeHoursList({
+  const { data, isLoading } = useGysList({
     pageIndex: page,
     perPage,
     search,
     status: status || undefined,
   });
 
-  const { remove } = useOfficeHoursMutations();
+  const { remove } = useGysMutations();
 
   const rows = data?.data ?? [];
   const totalPages = data?.pagination.totalPages ?? 0;
@@ -70,7 +62,6 @@ export function OfficeHoursTab() {
   const tableRows: Data[] = rows.map((r) => ({
     ...r,
     time: formatTime(r.time),
-    interest_groups: (r.interest_groups ?? []).join(", "),
   }));
 
   const handleSearch = (val: string) => {
@@ -153,14 +144,6 @@ export function OfficeHoursTab() {
         columnOrder={COLUMNS}
         id={["id"]}
         customCellRender={(column, row) => {
-          if (column === "time") {
-            const t = String(row.time ?? "");
-            return t ? (
-              <span>{t}</span>
-            ) : (
-              <span className="text-muted-foreground">—</span>
-            );
-          }
           if (column === "status") {
             const s = String(row.status ?? "");
             return (
@@ -171,17 +154,12 @@ export function OfficeHoursTab() {
               </span>
             );
           }
-          if (column === "interest_groups") {
-            const val = String(row.interest_groups ?? "");
-            if (!val) return <span className="text-muted-foreground">—</span>;
-            return (
-              <div className="flex flex-wrap gap-1">
-                {val.split(", ").map((ig) => (
-                  <Badge key={ig} variant="secondary" className="text-xs">
-                    {ig}
-                  </Badge>
-                ))}
-              </div>
+          if (column === "time") {
+            const t = String(row.time ?? "");
+            return t ? (
+              <span>{t}</span>
+            ) : (
+              <span className="text-muted-foreground">—</span>
             );
           }
           return null;
@@ -233,21 +211,18 @@ export function OfficeHoursTab() {
         />
       </Table>
 
-      <OfficeHoursForm
+      <GysForm
         isOpen={formOpen}
         onClose={() => setFormOpen(false)}
         initialData={editTarget}
       />
 
-      <OfficeHoursDetailDialog
-        item={viewTarget}
-        onClose={() => setViewTarget(null)}
-      />
+      <GysDetailDialog item={viewTarget} onClose={() => setViewTarget(null)} />
 
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Office Hours Session?"
+        title="Delete Grab Your Superpowers Session?"
         description={`"${deleteTarget?.title}" will be soft-deleted and hidden from all listings.`}
         onConfirm={handleDelete}
         isPending={remove.isPending}

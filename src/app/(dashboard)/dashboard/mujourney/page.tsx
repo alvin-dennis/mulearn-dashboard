@@ -6,7 +6,6 @@
 
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import { isAuthenticated } from "@/lib/auth/server";
 
 const MuJourneyDashboard = dynamic(() =>
   import("@/features/mujourney").then((mod) => ({
@@ -20,7 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default async function MuJourneyPage() {
-  const authenticated = await isAuthenticated();
-
-  return <MuJourneyDashboard isAuthenticated={authenticated} />;
+  return <MuJourneyDashboard />;
 }
