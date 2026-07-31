@@ -235,6 +235,35 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
 
   const startDatetimeValue = watch("start_datetime");
   const minEndDatetime = startDatetimeValue || undefined;
+  useEffect(() => {
+    if (!open) return;
+
+    const now = new Date();
+
+    const start = new Date(now.getTime() + 15 * 60 * 1000);
+    const startDatetime = new Date(
+      start.getTime() - start.getTimezoneOffset() * 60000,
+    )
+      .toISOString()
+      .slice(0, 16);
+
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const endDatetime = new Date(
+      end.getTime() - end.getTimezoneOffset() * 60000,
+    )
+      .toISOString()
+      .slice(0, 16);
+
+    setValue("start_datetime", startDatetime, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+
+    setValue("end_datetime", endDatetime, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [open, setValue]);
 
   // Auto-select the first available cluster when options load (replaces hardcoded "coder" default)
   useEffect(() => {
