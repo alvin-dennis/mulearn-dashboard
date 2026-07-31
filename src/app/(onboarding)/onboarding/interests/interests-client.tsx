@@ -22,7 +22,7 @@ import {
   useSelectDomains,
   useSelectEndgoals,
 } from "@/features/onboarding";
-import { getRoleHomePath } from "@/lib/auth";
+import { getRoleHomePath, sanitizeReturnPath } from "@/lib/auth";
 
 interface InterestsClientProps {
   redirectUri?: string;
@@ -50,9 +50,12 @@ export function InterestsClient({ redirectUri, mode }: InterestsClientProps) {
     }
   }, [user, isLoadingUser, router, isSubmitting]);
 
+  // `ruri` arrives from the URL, so it is attacker-controllable — sanitize
+  // before redirecting. The sanitizer keeps the query string, which is what
+  // carries an OAuth `?code=` through to its destination.
   const getRedirectPath = () => {
     if (redirectUri && redirectUri !== "noredirect") {
-      return `/${redirectUri}`;
+      return `/${sanitizeReturnPath(redirectUri)}`;
     }
     // Route to the role-specific home dashboard after onboarding completes.
     // Falls back to "/dashboard" for standard member roles.
