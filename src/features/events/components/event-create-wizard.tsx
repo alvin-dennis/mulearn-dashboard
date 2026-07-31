@@ -1477,13 +1477,13 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
                     ].map(([label, value, required]) => (
                       <div
                         key={String(label)}
-                        className="flex items-start justify-between gap-4 px-4 py-3"
+                        className="flex items-start justify-between gap-3 px-4 py-3 sm:gap-4"
                       >
                         <p className="w-28 shrink-0 text-xs font-medium text-muted-foreground">
                           {label}
                         </p>
                         <p
-                          className={`text-right text-sm ${String(value) === "Not set" ? (required ? "text-destructive" : "text-muted-foreground") : "text-foreground"}`}
+                          className={`min-w-0 flex-1 whitespace-pre-wrap text-right text-sm break-words [overflow-wrap:anywhere] ${String(value) === "Not set" ? (required ? "text-destructive" : "text-muted-foreground") : "text-foreground"}`}
                         >
                           {String(value)}
                         </p>

@@ -474,7 +474,8 @@ export function InterestGroupDetailClient() {
               </p>
             </div>
 
-            <ImpactProjectsSection igId={group.id} />
+            {/* TODO: Impact Projects disabled — backend conflict */}
+            {/* <ImpactProjectsSection igId={group.id} /> */}
           </div>
         </div>
       </div>

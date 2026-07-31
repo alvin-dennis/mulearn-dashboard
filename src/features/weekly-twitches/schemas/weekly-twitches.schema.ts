@@ -24,6 +24,7 @@ export const OfficeHoursItemSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
   date: z.string(),
+  time: z.string().nullable().optional(),
   performer: z.string().nullable().optional(),
   designation: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
@@ -54,10 +55,14 @@ export const OfficeHoursDetailResponseSchema = ApiResponseSchema(
 export const OfficeHoursWriteSchema = z.object({
   title: z.string().min(1, "Title is required").max(300),
   date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
   performer: z.string().max(200).optional().or(z.literal("")),
   designation: z.string().max(200).optional().or(z.literal("")),
   description: z.string().optional(),
-  link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  link: z
+    .string()
+    .min(1, "Meeting link is required")
+    .url("Must be a valid URL"),
   interest_groups: z.array(z.string()).optional(),
 });
 
@@ -68,6 +73,7 @@ export const CampusContentItemSchema = z.object({
   topic: z.string(),
   campus: z.string(),
   date: z.string(),
+  time: z.string().nullable().optional(),
   zone: ZoneSchema.nullable().optional(),
   description: z.string().nullable().optional(),
   link: z.string().nullable().optional(),
@@ -92,9 +98,52 @@ export const CampusContentWriteSchema = z.object({
   topic: z.string().min(1, "Topic is required").max(300),
   campus: z.string().min(1, "Campus is required").max(200),
   date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
   zone: ZoneSchema.optional(),
   description: z.string().optional(),
-  link: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  link: z
+    .string()
+    .min(1, "Streaming link is required")
+    .url("Must be a valid URL"),
+});
+
+// ─── Grab Your Superpowers ──────────────────────────────────────
+
+export const GysItemSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  date: z.string(),
+  time: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  performer: z.string().nullable().optional(),
+  designation: z.string().nullable().optional(),
+  campus: z.string(),
+  link: z.string().nullable().optional(),
+  status: StatusSchema,
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const GysListDataSchema = z.object({
+  data: z.array(GysItemSchema),
+  pagination: PaginationSchema,
+});
+
+export const GysListResponseSchema = ApiResponseSchema(GysListDataSchema);
+export const GysDetailResponseSchema = ApiResponseSchema(GysItemSchema);
+
+export const GysWriteSchema = z.object({
+  title: z.string().min(1, "Title is required").max(300),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+  campus: z.string().min(1, "Campus is required").max(200),
+  performer: z.string().max(200).optional().or(z.literal("")),
+  designation: z.string().max(200).optional().or(z.literal("")),
+  description: z.string().optional(),
+  link: z
+    .string()
+    .min(1, "Meeting link is required")
+    .url("Must be a valid URL"),
 });
 
 // ─── Exported types ───────────────────────────────────────────
@@ -107,3 +156,6 @@ export type CampusContentListData = z.infer<typeof CampusContentListDataSchema>;
 export type CampusContentWrite = z.infer<typeof CampusContentWriteSchema>;
 export type ContentStatus = z.infer<typeof StatusSchema>;
 export type ContentZone = z.infer<typeof ZoneSchema>;
+export type GysItem = z.infer<typeof GysItemSchema>;
+export type GysListData = z.infer<typeof GysListDataSchema>;
+export type GysWrite = z.infer<typeof GysWriteSchema>;

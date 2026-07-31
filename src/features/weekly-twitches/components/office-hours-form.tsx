@@ -32,6 +32,7 @@ interface Props {
 const DEFAULTS: OfficeHoursWrite = {
   title: "",
   date: "",
+  time: "",
   performer: "",
   designation: "",
   description: "",
@@ -46,6 +47,11 @@ function isoToInputDate(isoDate: string): string {
     return `${year}-${month}-${day}`;
   }
   return isoDate;
+}
+
+function toTimeInput(time?: string | null): string {
+  if (!time) return "";
+  return time.slice(0, 5);
 }
 
 export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
@@ -75,6 +81,7 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
       reset({
         title: initialData.title,
         date: isoToInputDate(initialData.date),
+        time: toTimeInput(initialData.time),
         performer: initialData.performer ?? "",
         designation: initialData.designation ?? "",
         description: initialData.description ?? "",
@@ -91,10 +98,10 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
       await update.mutateAsync({
         id: initialData.id,
         data: values,
-        posterFile,
+        // posterFile, // Commented out due to backend conflict
       });
     } else {
-      await create.mutateAsync({ data: values, posterFile });
+      await create.mutateAsync({ data: values }); // Commented out posterFile due to backend conflict
     }
     onClose();
   };
@@ -130,18 +137,38 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
             )}
           </div>
 
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              Date <span className="text-destructive">*</span>
-            </p>
-            <Input
-              type="date"
-              className="rounded-xl border-border bg-background"
-              {...register("date")}
-            />
-            {errors.date && (
-              <p className="text-xs text-destructive">{errors.date.message}</p>
-            )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                Date <span className="text-destructive">*</span>
+              </p>
+              <Input
+                type="date"
+                className="rounded-xl border-border bg-background"
+                {...register("date")}
+              />
+              {errors.date && (
+                <p className="text-xs text-destructive">
+                  {errors.date.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                Time <span className="text-destructive">*</span>
+              </p>
+              <Input
+                type="time"
+                className="rounded-xl border-border bg-background"
+                {...register("time")}
+              />
+              {errors.time && (
+                <p className="text-xs text-destructive">
+                  {errors.time.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -185,7 +212,9 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Meeting Link</p>
+            <p className="text-sm font-medium text-foreground">
+              Meeting Link <span className="text-destructive">*</span>
+            </p>
             <Input
               className="rounded-xl border-border bg-background"
               placeholder="https://meet.google.com/..."
@@ -215,7 +244,8 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
             />
           </div>
 
-          <div className="space-y-1">
+          {/* TODO: Poster upload disabled — backend conflict */}
+          {/* <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
               Poster Thumbnail
             </p>
@@ -225,7 +255,7 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
               currentUrl={initialData?.poster_thumbnail}
               maxSizeMB={5}
             />
-          </div>
+          </div> */}
 
           <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
             <Button

@@ -4,10 +4,18 @@
  * 📍 src/features/company-jobs/schemas/jobs.schema.ts
  *
  * Zod schemas for API response validation AND form validation.
- * Imports only from types layer.
+ * Imports only from the types and constants layers (both leaf modules — the
+ * `lint:circular` check guards this).
  */
 
 import { z } from "zod";
+import {
+  getJobTypeFieldModel,
+  HOURLY_RATE_PATTERN,
+  isDurationUnitValue,
+  isJobTypeValue,
+  JOB_FIELD_LIMITS,
+} from "../constants/jobs.constants";
 
 // ─── Entity Schemas (API response validation) ───────────────
 
@@ -776,80 +784,198 @@ export const PublicJobsBySlugResponseSchema = DjangoResponse(
   PublicJobsBySlugDataSchema,
 );
 
-// ─── Form Schemas (per-step validation) ─────────────────────
+// ─── Job Form Schema ────────────────────────────────────────
+//
+// Every limit below is traceable to a column in db/job.py :: CompanyJob.
+// The backend requires only `title` and `job_type`; every other column is
+// null=True, blank=True, so the wizard is free to hide fields that do not
+// apply to the chosen job type.
+//
+// Cross-field rules live in ONE superRefine on the object rather than in
+// chained .refine() calls. Zod aborts an object parse when a field fails with
+// an invalid_type error (e.g. a field is `undefined` rather than ""), and an
+// aborted parse silently skips top-level refinements — which is how the old
+// "Salary range is required" rule could go missing. Keeping every base field a
+// plain string and doing the conditional work in superRefine means the rules
+// are evaluated on every keystroke regardless of what else is incomplete.
 
-export const BasicInfoStepObjectSchema = z.object({
+const HOURLY_RATE_HINT = `Numbers only — up to ${JOB_FIELD_LIMITS.hourlyRateIntegerDigits} digits and ${JOB_FIELD_LIMITS.hourlyRateDecimalPlaces} decimal places (e.g. 499.50)`;
+
+const JobFormObjectSchema = z.object({
+  // — Always applicable —
   title: z
     .string()
+    .trim()
     .min(1, "Job title is required")
-    .max(100, "Title must be 100 characters or fewer"),
-  job_type: z.string().min(1, "Job type is required"),
+    .max(
+      JOB_FIELD_LIMITS.title,
+      `Keep this within ${JOB_FIELD_LIMITS.title} characters`,
+    ),
+  job_type: z.string().min(1, "Select a job type"),
   location: z
     .string()
+    .trim()
     .min(1, "Location is required")
-    .max(100, "Location must be 100 characters or fewer"),
-  salary_range: z
-    .string()
-    .max(50, "Salary range must be 50 characters or fewer")
-    .optional(),
-});
-
-export const BasicInfoStepSchema = BasicInfoStepObjectSchema.refine(
-  (data) => {
-    if (data.job_type !== "Gig") {
-      return !!data.salary_range && data.salary_range.trim().length > 0;
-    }
-    return true;
-  },
-  {
-    message: "Salary range is required for non-gig jobs",
-    path: ["salary_range"],
-  },
-);
-
-export const RequirementsStepSchema = z.object({
+    .max(
+      JOB_FIELD_LIMITS.location,
+      `Keep this within ${JOB_FIELD_LIMITS.location} characters`,
+    ),
   experience: z
     .string()
+    .trim()
     .min(1, "Experience is required")
-    .max(50, "Experience must be 50 characters or fewer"),
+    .max(
+      JOB_FIELD_LIMITS.experience,
+      `Keep this short — ${JOB_FIELD_LIMITS.experience} characters max (e.g. "2-4 years")`,
+    ),
   job_description: z
     .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(5000, "Description must be 5000 characters or fewer"),
-  // Advanced options — all optional
+    .trim()
+    .min(10, "Give candidates at least a sentence — 10 characters minimum")
+    .max(
+      JOB_FIELD_LIMITS.jobDescription,
+      `Keep this within ${JOB_FIELD_LIMITS.jobDescription} characters`,
+    ),
 
+  // — Compensation: exactly one applies, decided by job type —
+  salary_range: z
+    .string()
+    .trim()
+    .max(
+      JOB_FIELD_LIMITS.salaryRange,
+      `Keep this within ${JOB_FIELD_LIMITS.salaryRange} characters`,
+    )
+    .optional(),
+  stipend: z
+    .string()
+    .trim()
+    .max(
+      JOB_FIELD_LIMITS.stipend,
+      `Keep this within ${JOB_FIELD_LIMITS.stipend} characters`,
+    )
+    .optional(),
+  /** Backend is DecimalField(10, 2) — a bare number, never a formatted string. */
+  hourly_rate: z.string().trim().optional(),
+
+  // — Fixed-term engagement fields —
   duration_value: z
-    .number()
-    .int("Must be a whole number")
+    .number({ error: "Enter a whole number" })
+    .int("Enter a whole number")
     .min(1, "Must be at least 1")
-    .max(365, "Must be 365 or fewer")
+    .max(JOB_FIELD_LIMITS.durationValueMax, "That duration is too large")
     .optional(),
   duration_unit: z.string().optional(),
-  hourly_rate: z.string().max(50, "Must be 50 characters or fewer").optional(),
-  deliverables: z.array(z.string().min(1)).optional(),
-  stipend: z.string().max(50, "Must be 50 characters or fewer").optional(),
+  deliverables: z.array(z.string()).optional(),
   certificate_provided: z.boolean().optional(),
 });
 
-/** Combined form schema for create / edit */
-export const JobFormSchema = BasicInfoStepObjectSchema.merge(
-  RequirementsStepSchema,
-).refine(
-  (data) => {
-    if (data.job_type !== "Gig") {
-      return !!data.salary_range && data.salary_range.trim().length > 0;
-    }
-    return true;
-  },
-  {
-    message: "Salary range is required for non-gig jobs",
-    path: ["salary_range"],
-  },
-);
+export const JobFormSchema = JobFormObjectSchema.superRefine((values, ctx) => {
+  const model = getJobTypeFieldModel(values.job_type);
 
-export type JobFormValues = z.infer<typeof JobFormSchema>;
-export type BasicInfoStepValues = z.infer<typeof BasicInfoStepSchema>;
-export type RequirementsStepValues = z.infer<typeof RequirementsStepSchema>;
+  // job_type must be one the backend recognises.
+  if (values.job_type && !isJobTypeValue(values.job_type)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["job_type"],
+      message: "Select a job type from the list",
+    });
+  }
+
+  // ── Compensation — required, and only the one this job type uses ──
+  if (model.compensation === "salary") {
+    if (!values.salary_range) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["salary_range"],
+        message: "Salary range is required",
+      });
+    }
+  } else if (model.compensation === "stipend") {
+    if (!values.stipend) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["stipend"],
+        message: "Stipend is required for an internship",
+      });
+    }
+  } else {
+    const rate = values.hourly_rate ?? "";
+    if (!rate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["hourly_rate"],
+        message: "Hourly rate is required for a gig",
+      });
+    } else if (!HOURLY_RATE_PATTERN.test(rate)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["hourly_rate"],
+        message: HOURLY_RATE_HINT,
+      });
+    } else if (Number(rate) <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["hourly_rate"],
+        message: "Hourly rate must be greater than 0",
+      });
+    }
+  }
+
+  // ── Duration — optional, but the serializer rejects a half-filled pair ──
+  if (model.duration) {
+    const hasValue = values.duration_value != null;
+    const hasUnit = !!values.duration_unit;
+
+    if (hasValue && !hasUnit) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["duration_unit"],
+        message: "Choose a unit to go with the duration",
+      });
+    }
+    if (hasUnit && !hasValue) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["duration_value"],
+        message: "Enter a duration to go with the unit",
+      });
+    }
+    if (hasUnit && !isDurationUnitValue(values.duration_unit as string)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["duration_unit"],
+        message: "Choose days, weeks or months",
+      });
+    }
+  }
+
+  // ── Deliverables — no blanks, no duplicates ──
+  if (model.deliverables && values.deliverables?.length) {
+    const seen = new Set<string>();
+    for (const item of values.deliverables) {
+      const trimmedItem = item.trim();
+      if (!trimmedItem) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deliverables"],
+          message: "Remove the empty deliverable",
+        });
+        break;
+      }
+      if (seen.has(trimmedItem.toLowerCase())) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deliverables"],
+          message: `"${trimmedItem}" is listed twice`,
+        });
+        break;
+      }
+      seen.add(trimmedItem.toLowerCase());
+    }
+  }
+});
+
+export type JobFormValues = z.infer<typeof JobFormObjectSchema>;
 
 // ─── Rule Form Schema ───────────────────────────────────────
 

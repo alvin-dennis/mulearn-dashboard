@@ -239,26 +239,28 @@ export function EditInterestGroupForm({
         editInterestGroup({ id: group.id, data: payload }).catch(() => {}),
       );
     }
-    if (coverImageFile) {
-      tasks.push(
-        uploadCoverImage(group.id, coverImageFile)
-          .then((url) => {
-            setCoverImageUrl(url ? `${url}?v=${Date.now()}` : url);
-            setCoverImageFile(null);
-          })
-          .catch(() => {}),
-      );
-    }
-    if (iconImageFile) {
-      tasks.push(
-        uploadIconImage(group.id, iconImageFile)
-          .then((url) => {
-            setIconImageUrl(url ? `${url}?v=${Date.now()}` : url);
-            setIconImageFile(null);
-          })
-          .catch(() => {}),
-      );
-    }
+    // TODO: Cover image upload disabled — backend conflict
+    // if (coverImageFile) {
+    //   tasks.push(
+    //     uploadCoverImage(group.id, coverImageFile)
+    //       .then((url) => {
+    //         setCoverImageUrl(url ? `${url}?v=${Date.now()}` : url);
+    //         setCoverImageFile(null);
+    //       })
+    //       .catch(() => {}),
+    //   );
+    // }
+    // TODO: Icon image upload disabled — backend conflict
+    // if (iconImageFile) {
+    //   tasks.push(
+    //     uploadIconImage(group.id, iconImageFile)
+    //       .then((url) => {
+    //         setIconImageUrl(url ? `${url}?v=${Date.now()}` : url);
+    //         setIconImageFile(null);
+    //       })
+    //       .catch(() => {}),
+    //   );
+    // }
 
     await Promise.all(tasks);
 
@@ -335,7 +337,8 @@ export function EditInterestGroupForm({
             />
           </div>
 
-          <div className="space-y-2">
+          {/* TODO: Cover image editing disabled — backend conflict */}
+          {/* <div className="space-y-2">
             <Label>Cover image</Label>
             <ImageUpload
               value={coverImageFile}
@@ -357,9 +360,10 @@ export function EditInterestGroupForm({
                 {isRemovingCoverImage ? "Removing…" : "Remove cover image"}
               </Button>
             ) : null}
-          </div>
+          </div> */}
 
-          <div className="space-y-2">
+          {/* TODO: Icon image editing disabled — backend conflict */}
+          {/* <div className="space-y-2">
             <Label>Icon image</Label>
             <ImageUpload
               value={iconImageFile}
@@ -382,7 +386,7 @@ export function EditInterestGroupForm({
                 {isRemovingIconImage ? "Removing…" : "Remove icon image"}
               </Button>
             ) : null}
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="ig-category">Category</Label>
