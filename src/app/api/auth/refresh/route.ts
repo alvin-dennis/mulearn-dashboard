@@ -13,38 +13,16 @@
  *   4. Redirect the user back to the originally requested route (ruri param).
  *
  * If refresh fails, redirect to /login.
+ *
+ * The `ruri` round trip preserves the original query string (see
+ * lib/auth/return-path.ts). An OAuth callback like
+ * /dashboard/connect-discord?code=… is worthless once `code` is dropped.
  */
 
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { refreshAccessTokenServer } from "@/api/refresh.server";
-
-const ALLOWED_PATH_PREFIX = [
-  "dashboard",
-  "profile",
-  "callback",
-  "login",
-  "register",
-  "onboarding",
-];
-
-function sanitizeReturnPath(raw: string): string {
-  const cleaned = raw
-    .replace(/^[/\\]+/, "")
-    .replace(/\\/g, "/")
-    .split("?")[0];
-
-  const firstSegment = cleaned.split("/")[0];
-  if (!ALLOWED_PATH_PREFIX.includes(firstSegment)) {
-    return "dashboard";
-  }
-
-  if (/[:@]/.test(cleaned)) {
-    return "dashboard";
-  }
-
-  return cleaned;
-}
+import { sanitizeReturnPath } from "@/lib/auth/return-path";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -83,14 +61,14 @@ export async function GET(request: NextRequest) {
       httpOnly: false,
       expires: new Date(Date.now() + 86_400_000),
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
     });
 
     cookieStore.set("isAuthenticated", "true", {
       expires: new Date(Date.now() + 86_400_000),
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
     });
 
