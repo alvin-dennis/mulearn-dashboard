@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { CustomDateTimePicker } from "@/components/ui/custom-datetime-picker";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +54,6 @@ import type {
 } from "../types";
 import { EventSearch } from "./event-search";
 import { VenueSection } from "./venue-section";
-import { CustomDateTimePicker } from "@/components/ui/custom-datetime-picker";
 
 const MAX_WIZARD_UPLOAD_BYTES = 900 * 1024;
 const MAX_SINGLE_IMAGE_BYTES = 450 * 1024;
