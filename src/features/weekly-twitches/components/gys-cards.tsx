@@ -11,20 +11,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StateDisplay } from "@/components/ui/state-display";
-import { useOfficeHoursList } from "../hooks";
-import type { OfficeHoursItem } from "../schemas";
+import { useGysList } from "../hooks";
+import type { GysItem } from "../schemas";
+import { GysDetailDialog } from "./gys-detail-dialog";
 import { MediaCard, MediaCardSkeleton } from "./media-card";
-import { OfficeHoursDetailDialog } from "./office-hours-detail-dialog";
 
 const SKELETONS = Array.from({ length: 6 }, (_, i) => `skeleton-${i}`);
 
-export function OfficeHoursCards() {
+export function GysCards() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [sheetItem, setSheetItem] = useState<OfficeHoursItem | null>(null);
+  const [sheetItem, setSheetItem] = useState<GysItem | null>(null);
 
-  const { data, isLoading, isError } = useOfficeHoursList({
+  const { data, isLoading, isError } = useGysList({
     pageIndex: page,
     perPage: 12,
     search,
@@ -33,6 +33,7 @@ export function OfficeHoursCards() {
 
   const items = data?.data ?? [];
   const totalPages = data?.pagination.totalPages ?? 0;
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -79,14 +80,14 @@ export function OfficeHoursCards() {
           variant="no-results"
           className="rounded-2xl border border-dashed border-border bg-muted/40"
           title="Failed to load sessions"
-          description="Something went wrong while fetching Office Hours sessions. Please try again."
+          description="Something went wrong while fetching Grab Your Superpowers sessions. Please try again."
         />
       ) : items.length === 0 ? (
         <StateDisplay
           variant="no-results"
           className="rounded-2xl border border-dashed border-border bg-muted/40"
           title="No sessions found"
-          description="There are currently no Office Hours sessions listed here."
+          description="There are currently no Grab Your Superpowers sessions listed here."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -95,11 +96,10 @@ export function OfficeHoursCards() {
               key={item.id}
               id={item.id}
               title={item.title}
-              subtitle={item.performer ?? undefined}
+              subtitle={item.campus}
               date={item.date}
               time={item.time}
               status={item.status}
-              imageSrc={item.poster_thumbnail}
               onClick={() => setSheetItem(item)}
             />
           ))}
@@ -118,10 +118,7 @@ export function OfficeHoursCards() {
       />
 
       {/* Detail dialog */}
-      <OfficeHoursDetailDialog
-        item={sheetItem}
-        onClose={() => setSheetItem(null)}
-      />
+      <GysDetailDialog item={sheetItem} onClose={() => setSheetItem(null)} />
     </div>
   );
 }

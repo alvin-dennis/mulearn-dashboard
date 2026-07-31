@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 import Loader from "@/app/loading";
@@ -16,6 +17,7 @@ import {
   useMentorProfile,
 } from "@/features/mentor/onboarding/hooks/use-onboarding";
 import { MentorProfilePage } from "@/features/mentor/profile";
+import { mujourneyKeys } from "@/features/mujourney/hooks/query-keys";
 import {
   AccountSettingsModal,
   Achievements,
@@ -53,6 +55,7 @@ import { ROLES } from "@/lib/auth/roles";
 import { useUIStore } from "@/stores/ui-store";
 
 export function ProfilePageClient() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<ProfileTab>("basic-details");
   const [lastSavedDepartmentId, setLastSavedDepartmentId] = useState("");
   // Persisted toggle: "learner" = show standard learner view even if user is a mentor.
@@ -204,6 +207,8 @@ export function ProfilePageClient() {
   const handleSaveInterestGroups = async (groupIds: string[]) => {
     await updateInterestGroups(groupIds);
     refetchProfile();
+    queryClient.invalidateQueries({ queryKey: mujourneyKeys.interestGroups() });
+    queryClient.invalidateQueries({ queryKey: mujourneyKeys.taskListAll() });
   };
 
   // Loading state

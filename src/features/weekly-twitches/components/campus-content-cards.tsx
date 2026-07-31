@@ -10,12 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { StateDisplay } from "@/components/ui/state-display";
 import { useIsList, useSmtList } from "../hooks";
 import type { CampusContentItem, CampusContentType } from "../schemas";
 import { CampusContentDetailDialog } from "./campus-content-detail-dialog";
 import { MediaCard, MediaCardSkeleton } from "./media-card";
 
 const SKELETONS = Array.from({ length: 6 }, (_, i) => `skeleton-${i}`);
+
+const LABELS: Record<CampusContentType, string> = {
+  smt: "Salt Mango Tree",
+  isr: "Inspiration Station Radio",
+};
 
 interface Props {
   contentType: CampusContentType;
@@ -96,33 +102,40 @@ export function CampusContentCards({ contentType }: Props) {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {isLoading
-          ? SKELETONS.map((key) => <MediaCardSkeleton key={key} />)
-          : items.map((item) => (
-              <MediaCard
-                key={item.id}
-                id={item.id}
-                title={item.topic}
-                subtitle={item.campus}
-                date={item.date}
-                status={item.status}
-                onClick={() => setSheetItem(item)}
-              />
-            ))}
-      </div>
-
-      {/* Error */}
-      {!isLoading && isError && (
-        <div className="flex flex-col items-center justify-center py-16 text-destructive">
-          <p className="text-sm">Failed to load episodes. Please try again.</p>
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {SKELETONS.map((key) => (
+            <MediaCardSkeleton key={key} />
+          ))}
         </div>
-      )}
-
-      {/* Empty */}
-      {!isLoading && !isError && items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <p className="text-sm">No episodes found.</p>
+      ) : isError ? (
+        <StateDisplay
+          variant="no-results"
+          className="rounded-2xl border border-dashed border-border bg-muted/40"
+          title="Failed to load episodes"
+          description={`Something went wrong while fetching ${LABELS[contentType]} episodes. Please try again.`}
+        />
+      ) : items.length === 0 ? (
+        <StateDisplay
+          variant="no-results"
+          className="rounded-2xl border border-dashed border-border bg-muted/40"
+          title="No episodes found"
+          description={`There are currently no ${LABELS[contentType]} episodes listed here.`}
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map((item) => (
+            <MediaCard
+              key={item.id}
+              id={item.id}
+              title={item.topic}
+              subtitle={item.campus}
+              date={item.date}
+              time={item.time}
+              status={item.status}
+              onClick={() => setSheetItem(item)}
+            />
+          ))}
         </div>
       )}
 

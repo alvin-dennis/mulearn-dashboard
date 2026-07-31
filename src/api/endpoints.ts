@@ -828,12 +828,8 @@ export const endpoints = {
   // MuJourney Endpoints
   // ============================================
   mujourney: {
-    /** GET - Get user levels with tasks and progress (logged-in) */
-    getUserLevels: "/api/v1/dashboard/profile/get-user-levels/",
-    /** GET - Get public levels list (no auth required) */
-    publicListLevels: "/api/v1/public/list/levels/",
-    /** GET - Get interest group tasks (params: ig_id, perPage) */
-    taskList: "/api/v1/register/area-of-interest/list/",
+    /** GET - Redesigned grouped task list (start_journey, become_expert, events) */
+    taskList: "/api/v1/dashboard/task/list/",
     /** GET - Get public user journey by MUID */
     getPublicUserLevels: (muid: string) =>
       `/api/v1/dashboard/profile/get-user-levels/${muid}/`,
@@ -1374,6 +1370,21 @@ export const endpoints = {
       /** DELETE - Soft-delete Inspiration Station episode (admin) */
       delete: (id: string) =>
         `/api/v1/dashboard/media-content/inspiration-station/${id}/`,
+    },
+    grabYourSuperpowers: {
+      /** GET - List Grab Your Superpowers sessions (public) */
+      list: "/api/v1/dashboard/media-content/grab-your-superpowers/",
+      /** GET - Single Grab Your Superpowers session (public) */
+      detail: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
+      /** POST - Create Grab Your Superpowers session (admin) */
+      create: "/api/v1/dashboard/media-content/grab-your-superpowers/",
+      /** PATCH - Update Grab Your Superpowers session (admin) */
+      update: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
+      /** DELETE - Soft-delete Grab Your Superpowers session (admin) */
+      delete: (id: string) =>
+        `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
     },
   },
 

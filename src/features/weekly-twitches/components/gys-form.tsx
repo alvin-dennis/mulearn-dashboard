@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
@@ -12,40 +13,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useIsMutations, useSmtMutations } from "../hooks";
-import {
-  type CampusContentItem,
-  type CampusContentType,
-  type CampusContentWrite,
-  CampusContentWriteSchema,
-} from "../schemas";
-
-const LABELS: Record<CampusContentType, { title: string; noun: string }> = {
-  smt: { title: "Salt Mango Tree", noun: "episode" },
-  isr: { title: "Inspiration Station Radio", noun: "episode" },
-};
+import { useOrgsList } from "@/features/organizations";
+import { useGysMutations } from "../hooks";
+import { type GysItem, type GysWrite, GysWriteSchema } from "../schemas";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  contentType: CampusContentType;
-  initialData?: CampusContentItem | null;
+  initialData?: GysItem | null;
 }
 
-const DEFAULTS: CampusContentWrite = {
-  topic: "",
-  campus: "",
+const DEFAULTS: GysWrite = {
+  title: "",
   date: "",
   time: "",
-  zone: undefined,
+  campus: "",
+  performer: "",
+  designation: "",
   description: "",
   link: "",
 };
@@ -55,16 +40,22 @@ function toTimeInput(time?: string | null): string {
   return time.slice(0, 5);
 }
 
-export function CampusContentForm({
-  isOpen,
-  onClose,
-  contentType,
-  initialData,
-}: Props) {
-  const smtMutations = useSmtMutations();
-  const isMutations = useIsMutations();
-  const mutations = contentType === "smt" ? smtMutations : isMutations;
-  const { create, update } = mutations;
+export function GysForm({ isOpen, onClose, initialData }: Props) {
+  const { create, update } = useGysMutations();
+  const [campusSearch, setCampusSearch] = useState("");
+
+  const { data: campusData, isFetching: isCampusFetching } = useOrgsList({
+    pageIndex: 1,
+    perPage: 20,
+    search: campusSearch,
+    sortBy: "",
+    org_type: "College",
+    enabled: isOpen,
+  });
+  const campusOptions = (campusData?.data ?? []).map((org) => ({
+    id: org.title,
+    title: org.title,
+  }));
 
   const {
     register,
@@ -72,20 +63,22 @@ export function CampusContentForm({
     reset,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<CampusContentWrite>({
-    resolver: zodResolver(CampusContentWriteSchema),
+  } = useForm<GysWrite>({
+    resolver: zodResolver(GysWriteSchema),
     defaultValues: DEFAULTS,
   });
 
   useEffect(() => {
     if (!isOpen) return;
+    setCampusSearch("");
     if (initialData) {
       reset({
-        topic: initialData.topic,
-        campus: initialData.campus,
+        title: initialData.title,
         date: initialData.date,
         time: toTimeInput(initialData.time),
-        zone: initialData.zone ?? undefined,
+        campus: initialData.campus,
+        performer: initialData.performer ?? "",
+        designation: initialData.designation ?? "",
         description: initialData.description ?? "",
         link: initialData.link ?? "",
       });
@@ -94,7 +87,7 @@ export function CampusContentForm({
     }
   }, [isOpen, initialData, reset]);
 
-  const onSubmit = async (values: CampusContentWrite) => {
+  const onSubmit = async (values: GysWrite) => {
     if (initialData) {
       await update.mutateAsync({ id: initialData.id, data: values });
     } else {
@@ -104,14 +97,15 @@ export function CampusContentForm({
   };
 
   const isPending = create.isPending || update.isPending || isSubmitting;
-  const label = LABELS[contentType];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 sm:h-auto sm:w-[94vw] sm:max-w-[580px] sm:rounded-2xl sm:border">
+      <DialogContent className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 sm:h-auto sm:w-[94vw] sm:max-w-[640px] sm:rounded-2xl sm:border">
         <DialogHeader className="pb-2">
           <DialogTitle>
-            {initialData ? `Edit ${label.title}` : `Add ${label.title}`}
+            {initialData
+              ? "Edit Grab Your Superpowers Session"
+              : "Add Grab Your Superpowers Session"}
           </DialogTitle>
         </DialogHeader>
 
@@ -121,60 +115,16 @@ export function CampusContentForm({
         >
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
-              Topic <span className="text-destructive">*</span>
+              Title <span className="text-destructive">*</span>
             </p>
             <Input
               className="rounded-xl border-border bg-background"
-              placeholder="e.g. Building Sustainable Startups"
-              {...register("topic")}
+              placeholder="e.g. Unlock Your Product Sense"
+              {...register("title")}
             />
-            {errors.topic && (
-              <p className="text-xs text-destructive">{errors.topic.message}</p>
+            {errors.title && (
+              <p className="text-xs text-destructive">{errors.title.message}</p>
             )}
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                Campus <span className="text-destructive">*</span>
-              </p>
-              <Input
-                className="rounded-xl border-border bg-background"
-                placeholder="e.g. NIT Calicut"
-                {...register("campus")}
-              />
-              {errors.campus && (
-                <p className="text-xs text-destructive">
-                  {errors.campus.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Zone</p>
-              <Controller
-                control={control}
-                name="zone"
-                render={({ field }) => (
-                  <Select
-                    value={field.value ?? "none"}
-                    onValueChange={(v) =>
-                      field.onChange(v === "none" ? undefined : v)
-                    }
-                  >
-                    <SelectTrigger className="rounded-xl border-border bg-background">
-                      <SelectValue placeholder="Select zone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No zone</SelectItem>
-                      <SelectItem value="north">North</SelectItem>
-                      <SelectItem value="central">Central</SelectItem>
-                      <SelectItem value="south">South</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -212,10 +162,69 @@ export function CampusContentForm({
           </div>
 
           <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              Campus <span className="text-destructive">*</span>
+            </p>
+            <Controller
+              control={control}
+              name="campus"
+              render={({ field }) => (
+                <Combobox
+                  options={campusOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onSearchChange={setCampusSearch}
+                  loading={isCampusFetching}
+                  placeholder="Search campus..."
+                  searchPlaceholder="Search campus..."
+                  emptyText="No campus found."
+                  onCreateNew={field.onChange}
+                  createNewText="Use"
+                />
+              )}
+            />
+            {errors.campus && (
+              <p className="text-xs text-destructive">
+                {errors.campus.message}
+              </p>
+            )}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">Performer</p>
+              <Input
+                className="rounded-xl border-border bg-background"
+                placeholder="e.g. Anjali Menon"
+                {...register("performer")}
+              />
+              {errors.performer && (
+                <p className="text-xs text-destructive">
+                  {errors.performer.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">Designation</p>
+              <Input
+                className="rounded-xl border-border bg-background"
+                placeholder="e.g. Product Manager, Zoho"
+                {...register("designation")}
+              />
+              {errors.designation && (
+                <p className="text-xs text-destructive">
+                  {errors.designation.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">Description</p>
             <Textarea
               className="rounded-xl border-border bg-background"
-              placeholder="Episode description..."
+              placeholder="Session description..."
               rows={3}
               {...register("description")}
             />
@@ -223,11 +232,11 @@ export function CampusContentForm({
 
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
-              Streaming Link <span className="text-destructive">*</span>
+              Meeting Link <span className="text-destructive">*</span>
             </p>
             <Input
               className="rounded-xl border-border bg-background"
-              placeholder="https://youtube.com/live/..."
+              placeholder="https://meet.google.com/..."
               {...register("link")}
             />
             {errors.link && (
@@ -246,7 +255,7 @@ export function CampusContentForm({
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? "Save Changes" : `Create ${label.noun}`}
+              {initialData ? "Save Changes" : "Create Session"}
             </Button>
           </div>
         </form>
