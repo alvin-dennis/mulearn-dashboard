@@ -65,6 +65,12 @@ export function OfficeHoursDetailDialog({ item, onClose }: Props) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Date">{item.date}</Field>
+            <Field label="Time">
+              {item.time ? item.time.slice(0, 5) : "—"}
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Status">
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[item.status] ?? ""}`}
@@ -72,10 +78,10 @@ export function OfficeHoursDetailDialog({ item, onClose }: Props) {
                 {item.status}
               </span>
             </Field>
+            <Field label="Performer">{item.performer ?? "—"}</Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Performer">{item.performer ?? "—"}</Field>
             <Field label="Designation">{item.designation ?? "—"}</Field>
           </div>
 

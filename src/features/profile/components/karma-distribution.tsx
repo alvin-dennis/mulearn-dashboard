@@ -3,9 +3,9 @@
  *
  * 📍 src/features/profile/components/karma-distribution.tsx
  *
- * Donut chart of karma broken down straight from the API's split fields —
- * no derived buckets, just what `org_ig_karma_split`, `event_karma_split`,
- * `intern_karma`, and `general_enablement_karma` already report.
+ * Donut chart of karma broken down from the API's nested
+ * `karma_distribution` object — events, ig, intern, general,
+ * and level slices. No derived buckets, just what the API reports.
  *
  * Layout: chart left / legend right on desktop, chart above legend on
  * mobile. Total karma sits fixed in the donut's center. On desktop only,
@@ -29,8 +29,8 @@ interface KarmaDistributionProps {
 
 /**
  * The shared --chart-1..5 tokens only give 5 distinct hues, but this chart
- * commonly has 6 slices (up to 5 IGs collapsed + event/intern/general). Add
- * --success as a 6th, already-themed color not otherwise used in charts.
+ * commonly has more slices. Add --success as a 6th, already-themed color
+ * not otherwise used in charts.
  */
 const SLICE_COLORS = [...CHART_SERIES.map((c) => c.token), "var(--success)"];
 const sliceColor = (index: number) =>
@@ -59,18 +59,24 @@ export function KarmaDistribution({ profile }: KarmaDistributionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const chartData = useMemo(() => {
+    const kd = profile.karma_distribution;
+
     const slices = [
-      ...profile.org_ig_karma_split.map((ig) => ({
+      ...kd.ig.map((ig) => ({
         name: ig.ig_name,
         value: ig.karma,
       })),
-      ...profile.event_karma_split.map((event) => ({
-        name: event.event_name ?? "Event Task",
+      ...kd.events.map((event) => ({
+        name: event.event_title,
         value: event.karma,
       })),
-      { name: "Intern Task", value: profile.intern_karma },
-      { name: "General Enablement", value: profile.general_enablement_karma },
+      { name: "Intern Task", value: kd.intern.karma },
+      ...kd.general.map((g) => ({
+        name: g.category,
+        value: g.karma,
+      })),
     ];
+
     const seen = new Map<string, number>();
     return slices
       .filter((slice) => slice.value > 0)
