@@ -31,7 +31,9 @@ export function GysCards() {
     status: status || undefined,
   });
 
-  const items = data?.data ?? [];
+  const items = status
+    ? (data?.data ?? [])
+    : (data?.data ?? []).filter((item) => item.status !== "completed");
   const totalPages = data?.pagination.totalPages ?? 0;
 
   return (
