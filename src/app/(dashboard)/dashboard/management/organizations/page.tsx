@@ -1,5 +1,4 @@
 import {
-  Briefcase,
   Building,
   Building2,
   CheckCircle,

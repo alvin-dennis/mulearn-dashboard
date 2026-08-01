@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, Upload, X } from "lucide-react";
+import { ImageIcon, Upload } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 import { toast } from "sonner";

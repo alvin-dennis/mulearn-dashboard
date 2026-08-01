@@ -24,7 +24,6 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { IGIcon, useInterestGroupDetail } from "@/features/interest-groups";
-import { ImpactProjectsSection } from "@/features/manage-ig";
 import { PersonCard } from "./person-card";
 
 export function InterestGroupDetailClient() {

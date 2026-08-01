@@ -35,7 +35,6 @@ import {
   Shield,
   Trophy,
   User,
-  UserCheck,
   Users,
 } from "lucide-react";
 import type { Permission } from "@/lib/auth/permissions";
