@@ -62,7 +62,6 @@ export function GysCards() {
               <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="upcoming">Upcoming</SelectItem>
               <SelectItem value="ongoing">Ongoing</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
