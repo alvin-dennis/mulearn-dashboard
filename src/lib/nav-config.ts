@@ -130,7 +130,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     id: "learning-circle",
-    title: "Learning Circle",
+    title: "Learning Circles",
     href: "/dashboard/learning-circle",
     icon: BookOpen,
     section: "main",
