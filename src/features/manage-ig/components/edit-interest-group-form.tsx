@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
@@ -25,6 +26,11 @@ import {
 import { TagInput } from "@/components/ui/tag-input";
 import { Textarea } from "@/components/ui/textarea";
 import type { InterestGroupDetail } from "@/features/interest-groups/schemas";
+import {
+  IG_COVER_IMAGE_ASPECT,
+  IG_ICON_IMAGE_ASPECT,
+  IG_IMAGE_MAX_MB,
+} from "../constants/ig-images.constants";
 import { useEditInterestGroup } from "../hooks/use-edit-interest-group";
 
 // ─── Types ──────────────────────────────────────────────────
@@ -88,6 +94,8 @@ export function EditInterestGroupForm({
     isPending,
     removeCoverImage,
     removeIconImage,
+    uploadCoverImage,
+    uploadIconImage,
     isRemovingCoverImage,
     isRemovingIconImage,
     isUploadingCoverImage,

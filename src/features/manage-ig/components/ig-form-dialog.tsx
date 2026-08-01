@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
@@ -22,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  IG_COVER_IMAGE_ASPECT,
+  IG_ICON_IMAGE_ASPECT,
+  IG_IMAGE_MAX_MB,
+} from "../constants/ig-images.constants";
 import { useInterestGroupsAdmin } from "../hooks/use-manage-ig";
 import {
   type InterestGroup,
@@ -206,6 +212,8 @@ export function InterestGroupFormDialog({
     createInterestGroup,
     updateInterestGroup,
     partialUpdateInterestGroup,
+    uploadCoverImage,
+    uploadIconImage,
   } = useInterestGroupsAdmin();
 
   const [currentStep, setCurrentStep] = useState(1);
