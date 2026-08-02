@@ -1,4 +1,5 @@
 import { Crown, Layers, Trophy, Users } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
@@ -82,11 +83,16 @@ export function ExecomCard({ execom }: { execom?: ExecomMember[] }) {
               <AvatarFallback>{initials(member.full_name)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">
+              <Link
+                href={`/profile/${member.muid}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="truncate block text-sm font-bold text-foreground hover:underline"
+              >
                 {member.full_name}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">
-                {member.muid} &middot; {member.role}
+              </Link>
+              <p className="truncate text-xs font-semibold text-primary">
+                {member.role_title}
               </p>
             </div>
           </li>
@@ -104,7 +110,7 @@ export function TopLeaderboardCard({
   if (!entries || entries.length === 0) return null;
   return (
     <SectionCard
-      title="Top 10 µLearn Leaderboard"
+      title="Top 10 Campus Leaderboard"
       icon={<Trophy className="size-4" />}
     >
       <ul className="space-y-2.5">

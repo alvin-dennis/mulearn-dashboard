@@ -63,7 +63,9 @@ export const OfficeHoursWriteSchema = z.object({
     .string()
     .min(1, "Meeting link is required")
     .url("Must be a valid URL"),
-  interest_groups: z.array(z.string()).optional(),
+  interest_groups: z
+    .array(z.string())
+    .min(1, "Select at least one interest group"),
 });
 
 // ─── Campus Content (Salt Mango Tree + Inspiration Station) ───

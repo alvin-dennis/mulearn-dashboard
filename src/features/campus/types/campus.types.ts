@@ -16,7 +16,7 @@ export interface ExecomMember {
   user_id: string;
   full_name: string;
   muid: string;
-  role: string;
+  role_title: string;
 }
 
 export interface LeaderboardEntry {

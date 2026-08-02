@@ -38,7 +38,7 @@ export function CampusContentCards({ contentType }: Props) {
     pageIndex: page,
     perPage: 12,
     search,
-    status: status || undefined,
+    status: status || ["ongoing", "upcoming"],
     zone: zone || undefined,
   };
 
@@ -47,9 +47,7 @@ export function CampusContentCards({ contentType }: Props) {
   const { data, isLoading, isError } =
     contentType === "smt" ? smtQuery : isQuery;
 
-  const items = status
-    ? (data?.data ?? [])
-    : (data?.data ?? []).filter((item) => item.status !== "completed");
+  const items = data?.data ?? [];
   const totalPages = data?.pagination.totalPages ?? 0;
 
   return (

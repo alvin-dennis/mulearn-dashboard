@@ -236,7 +236,7 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
 
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
-              Interest Groups
+              Interest Groups <span className="text-destructive">*</span>
             </p>
             <Controller
               control={control}
