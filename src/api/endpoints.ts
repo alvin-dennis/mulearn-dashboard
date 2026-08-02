@@ -1008,6 +1008,12 @@ export const endpoints = {
 
       /** POST/DELETE - Upload/replace or remove an IG's icon image (multipart, field "image") */
       iconImage: (id: string) => `/api/v1/dashboard/ig/${id}/icon-image/`,
+
+      /** POST - Activate an IG (ADMIN, IG_LEAD) */
+      activate: (id: string) => `/api/v1/dashboard/ig/${id}/activate/`,
+
+      /** POST - Deactivate an IG (ADMIN, IG_LEAD) */
+      deactivate: (id: string) => `/api/v1/dashboard/ig/${id}/deactivate/`,
     },
   },
 
@@ -1151,6 +1157,26 @@ export const endpoints = {
     /** POST - Bulk assign from Excel upload */
     bulkAssignExcel: "/api/v1/dashboard/roles/bulk-assign-excel/",
   },
+
+  // ============================================
+  // Career Lab Endpoints
+  // ============================================
+  careerLab: {
+    hiring: {
+      /** GET - List hiring postings (paginated, filterable) | POST - Create */
+      list: "/api/v1/dashboard/career-lab/hiring/",
+      create: "/api/v1/dashboard/career-lab/hiring/",
+      /** GET/PUT/DELETE - Retrieve, update, delete a hiring posting */
+      detail: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      update: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      delete: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      /** GET - Download hiring postings as CSV */
+      csvExport: "/api/v1/dashboard/career-lab/hiring/csv/",
+      /** POST - Bulk import hiring postings from CSV (multipart, field "file") */
+      csvImport: "/api/v1/dashboard/career-lab/hiring/csv/",
+    },
+  },
+
   // channels
   channels: {
     List: "/api/v1/dashboard/channels/",

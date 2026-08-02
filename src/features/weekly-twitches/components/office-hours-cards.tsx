@@ -108,15 +108,17 @@ export function OfficeHoursCards() {
       )}
 
       {/* Pagination */}
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        perPage={12}
-        totalCount={data?.pagination.count}
-        currentPageCount={items.length}
-        handlePreviousClick={() => setPage((p) => p - 1)}
-        handleNextClick={() => setPage((p) => p + 1)}
-      />
+      {items.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          perPage={12}
+          totalCount={data?.pagination.count}
+          currentPageCount={items.length}
+          handlePreviousClick={() => setPage((p) => p - 1)}
+          handleNextClick={() => setPage((p) => p + 1)}
+        />
+      )}
 
       {/* Detail dialog */}
       <OfficeHoursDetailDialog

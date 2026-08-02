@@ -202,6 +202,23 @@ const InterestGroupDetailBaseSchema = z.object({
     .nullable()
     .catch(undefined),
 
+  // Linked media content (e.g. Office Hours sessions) for this IG
+  media_content_links: z
+    .array(
+      z.object({
+        id: z.string(),
+        media_content_id: z.string(),
+        content_type: z.string(),
+        title: z.string(),
+        date: z.string().optional().nullable(),
+        link: z.string().optional().nullable(),
+        status: z.string().optional().nullable(),
+      }),
+    )
+    .optional()
+    .nullable()
+    .catch(undefined),
+
   // Audit fields
   created_at: z.string().optional().nullable(),
   updated_at: z.string().optional().nullable(),

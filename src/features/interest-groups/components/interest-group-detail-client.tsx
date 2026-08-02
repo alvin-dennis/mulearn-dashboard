@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   BookOpen,
   Briefcase,
+  Calendar,
   Clock,
   ExternalLink,
   FileText,
@@ -84,6 +85,17 @@ export function InterestGroupDetailClient() {
   }
 
   // ── Helpers ───────────────────────────────────────────────
+  const officeHoursSessions = (group.media_content_links ?? []).filter(
+    (link) =>
+      link.content_type === "office_hours" && link.status !== "completed",
+  );
+
+  const OFFICE_HOURS_STATUS_COLORS: Record<string, string> = {
+    upcoming: "app-status-applied",
+    ongoing: "app-status-accepted",
+    completed: "ig-status-cancelled",
+  };
+
   const hasContent =
     group.about ||
     group.prerequisites?.length ||
@@ -94,7 +106,8 @@ export function InterestGroupDetailClient() {
     group.leads?.length ||
     group.thinktank ||
     group.office_hours ||
-    group.resource;
+    group.resource ||
+    officeHoursSessions.length;
 
   return (
     <div className="w-full space-y-8 py-6 sm:py-8">
@@ -421,6 +434,68 @@ export function InterestGroupDetailClient() {
                 )}
               </div>
             </div>
+
+            {officeHoursSessions.length > 0 && (
+              <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
+                <div className="border-b border-border/50 bg-muted/30 px-4 sm:px-6 py-3 sm:py-4">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Office Hours Sessions
+                  </h3>
+                </div>
+                <div className="p-4 sm:p-6 space-y-3">
+                  {officeHoursSessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/20 p-3"
+                    >
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-semibold text-foreground line-clamp-2">
+                            {session.title}
+                          </p>
+                          {session.status && (
+                            <span
+                              className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${
+                                OFFICE_HOURS_STATUS_COLORS[session.status] ?? ""
+                              }`}
+                            >
+                              {session.status}
+                            </span>
+                          )}
+                        </div>
+                        {session.date && (
+                          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {session.date}
+                          </p>
+                        )}
+                        {session.link && (
+                          <a
+                            href={session.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Join Meeting
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <Link
+                    href="/dashboard/weekly-twitches"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:border-primary/50 hover:text-primary"
+                  >
+                    View All Office Hours
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {group.thinktank && group.thinktank.length > 0 && (
               <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
