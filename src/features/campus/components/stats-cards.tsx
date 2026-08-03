@@ -29,7 +29,7 @@ export const StatsCards = ({ info }: { info: CampusInfo }) => {
       <StatCard
         title="Active Members"
         value={info.active_members}
-        description="members are active on µLearn"
+        description="active in last 30 days"
         accent="chart-3"
         icon={<Activity className="size-5" />}
       />
