@@ -28,7 +28,7 @@ export function GysCards() {
     pageIndex: page,
     perPage: 12,
     search,
-    status: status || ["ongoing", "upcoming"],
+    status: status || "ongoing,upcoming",
   });
 
   const items = data?.data ?? [];

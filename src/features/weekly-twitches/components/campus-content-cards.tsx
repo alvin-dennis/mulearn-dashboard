@@ -38,7 +38,7 @@ export function CampusContentCards({ contentType }: Props) {
     pageIndex: page,
     perPage: 12,
     search,
-    status: status || ["ongoing", "upcoming"],
+    status: status || "ongoing,upcoming",
     zone: zone || undefined,
   };
 
