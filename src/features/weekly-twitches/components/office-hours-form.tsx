@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +56,7 @@ function toTimeInput(time?: string | null): string {
 export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
   const { create, update } = useOfficeHoursMutations();
   const { data: igListData } = useInterestGroupsList();
-  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [_posterFile, setPosterFile] = useState<File | null>(null);
   const igList = useMemo(
     () => igListData?.response?.interestGroup ?? [],
     [igListData],

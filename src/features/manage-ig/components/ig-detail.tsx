@@ -32,7 +32,6 @@ import { PersonCard } from "@/features/interest-groups/components/person-card";
 import { useOfficeHoursList } from "@/features/weekly-twitches";
 import type { InterestGroup } from "../schemas";
 import { InterestGroupFormDialog } from "./ig-form-dialog";
-import { ImpactProjectsSection } from "./impact-projects/impact-projects-section";
 
 const OFFICE_HOURS_STATUS_COLORS: Record<string, string> = {
   upcoming: "app-status-applied",
