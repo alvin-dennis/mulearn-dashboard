@@ -60,7 +60,7 @@ export interface CampusInfo {
   social_links?: SocialLink[];
   campus_lead?: CampusLead | null;
   execom?: ExecomMember[];
-  top_10_mulearn_leaderboard?: LeaderboardEntry[];
+  top_10_campus_leaderboard?: LeaderboardEntry[];
   active_ig_chapters?: ActiveIgChapter[];
   karma_by_cluster?: KarmaByCluster;
 }

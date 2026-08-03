@@ -219,7 +219,7 @@ export const CampusView = ({ id }: CampusDashboardProps) => {
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <TopLeaderboardCard entries={info.top_10_mulearn_leaderboard} />
+          <TopLeaderboardCard entries={info.top_10_campus_leaderboard} />
           <KarmaByClusterCard clusters={info.karma_by_cluster} />
         </div>
       </div>
