@@ -92,10 +92,10 @@ export function EditInterestGroupForm({
   const {
     editInterestGroup,
     isPending,
-    uploadCoverImage,
     removeCoverImage,
-    uploadIconImage,
     removeIconImage,
+    uploadCoverImage,
+    uploadIconImage,
     isRemovingCoverImage,
     isRemovingIconImage,
     isUploadingCoverImage,
