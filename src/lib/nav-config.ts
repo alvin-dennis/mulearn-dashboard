@@ -35,7 +35,6 @@ import {
   Shield,
   Trophy,
   User,
-  UserCheck,
   Users,
 } from "lucide-react";
 import type { Permission } from "@/lib/auth/permissions";
@@ -130,7 +129,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     id: "learning-circle",
-    title: "Learning Circle",
+    title: "Learning Circles",
     href: "/dashboard/learning-circle",
     icon: BookOpen,
     section: "main",
