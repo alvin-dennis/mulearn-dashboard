@@ -5,7 +5,6 @@
  */
 
 "use client";
-import type { AnchorHTMLAttributes } from "react";
 
 import {
   AlignLeft,
@@ -28,6 +27,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import type { AnchorHTMLAttributes } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";

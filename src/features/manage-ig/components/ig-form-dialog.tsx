@@ -1,23 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Check,
+  Github as GithubIcon,
+  Globe,
+  Handshake,
+  Instagram,
+  Linkedin,
   Loader2,
   Lock,
+  Pencil,
   Plus,
   Trash2,
   X,
-  Pencil,
-  Globe,
-  Linkedin,
-  Github as GithubIcon,
-  Instagram,
-  Handshake,
 } from "lucide-react";
+import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { type Control, Controller, useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -27,9 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ImageUpload } from "@/components/ui/image-upload";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { MuidSearchInput } from "@/components/ui/muid-search-input";
 import {
@@ -39,18 +38,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   IG_COVER_IMAGE_ASPECT,
   IG_ICON_IMAGE_ASPECT,
   IG_IMAGE_MAX_MB,
 } from "../constants/ig-images.constants";
+import { useCommunityPartners } from "../hooks/use-community-partners";
 import { useInterestGroupsAdmin } from "../hooks/use-manage-ig";
 import {
   type InterestGroup,
   type InterestGroupCreate,
   InterestGroupCreateSchema,
 } from "../schemas";
-import { useCommunityPartners } from "../hooks/use-community-partners";
 
 const IG_WIZARD_STEPS = [
   "Basic Info",

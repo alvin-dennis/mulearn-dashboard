@@ -2,17 +2,17 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Globe,
-  Linkedin,
+  Check,
   Github as GithubIcon,
-  Instagram,
+  Globe,
   Handshake,
+  Instagram,
+  Linkedin,
+  Pencil,
   Plus,
   Trash2,
-  XCircle,
-  Pencil,
-  Check,
   X,
+  XCircle,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 
@@ -45,16 +45,16 @@ import {
   fetchCommunityPartners,
   updateCommunityPartner,
 } from "../api/community-partner.api";
-import type {
-  CommunityPartner,
-  CommunityPartnerWrite,
-} from "../schemas/community-partner.schema";
 import {
   IG_COVER_IMAGE_ASPECT,
   IG_ICON_IMAGE_ASPECT,
   IG_IMAGE_MAX_MB,
 } from "../constants/ig-images.constants";
 import { useEditInterestGroup } from "../hooks/use-edit-interest-group";
+import type {
+  CommunityPartner,
+  CommunityPartnerWrite,
+} from "../schemas/community-partner.schema";
 
 // ─── Types ──────────────────────────────────────────────────
 
