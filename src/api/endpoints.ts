@@ -889,6 +889,9 @@ export const endpoints = {
   // Admin Endpoints
   // ============================================
   admin: {
+    features: {
+      gritMeter: "/api/v1/dashboard/feature/grit-meter/",
+    },
     errorLog: {
       /** GET - List all error log entries */
       list: "/api/v1/dashboard/error-log/",
