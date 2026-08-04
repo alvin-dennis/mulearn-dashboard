@@ -1233,7 +1233,7 @@ export function InterestGroupFormDialog({
                                 });
                               }}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <Pencil className="h-3.5 w-3.5 text-foreground" />
                             </Button>
                             <Button
                               type="button"
