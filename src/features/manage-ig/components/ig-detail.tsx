@@ -15,6 +15,11 @@ import {
   Clock,
   ExternalLink,
   FileText,
+  Github,
+  Globe,
+  Handshake,
+  Instagram,
+  Linkedin,
   Pencil,
   Sparkles,
   Twitter,
@@ -556,6 +561,113 @@ export function IGDetail() {
                 </div>
               </div>
             )}
+
+            {/* Community Partners */}
+            {group.community_partners &&
+              group.community_partners.length > 0 && (
+                <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
+                  <div className="border-b border-border/50 bg-muted/30 px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-2">
+                      <Handshake className="h-4 w-4 text-primary" />
+                      <h3 className="text-base sm:text-lg font-bold text-foreground">
+                        Community Partners
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="p-4 sm:p-6 space-y-4">
+                    {group.community_partners.map((partner) => (
+                      <div
+                        key={partner.id}
+                        className="flex items-start gap-3 rounded-2xl border border-border/60 bg-muted/20 p-3 transition-all hover:border-primary/30 hover:bg-card"
+                      >
+                        {partner.logo_key ? (
+                          <img
+                            src={partner.logo_key}
+                            alt={partner.name}
+                            className="h-10 w-10 shrink-0 rounded-xl object-contain border border-border/60 bg-background p-1"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-sm">
+                            {partner.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          {partner.website ? (
+                            <a
+                              href={partner.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-sm text-primary hover:underline truncate"
+                            >
+                              {partner.name}
+                            </a>
+                          ) : (
+                            <p className="font-semibold text-sm text-foreground truncate">
+                              {partner.name}
+                            </p>
+                          )}
+                          {partner.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                              {partner.description}
+                            </p>
+                          )}
+                          {(partner.linkedin ||
+                            partner.github ||
+                            partner.website ||
+                            partner.instagram) && (
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {partner.website && (
+                                <a
+                                  href={partner.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${partner.name} website`}
+                                  className="text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                  <Globe className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                              {partner.linkedin && (
+                                <a
+                                  href={partner.linkedin}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${partner.name} LinkedIn`}
+                                  className="text-muted-foreground hover:text-[#0a66c2] transition-colors"
+                                >
+                                  <Linkedin className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                              {partner.github && (
+                                <a
+                                  href={partner.github}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${partner.name} GitHub`}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Github className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                              {partner.instagram && (
+                                <a
+                                  href={partner.instagram}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${partner.name} Instagram`}
+                                  className="text-muted-foreground hover:text-pink-500 transition-colors"
+                                >
+                                  <Instagram className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             <div className="rounded-3xl bg-linear-to-br from-muted/50 to-muted/10 p-6 border border-border/50 text-center">
               <p className="text-sm font-medium text-muted-foreground">

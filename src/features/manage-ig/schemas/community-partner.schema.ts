@@ -41,7 +41,7 @@ export const CommunityPartnerWriteSchema = z.object({
   description: z.string().optional().nullable(),
   linkedin: z.string().optional().nullable(),
   github: z.string().optional().nullable(),
-  website: z.string().optional().nullable(),
+  website: z.string().min(1, "Website URL is required"),
   instagram: z.string().optional().nullable(),
   /** Array of IG ids to associate. Replaces the full link set on PATCH. */
   interest_groups: z.array(z.string()).optional(),

@@ -578,9 +578,20 @@ export function InterestGroupDetailClient() {
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm text-foreground truncate">
-                            {partner.name}
-                          </p>
+                          {partner.website ? (
+                            <a
+                              href={partner.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-sm text-primary hover:underline truncate"
+                            >
+                              {partner.name}
+                            </a>
+                          ) : (
+                            <p className="font-semibold text-sm text-foreground truncate">
+                              {partner.name}
+                            </p>
+                          )}
                           {partner.description && (
                             <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
                               {partner.description}
