@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  ToggleRight,
   type LucideIcon,
   Settings2,
   Ticket,
