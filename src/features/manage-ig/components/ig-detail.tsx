@@ -29,7 +29,6 @@ import { IGIcon, useInterestGroupDetail } from "@/features/interest-groups";
 import { PersonCard } from "@/features/interest-groups/components/person-card";
 import type { InterestGroup } from "../schemas";
 import { InterestGroupFormDialog } from "./ig-form-dialog";
-import { ImpactProjectsSection } from "./impact-projects/impact-projects-section";
 
 export function IGDetail() {
   const router = useRouter();
