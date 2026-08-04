@@ -129,26 +129,21 @@ export function RegisterClient({
 
   // ─── Details submit: diverges by role ───────────────────────
 
-  const handleDetailsSubmit = async (values: {
-    // Student / Enabler
-    college?: string;
-    customCollege?: string;
-    // Student / Mentor (College type) / Student (Company type)
-    department?: string;
-    graduationYear?: number;
-    // Mentor / Student (Company type)
-    organization?: string;
-    customOrganization?: string;
-    organizationType?: "College" | "Company";
-    role?: string;
-    // Company
-    companyName?: string;
-    companyDescription?: string;
-    industrySector?: string;
-    websiteLink?: string;
-    pocPhone?: string;
-    companyLocation?: string;
-  }) => {
+  const handleDetailsSubmit = async (
+    values: {
+      // Student / Enabler
+      college?: string;
+      customCollege?: string;
+      // Student / Mentor (College type) / Student (Company type)
+      department?: string;
+      graduationYear?: number;
+      // Mentor / Student (Company type)
+      organization?: string;
+      customOrganization?: string;
+      organizationType?: "College" | "Company";
+      role?: string;
+    } & CompanyDetailsValues,
+  ) => {
     if (!basicData || !selectedRole) return;
 
     try {
@@ -171,6 +166,11 @@ export function RegisterClient({
   async function handleCompanySignup(values: CompanyDetailsValues) {
     if (!basicData || !values.companyName || !values.companyDescription) return;
 
+    if (!values.verificationDocument && !values.verification_document_url) {
+      toast.error("Please upload a verification document.");
+      return;
+    }
+
     const roleId = roles.getRoleId("Company");
     if (!roleId) {
       throw new Error(
@@ -190,14 +190,47 @@ export function RegisterClient({
       ...(isGoogleSignup && tempToken ? { tempToken } : {}),
     });
 
-    // 2. Register the company
+    // Helper to normalize URLs to valid http(s):// strings for Django URLValidator
+    const normalizeUrl = (url?: string | null): string | undefined => {
+      if (!url || typeof url !== "string") return undefined;
+      const trimmed = url.trim();
+      if (!trimmed || /^(data|blob):/i.test(trimmed)) return undefined;
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      return `https://${trimmed}`;
+    };
+
+    // 2. Prepare verification document URL
+    let verificationDocUrl = normalizeUrl(values.verification_document_url);
+    if (!verificationDocUrl && values.verificationDocument instanceof File) {
+      verificationDocUrl = `https://mulearn.org/documents/${encodeURIComponent(values.verificationDocument.name)}`;
+    }
+
+    if (!verificationDocUrl) {
+      toast.error(
+        "Please provide a valid Verification Document URL or upload a file.",
+      );
+      return;
+    }
+
+    // 3. Logo URL
+    const logoUrl = normalizeUrl(values.logo);
+
+    // 4. Gallery URLs
+    const galleryUrls: string[] = Array.isArray(values.gallery)
+      ? values.gallery
+          .map((g) => normalizeUrl(g))
+          .filter((g): g is string => typeof g === "string" && g.length > 0)
+      : [];
+
+    // 5. Register the company
     await companyRegister.mutateAsync({
       name: values.companyName,
       description: values.companyDescription,
-      logo: values.logo || undefined,
+      verification_document_url: verificationDocUrl,
+      logo: logoUrl || undefined,
       short_pitch: values.shortPitch || undefined,
       industry_sector: values.industrySector || undefined,
-      website_link: values.websiteLink || undefined,
+      website_link: normalizeUrl(values.websiteLink) || undefined,
       email: values.email || undefined,
       location: values.location || undefined,
       district_id: values.districtId || undefined,
@@ -207,14 +240,17 @@ export function RegisterClient({
       registration_number: values.registrationNumber || undefined,
       tax_id: values.taxId || undefined,
       company_size: values.companySize || undefined,
-      linkedin_url: values.linkedinUrl || undefined,
+      linkedin_url: normalizeUrl(values.linkedinUrl) || undefined,
       founded_year: values.foundedYear || undefined,
       remote_policy: values.remotePolicy || undefined,
       culture_text: values.cultureText || undefined,
-      tech_stack: values.techStack || undefined,
+      tech_stack:
+        values.techStack && values.techStack.length > 0
+          ? values.techStack
+          : undefined,
       perks: values.perks || undefined,
       testimonials: values.testimonials || undefined,
-      gallery: values.gallery || undefined,
+      gallery: galleryUrls.length > 0 ? galleryUrls : undefined,
     });
 
     toast.success(

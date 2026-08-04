@@ -284,6 +284,13 @@ export const COMPANY_STATUS_CONFIG = {
     message:
       "Your company profile is inactive. Contact support for assistance.",
   },
+  deactivated: {
+    label: "Deactivated",
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    message: "This company has been deactivated.",
+  },
 } as const;
 
 export const JOB_STATUS_CONFIG = {

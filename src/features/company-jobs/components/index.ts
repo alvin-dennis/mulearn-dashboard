@@ -24,3 +24,8 @@ export { CompanyPublicView } from "./profile/company-public-view";
 export { CompanyTestimonialsSection } from "./profile/company-testimonials-section";
 export { PublicJobCard } from "./public-job-card";
 export { RuleAddDialog, RuleEmptyState, RuleItem, RuleList } from "./rules";
+export { CompanyAdminsPageClient } from "./admin/company-admins-client";
+export { CompanyFeedbackPageClient } from "./feedback/company-feedback-client";
+export { CompanyCollaborationsPageClient } from "./collaborations/company-collaborations-client";
+export { CompanySponsorshipPageClient } from "./sponsorship/company-sponsorship-client";
+export { CompanyTemplatesPageClient } from "./templates/company-templates-client";

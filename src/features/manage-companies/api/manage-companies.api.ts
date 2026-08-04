@@ -96,3 +96,27 @@ export async function fetchCompanyDetails(
     throw error;
   }
 }
+
+/**
+ * Admin: Deactivate a company.
+ */
+export async function deactivateCompanyAdmin(companyId: string) {
+  const res = await apiClient.post(
+    endpoints.company.deactivateAdmin(companyId),
+    undefined,
+    GenericMutationResponseSchema,
+  );
+  return res.response;
+}
+
+/**
+ * Admin: Reactivate a deactivated company.
+ */
+export async function reactivateCompanyAdmin(companyId: string) {
+  const res = await apiClient.post(
+    endpoints.company.reactivateAdmin(companyId),
+    undefined,
+    GenericMutationResponseSchema,
+  );
+  return res.response;
+}
