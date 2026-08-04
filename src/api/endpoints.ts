@@ -637,6 +637,18 @@ export const endpoints = {
   },
 
   // ============================================
+  // Community Partner Endpoints
+  // GET/POST  /api/v1/dashboard/community-partner/
+  // GET/PATCH/DELETE /api/v1/dashboard/community-partner/<partner_id>/
+  // ============================================
+  communityPartner: {
+    /** GET - List community partners (optional: ?ig_id=<id>) | POST - Create */
+    list: "/api/v1/dashboard/community-partner/",
+    /** GET/PATCH/DELETE - Community partner by ID */
+    detail: (id: string) => `/api/v1/dashboard/community-partner/${id}/`,
+  },
+
+  // ============================================
   // College Endpoints
   // ============================================
   college: {

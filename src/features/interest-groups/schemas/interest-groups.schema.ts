@@ -9,6 +9,18 @@ import { ApiResponseSchema } from "@/lib/schemas/api-response";
 
 export { ApiResponseSchema };
 
+// ─── Inline community partner stub (returned alongside IG detail) ─────────────
+const CommunityPartnerStubSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  logo_key: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  linkedin: z.string().nullable().optional(),
+  github: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  instagram: z.string().nullable().optional(),
+});
+
 function withCacheBust(
   url: string | null | undefined,
   version: string | null | undefined,
@@ -215,6 +227,13 @@ const InterestGroupDetailBaseSchema = z.object({
         status: z.string().optional().nullable(),
       }),
     )
+    .optional()
+    .nullable()
+    .catch(undefined),
+
+  // Linked community partners for this IG (from patch_3_8_2026.md § 5b)
+  community_partners: z
+    .array(CommunityPartnerStubSchema)
     .optional()
     .nullable()
     .catch(undefined),

@@ -38,3 +38,18 @@ export {
   InterestGroupSchema,
   InterestGroupUpdateSchema,
 } from "./manage-ig.schema";
+export type {
+  CommunityPartner,
+  CommunityPartnerListResponse,
+  CommunityPartnerDetailResponse,
+  CommunityPartnerWrite,
+  PartnerIgStub,
+} from "./community-partner.schema";
+export {
+  CommunityPartnerSchema,
+  CommunityPartnerWriteSchema,
+  CommunityPartnerListResponseSchema,
+  CommunityPartnerDetailResponseSchema,
+  CommunityPartnerMutationResponseSchema,
+  PartnerIgStubSchema,
+} from "./community-partner.schema";

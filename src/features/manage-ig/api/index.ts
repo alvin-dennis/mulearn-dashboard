@@ -20,3 +20,10 @@ export {
   uploadIgCoverImage,
   uploadIgIconImage,
 } from "./manage-ig.api";
+export {
+  createCommunityPartner,
+  deleteCommunityPartner,
+  fetchCommunityPartners,
+  getCommunityPartner,
+  updateCommunityPartner,
+} from "./community-partner.api";
