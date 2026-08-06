@@ -198,41 +198,65 @@ export const endpoints = {
 
   // ============================================
   // Mentor Dashboard Endpoints
-  // (Only the 22 endpoints from the provided API doc)
   // Base: /api/v1/dashboard/mentor/
   // ============================================
   mentor: {
-    // ── Overview & Persona ──────────────────────────────────────────────────
-    /** GET - Mentor overview (scopes + metrics) */
-    overview: "/api/v1/dashboard/mentor/overview/",
-
-    // ── #1 POST/PATCH  register/ ─────────────────────────────────────────────
+    // ── §14 Registration ─────────────────────────────────────────────────────
     /** POST/PATCH - Submit or update a mentor application */
     register: "/api/v1/dashboard/mentor/register/",
-
-    // ── #2 GET  status/ ──────────────────────────────────────────────────────
     /** GET - Check mentor application status */
     status: "/api/v1/dashboard/mentor/status/",
+    /** PATCH - Tier-specific verifier: approve or reject a mentor application */
+    verify: (mentorId: string) =>
+      `/api/v1/dashboard/mentor/verify/${mentorId}/`,
 
-    // ── #3 GET/PATCH  profile/ ───────────────────────────────────────────────
+    // ── §15 Public Profile ───────────────────────────────────────────────────
+    /** GET - Public profile of an approved mentor (auth required) */
+    publicProfile: (mentorId: string) =>
+      `/api/v1/dashboard/mentor/public/profile/${mentorId}/`,
+    /** GET - Public availability of an approved mentor (auth required) */
+    publicAvailability: (mentorId: string) =>
+      `/api/v1/dashboard/mentor/public/availability/${mentorId}/`,
+
+    // ── §16 Overview, Activity, Analytics, Profile ───────────────────────────
+    /** GET - Mentor overview (scopes + metrics) */
+    overview: "/api/v1/dashboard/mentor/overview/",
+    /** GET - Merged timeline: sessions created + task submissions appraised */
+    activity: "/api/v1/dashboard/mentor/activity/",
+    /** GET - Personal analytics for the logged-in mentor */
+    analyticsPersonal: "/api/v1/dashboard/mentor/analytics/personal/",
+    /** GET - Profile completion percentage and missing fields */
+    profileCompletion: "/api/v1/dashboard/mentor/profile/completion/",
+    /** GET - Current persona of the authenticated user (Auth) */
+    personaCurrent: "/api/v1/dashboard/mentor/persona/current/",
     /** GET/PATCH - Approved mentor's own full profile */
     profile: "/api/v1/dashboard/mentor/profile/",
 
-    // ── #4 GET  list/ ────────────────────────────────────────────────────────
+    // ── §17 Admin Listing / Roster ───────────────────────────────────────────
     /** GET - Admin: paginated list of all mentor applications */
     list: "/api/v1/dashboard/mentor/list/",
-
-    // ── #5 GET  detail/<mentor_id>/ ──────────────────────────────────────────
+    /** GET - Admin: full mentor roster (simplified list) */
+    roster: "/api/v1/dashboard/mentor/roster/",
+    /** GET - Admin: pending change requests from mentors */
+    changeRequests: "/api/v1/dashboard/mentor/change-requests/",
     /** GET - Admin: single mentor application detail */
     detail: (mentorId: string) =>
       `/api/v1/dashboard/mentor/detail/${mentorId}/`,
 
-    // ── #6 PATCH  verify/<mentor_id>/ ────────────────────────────────────────
-    /** PATCH - Admin: approve or reject a mentor application */
-    verify: (mentorId: string) =>
-      `/api/v1/dashboard/mentor/verify/${mentorId}/`,
+    // ── §18 Admin Assignment ─────────────────────────────────────────────────
+    /** POST - Bulk-assign users as mentors of one tier (Admin) */
+    adminAssign: "/api/v1/dashboard/mentor/admin/assign/",
+    /** DELETE - Revoke a user's mentor tier(s); ?mentor_tier= narrows to one */
+    adminRevoke: (muid: string) =>
+      `/api/v1/dashboard/mentor/admin/assign/${muid}/`,
+    /** POST - Deactivate a mentor by user_mentor_id (Admin) */
+    adminDeactivate: (userMentorId: string) =>
+      `/api/v1/dashboard/mentor/admin/deactivate/${userMentorId}/`,
+    /** POST - Reactivate a mentor by user_mentor_id (Admin) */
+    adminReactivate: (userMentorId: string) =>
+      `/api/v1/dashboard/mentor/admin/reactivate/${userMentorId}/`,
 
-    // ── §4 Mentor scope grants ───────────────────────────────────────────────
+    // ── §19 Scope Grants ─────────────────────────────────────────────────────
     /** GET - List a mentor's scope grants (Admin / owning Company user) */
     grants: (mentorId: string) =>
       `/api/v1/dashboard/mentor/${mentorId}/grants/`,
@@ -240,94 +264,67 @@ export const endpoints = {
     grantRevoke: (mentorId: string, grantId: string) =>
       `/api/v1/dashboard/mentor/${mentorId}/grants/${grantId}/`,
 
-    // ── §5 Admin bulk assignment ─────────────────────────────────────────────
-    /** POST - Bulk-assign users as mentors of one tier (Admin) */
-    adminAssign: "/api/v1/dashboard/mentor/admin/assign/",
-    /** DELETE - Revoke a user's mentor tier(s); ?mentor_tier= narrows to one */
-    adminRevoke: (muid: string) =>
-      `/api/v1/dashboard/mentor/admin/assign/${muid}/`,
+    // ── §20 Persona Switching ────────────────────────────────────────────────
+    /** GET - Persona switching status (Mentor) */
+    personaStatus: "/api/v1/dashboard/mentor/persona/status/",
+    /** POST - Switch active persona (Mentor) */
+    personaSwitch: "/api/v1/dashboard/mentor/persona/switch/",
 
-    // ── #7 GET  public/profile/<mentor_id>/ ──────────────────────────────────
-    /** GET - Public profile of an approved mentor (auth required) */
-    publicProfile: (mentorId: string) =>
-      `/api/v1/dashboard/mentor/public/profile/${mentorId}/`,
+    // ── §21 Company Affiliation Change ───────────────────────────────────────
+    /** POST - Request a company affiliation change (pending admin approval) */
+    changeCompany: "/api/v1/dashboard/mentor/change-company/",
 
-    // ── #8 GET  public/availability/<mentor_id>/ ─────────────────────────────
-    /** GET - Public availability of an approved mentor (auth required) */
-    publicAvailability: (mentorId: string) =>
-      `/api/v1/dashboard/mentor/public/availability/${mentorId}/`,
-
-    // ── #9 GET/POST  availability/ ───────────────────────────────────────────
-    /** GET/POST - Mentor's own availability slots */
-    availabilitySlots: "/api/v1/dashboard/mentor/availability/",
-
-    // ── #10 GET/PATCH/DELETE  availability/<slot_id>/ ────────────────────────
-    /** GET/PATCH/DELETE - Single availability slot */
-    availabilitySlot: (slotId: string) =>
-      `/api/v1/dashboard/mentor/availability/${slotId}/`,
-
-    // ── #11 POST  session/create/ ────────────────────────────────────────────
+    // ── §22 Sessions ─────────────────────────────────────────────────────────
     /** POST - Create a mentorship session */
     sessionCreate: "/api/v1/dashboard/mentor/session/create/",
-
-    // ── #12 GET  session/list/ ───────────────────────────────────────────────
     /** GET - List sessions created by the logged-in mentor */
     sessionList: "/api/v1/dashboard/mentor/session/list/",
-
-    // ── #13 GET  session/list/<session_id>/ ──────────────────────────────────
     /** GET - Single session detail */
     sessionDetail: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/list/${sessionId}/`,
-
-    // ── #14 PATCH/DELETE  session/update/<session_id>/ ───────────────────────
     /** PATCH/DELETE - Update or soft-delete a session */
     sessionUpdate: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/update/${sessionId}/`,
-
-    // ── #15 GET  session/available/ ──────────────────────────────────────────
+    /** POST - Mark a session as complete (Mentor owner) */
+    sessionComplete: (sessionId: string) =>
+      `/api/v1/dashboard/mentor/session/complete/${sessionId}/`,
     /** GET - Learner: list SCHEDULED sessions for the user's IGs */
     sessionAvailable: "/api/v1/dashboard/mentor/session/available/",
-
-    // ── #16 GET  session/admin/list/ ─────────────────────────────────────────
     /** GET - Admin: list all non-deleted sessions */
     sessionAdminList: "/api/v1/dashboard/mentor/session/admin/list/",
-
-    // ── #17 PATCH  session/admin/verify/<session_id>/ ────────────────────────
     /** PATCH - Admin: approve or reject a PENDING_APPROVAL session */
     sessionAdminVerify: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/admin/verify/${sessionId}/`,
 
-    // ── #18 POST  session/participation/join/<session_id>/ ───────────────────
+    // ── §23 Availability ─────────────────────────────────────────────────────
+    /** GET/POST - Mentor's own availability slots */
+    availabilitySlots: "/api/v1/dashboard/mentor/availability/",
+    /** GET/PATCH/DELETE - Single availability slot */
+    availabilitySlot: (slotId: string) =>
+      `/api/v1/dashboard/mentor/availability/${slotId}/`,
+
+    // ── §24 Participation ────────────────────────────────────────────────────
     /** POST - Join a SCHEDULED session as a learner */
     sessionJoin: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/participation/join/${sessionId}/`,
-
-    // ── #19 GET  session/participant/history/ ────────────────────────────────
+    /** POST - Add a participant to a session (Mentor owner) */
+    sessionParticipantAdd: (sessionId: string) =>
+      `/api/v1/dashboard/mentor/session/participant/add/${sessionId}/`,
     /** GET - Sessions the current user has joined (learner history) */
     sessionParticipantHistory:
       "/api/v1/dashboard/mentor/session/participant/history/",
-
-    // ── #20 GET/POST  session/participant/list/<session_id>/ ─────────────────
     /** GET - List participants for a session */
     sessionParticipantList: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/participant/list/${sessionId}/`,
-
-    /** POST - Add a participant to a session */
-    sessionParticipantAdd: (sessionId: string) =>
-      `/api/v1/dashboard/mentor/session/participant/add/${sessionId}/`,
-
-    // ── #21 PATCH  session/participant/update/<link_id>/ ─────────────────────
     /** PATCH - Mentor updates attendance/progress for one participant */
     sessionParticipantUpdate: (linkId: string) =>
       `/api/v1/dashboard/mentor/session/participant/update/${linkId}/`,
-
-    // ── #22 PATCH  session/participant/feedback/<session_id>/ ────────────────
     /** PATCH - Participant submits feedback after attending a session */
     sessionParticipantFeedback: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/participant/feedback/${sessionId}/`,
 
-    // ── Student Session Requests ─────────────────────────────────────────────
-    /** POST - Submit a session request */
+    // ── §25 Student Requests ─────────────────────────────────────────────────
+    /** POST - Submit a session request (Auth student) */
     studentSessionRequestCreate:
       "/api/v1/dashboard/mentor/session/student/request/",
     /** GET - Student's own session requests */
@@ -340,21 +337,36 @@ export const endpoints = {
     studentSessionVerify: (sessionId: string) =>
       `/api/v1/dashboard/mentor/session/student-requests/${sessionId}/verify/`,
 
-    // ── Tasks: IG dropdown ───────────────────────────────────────────────
+    // ── §26 Tasks ────────────────────────────────────────────────────────────
     /** GET - IGs where the mentor has an active assignment (for task creation) */
     tasksIgDropdown: "/api/v1/dashboard/mentor/tasks/ig-dropdown/",
-
-    // ── Tasks: list + create ─────────────────────────────────────────────
     /** GET/POST - List mentor-submitted tasks or create a new task */
     tasks: "/api/v1/dashboard/mentor/tasks/",
-
-    // ── Tasks: detail + update + delete ──────────────────────────────────
     /** GET/PUT/DELETE - Single mentor task by ID */
     task: (taskId: string) => `/api/v1/dashboard/mentor/tasks/${taskId}/`,
 
-    // ── Activity feed ────────────────────────────────────────────────────
-    /** GET - Merged timeline: sessions created + task submissions appraised */
-    activity: "/api/v1/dashboard/mentor/activity/",
+    // ── §27 IG Opportunities ─────────────────────────────────────────────────
+    /** GET - List IG opportunities for the logged-in mentor */
+    opportunitiesList: "/api/v1/dashboard/mentor/opportunities/",
+    /** POST - Create a new IG opportunity (Mentor, active, scoped) */
+    opportunitiesCreate: "/api/v1/dashboard/mentor/opportunities/",
+    /** GET - Single opportunity detail (Mentor managing) */
+    opportunityDetail: (opportunityId: string) =>
+      `/api/v1/dashboard/mentor/opportunities/${opportunityId}/`,
+    /** PATCH - Update an opportunity (Mentor managing, active) */
+    opportunityUpdate: (opportunityId: string) =>
+      `/api/v1/dashboard/mentor/opportunities/${opportunityId}/`,
+    /** DELETE - Delete an opportunity (Mentor managing) */
+    opportunityDelete: (opportunityId: string) =>
+      `/api/v1/dashboard/mentor/opportunities/${opportunityId}/`,
+    /** POST - Publish an opportunity (Mentor managing, active) */
+    opportunityPublish: (opportunityId: string) =>
+      `/api/v1/dashboard/mentor/opportunities/${opportunityId}/publish/`,
+    /** POST - Close an opportunity (Mentor managing, active) */
+    opportunityClose: (opportunityId: string) =>
+      `/api/v1/dashboard/mentor/opportunities/${opportunityId}/close/`,
+    /** GET - Public catalogue of all open opportunities (public) */
+    opportunitiesPublic: "/api/v1/dashboard/mentor/opportunities/public/",
   },
 
   // ============================================
@@ -828,8 +840,12 @@ export const endpoints = {
   // MuJourney Endpoints
   // ============================================
   mujourney: {
-    /** GET - Redesigned grouped task list (start_journey, become_expert, events) */
-    taskList: "/api/v1/dashboard/task/list/",
+    /** GET - Get user levels with tasks and progress (logged-in) */
+    getUserLevels: "/api/v1/dashboard/profile/get-user-levels/",
+    /** GET - Get public levels list (no auth required) */
+    publicListLevels: "/api/v1/public/list/levels/",
+    /** GET - Get interest group tasks (params: ig_id, perPage) */
+    taskList: "/api/v1/register/area-of-interest/list/",
     /** GET - Get public user journey by MUID */
     getPublicUserLevels: (muid: string) =>
       `/api/v1/dashboard/profile/get-user-levels/${muid}/`,

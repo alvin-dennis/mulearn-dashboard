@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Combobox } from "@/components/ui/combobox";
 import {
   Form,
@@ -167,9 +168,24 @@ const enablerDetailsSchema = z
 // Schema for Mentor
 const mentorDetailsSchema = z
   .object({
-    organization: z.string().min(1, "Please select your company"),
+    organization: z.string().optional(),
     customOrganization: z.string().optional(),
+    isFreelancer: z.boolean().optional(),
+    mentorType: z.enum(["ig", "company"]).optional(),
   })
+  .refine(
+    (data) => {
+      // Non-freelancer must select a company (for both IG mentor and Company mentor)
+      if (!data.isFreelancer) {
+        return !!data.organization && data.organization.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Please select your company",
+      path: ["organization"],
+    },
+  )
   .refine(
     (data) => {
       // If "Others" is selected, custom organization must be provided
@@ -275,6 +291,8 @@ interface RegisterRoleDetailsProps {
       customOrganization?: string;
       organizationType?: "College" | "Company";
       role?: string;
+      mentorType?: "ig" | "company";
+      isFreelancer?: boolean;
     } & CompanyDetailsValues,
   ) => void;
   onBack?: () => void;
@@ -334,6 +352,8 @@ export function RegisterRoleDetails({
       return {
         organization: "",
         customOrganization: "",
+        isFreelancer: false,
+        mentorType: "ig" as const,
       };
     }
     return {
@@ -374,6 +394,10 @@ export function RegisterRoleDetails({
   const [studentOrgType, setStudentOrgType] = useState<"College" | "Company">(
     "College",
   );
+
+  // Mentor-specific: freelancer toggle & mentor type selection
+  const [isFreelancer, setIsFreelancer] = useState(false);
+  const [mentorType, setMentorType] = useState<"ig" | "company">("ig");
 
   // Company stepper state
   const [companyStep, setCompanyStep] = useState(1);
@@ -437,7 +461,16 @@ export function RegisterRoleDetails({
       void handleCompanyNext();
       return;
     }
-    onSubmit(values as Parameters<RegisterRoleDetailsProps["onSubmit"]>[0]);
+    const payload = values as Parameters<
+      RegisterRoleDetailsProps["onSubmit"]
+    >[0];
+    // Explicitly forward the mentor type selection (from local React state)
+    // so that the parent can persist it before routing away.
+    if (role === "mentor") {
+      payload.mentorType = mentorType;
+      payload.isFreelancer = isFreelancer;
+    }
+    onSubmit(payload);
   };
 
   const getRoleLabel = () => {
@@ -826,60 +859,210 @@ export function RegisterRoleDetails({
           {/* Mentor Fields */}
           {role === "mentor" && (
             <>
-              <FormField
-                control={form.control}
-                name="organization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Company
-                    </FormLabel>
-                    <FormControl>
-                      <Combobox
-                        options={companies}
-                        value={showCustomOrganization ? "others" : field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setShowCustomOrganization(false);
-                          form.setValue("customOrganization", "");
-                        }}
-                        placeholder="Select your company"
-                        searchPlaceholder="Search companies..."
-                        disabled={isLoading || isLoadingCompanies}
-                        onCreateNew={(searchTerm) => {
-                          field.onChange("others");
-                          form.setValue("customOrganization", searchTerm);
-                          setShowCustomOrganization(true);
-                        }}
-                        createNewText="Others"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {showCustomOrganization && (
-                <FormField
-                  control={form.control}
-                  name="customOrganization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">
-                        Company Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your company name"
-                          className="h-12 rounded-xl border-border bg-muted/50 px-4"
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              {/* Freelancer Toggle */}
+              <div className="flex items-center justify-between py-2 my-2">
+                <p className="text-sm font-semibold text-foreground">
+                  Are you a FREELANCER?
+                </p>
+                <Switch
+                  checked={isFreelancer}
+                  onCheckedChange={(checked) => {
+                    setIsFreelancer(checked);
+                    form.setValue("isFreelancer", checked);
+                    if (checked) {
+                      // Freelancer → IG mentor only, clear company
+                      setMentorType("ig");
+                      form.setValue("mentorType", "ig");
+                      form.setValue("organization", "");
+                      form.setValue("customOrganization", "");
+                      setShowCustomOrganization(false);
+                    } else {
+                      setMentorType("ig");
+                      form.setValue("mentorType", "ig");
+                    }
+                  }}
+                  disabled={isLoading}
                 />
+              </div>
+
+              {/* Mentor Type Cards */}
+              <div className="space-y-3">
+                {/* IG Mentor card — always visible */}
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => {
+                    setMentorType("ig");
+                    form.setValue("mentorType", "ig");
+                  }}
+                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl border text-left transition-all duration-200 hover:shadow-md active:scale-[0.98] ${
+                    mentorType === "ig" || isFreelancer
+                      ? "border-primary bg-primary text-primary-foreground shadow-md"
+                      : "border-border bg-card shadow-sm hover:border-primary/30"
+                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <span className="text-2xl shrink-0">👨‍🏫</span>
+                  <span className="flex-1 min-w-0">
+                    <span
+                      className={`block text-base font-medium ${
+                        mentorType === "ig" || isFreelancer
+                          ? "text-primary-foreground"
+                          : "text-foreground"
+                      }`}
+                    >
+                      IG Mentor
+                    </span>
+                    <span
+                      className={`block text-xs mt-0.5 leading-snug ${
+                        mentorType === "ig" || isFreelancer
+                          ? "text-primary-foreground/80"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      I guide and support learners independently through
+                      interest groups.
+                    </span>
+                  </span>
+                  {(mentorType === "ig" || isFreelancer) && (
+                    <span className="w-5 h-5 rounded-full bg-primary-foreground flex items-center justify-center shrink-0">
+                      <svg
+                        className="w-3 h-3 text-primary"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+
+                {/* Company Mentor card — hidden when freelancer */}
+                {!isFreelancer && (
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => {
+                      setMentorType("company");
+                      form.setValue("mentorType", "company");
+                    }}
+                    className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl border text-left transition-all duration-200 hover:shadow-md active:scale-[0.98] ${
+                      mentorType === "company"
+                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                        : "border-border bg-card shadow-sm hover:border-primary/30"
+                    } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <span className="text-2xl shrink-0">🏢</span>
+                    <span className="flex-1 min-w-0">
+                      <span
+                        className={`block text-base font-medium ${
+                          mentorType === "company"
+                            ? "text-primary-foreground"
+                            : "text-foreground"
+                        }`}
+                      >
+                        Company Mentor
+                      </span>
+                      <span
+                        className={`block text-xs mt-0.5 leading-snug ${
+                          mentorType === "company"
+                            ? "text-primary-foreground/80"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        I mentor as a company employee. I&apos;ll select my
+                        company during setup.
+                      </span>
+                    </span>
+                    {mentorType === "company" && (
+                      <span className="w-5 h-5 rounded-full bg-primary-foreground flex items-center justify-center shrink-0">
+                        <svg
+                          className="w-3 h-3 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Company combobox — visible for all mentors when toggle is off */}
+              {!isFreelancer && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="organization"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Company
+                        </FormLabel>
+                        <FormControl>
+                          <Combobox
+                            options={companies}
+                            value={
+                              showCustomOrganization ? "others" : field.value
+                            }
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setShowCustomOrganization(false);
+                              form.setValue("customOrganization", "");
+                            }}
+                            placeholder="Select your company"
+                            searchPlaceholder="Search companies..."
+                            disabled={isLoading || isLoadingCompanies}
+                            onCreateNew={(searchTerm) => {
+                              field.onChange("others");
+                              form.setValue("customOrganization", searchTerm);
+                              setShowCustomOrganization(true);
+                            }}
+                            createNewText="Others"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {showCustomOrganization && (
+                    <FormField
+                      control={form.control}
+                      name="customOrganization"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Company Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter your company name"
+                              className="h-12 rounded-xl border-border bg-muted/50 px-4"
+                              disabled={isLoading}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
