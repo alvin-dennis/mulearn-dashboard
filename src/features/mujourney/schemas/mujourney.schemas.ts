@@ -44,8 +44,7 @@ export const TaskListPublicSchema = z
     event: z.string().nullable().optional(),
     event_id: z.string().nullable().optional(),
     company_name: z.string().nullable().optional(),
-    // completed is not returned by the API but we track it client-side
-    completed: z.boolean().default(false),
+    completed: z.boolean().nullish().default(false),
   })
   .passthrough();
 
