@@ -463,7 +463,7 @@ export function CompanyTemplatesPageClient() {
                   <CardHeader className="space-y-2 pb-3">
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline" className="text-xs">
-                        {template.type || "ASSIGNMENT"}
+                        {template.type_title || template.type || "ASSIGNMENT"}
                       </Badge>
                       <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold flex items-center gap-1">
                         <Coins className="h-3 w-3" />
@@ -473,10 +473,10 @@ export function CompanyTemplatesPageClient() {
                     <CardTitle className="text-base font-bold line-clamp-1">
                       {template.title}
                     </CardTitle>
-                    {template.hashtag && (
+                    {(template.hashtag_prefix || template.hashtag) && (
                       <div className="text-xs text-primary font-medium flex items-center gap-1">
                         <Hash className="h-3 w-3" />
-                        {template.hashtag}
+                        {template.hashtag_prefix || template.hashtag}
                       </div>
                     )}
                   </CardHeader>

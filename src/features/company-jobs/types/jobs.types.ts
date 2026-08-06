@@ -628,12 +628,15 @@ export interface TalentPoolInsights {
 export interface TaskTemplate {
   id: string;
   title: string;
-  description: string;
-  hashtag: string;
+  description?: string | null;
+  hashtag_prefix?: string | null;
+  hashtag?: string | null;
   karma: number;
-  type: string;
-  skills: string[];
-  created_at: string;
+  type_id?: string | null;
+  type_title?: string | null;
+  type?: string | null;
+  skills?: string[];
+  created_at?: string | null;
 }
 
 export interface CompanyFeedback {

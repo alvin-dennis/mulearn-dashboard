@@ -795,25 +795,38 @@ export async function fetchTalentPoolInsights(): Promise<TalentPoolInsights> {
   return res.response;
 }
 
-// ─── Task Templates (§7) ────────────────────────────────────
-
 export async function fetchTaskTemplates(): Promise<TaskTemplate[]> {
   const res = await apiClient.get(
     endpoints.company.taskTemplates,
     TaskTemplatesListResponseSchema,
   );
-  return res.response ?? [];
+  if ("response" in res && res.response) {
+    if (Array.isArray(res.response)) return res.response;
+    if ("data" in res.response && Array.isArray(res.response.data)) {
+      return res.response.data;
+    }
+  }
+  if ("data" in res && Array.isArray(res.data)) {
+    return res.data;
+  }
+  if (Array.isArray(res)) {
+    return res;
+  }
+  return [];
 }
 
 export async function createTaskTemplate(
-  payload: Omit<TaskTemplate, "id" | "created_at">,
+  payload: Partial<TaskTemplate>,
 ): Promise<TaskTemplate> {
   const res = await apiClient.post(
     endpoints.company.taskTemplates,
     payload,
     TaskTemplateDetailResponseSchema,
   );
-  return res.response;
+  if ("response" in res && res.response) {
+    return res.response as TaskTemplate;
+  }
+  return res as unknown as TaskTemplate;
 }
 
 export async function deleteTaskTemplate(templateId: string): Promise<void> {
