@@ -75,7 +75,14 @@ export {
   useUpdateApplicantStatus,
 } from "./use-job-applicants";
 export { useJobDetail } from "./use-job-detail";
-export { useCreateJob, useDeleteJob, useUpdateJob } from "./use-job-mutations";
+export {
+  useApproveJob,
+  useCreateJob,
+  useDeleteJob,
+  useRejectJob,
+  useRequestJobChanges,
+  useUpdateJob,
+} from "./use-job-mutations";
 export {
   useCreateJobRule,
   useDeleteJobRule,

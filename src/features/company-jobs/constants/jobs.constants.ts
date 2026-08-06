@@ -312,6 +312,24 @@ export const JOB_STATUS_CONFIG = {
     textColor: "text-amber-700",
     bgColor: "bg-amber-50",
   },
+  "Pending Approval": {
+    label: "Pending Approval",
+    dotColor: "bg-blue-500",
+    textColor: "text-blue-700",
+    bgColor: "bg-blue-50",
+  },
+  "Needs Revision": {
+    label: "Needs Revision",
+    dotColor: "bg-amber-500",
+    textColor: "text-amber-700",
+    bgColor: "bg-amber-50",
+  },
+  Rejected: {
+    label: "Rejected",
+    dotColor: "bg-red-500",
+    textColor: "text-red-700",
+    bgColor: "bg-red-50",
+  },
   Closed: {
     label: "Closed",
     dotColor: "bg-rose-500",

@@ -64,7 +64,7 @@ export interface Job {
   duration_value?: number | null;
   duration_unit?: string | null;
   hourly_rate?: string | null;
-  deliverables?: string[] | string | null;
+  deliverables?: Record<string, unknown> | string[] | string | null;
   stipend?: string | null;
   certificate_provided?: boolean | null;
   applicant_count?: number | null;
@@ -72,6 +72,16 @@ export interface Job {
   total_applicants?: number | null;
   applicantCount?: number | null;
   applicationsCount?: number | null;
+  expires_at?: string | null;
+  eligibility?: {
+    eligible: boolean;
+    rules: {
+      rule_type: string;
+      rule_value: string;
+      met: boolean;
+      message?: string;
+    }[];
+  } | null;
 }
 
 export interface Pagination {
@@ -110,10 +120,20 @@ export interface PublicJob {
   duration_value?: number | null;
   duration_unit?: string | null;
   hourly_rate?: string | null;
-  deliverables?: string[] | string | null;
+  deliverables?: Record<string, unknown> | string[] | string | null;
   stipend?: string | null;
   certificate_provided?: boolean | null;
   rules: JobRule[];
+  expires_at?: string | null;
+  eligibility?: {
+    eligible: boolean;
+    rules: {
+      rule_type: string;
+      rule_value: string;
+      met: boolean;
+      message?: string;
+    }[];
+  } | null;
 }
 
 export interface LearnerApplication {
@@ -186,9 +206,10 @@ export interface CreateJobPayload {
   duration_value?: number;
   duration_unit?: string;
   hourly_rate?: string | number;
-  deliverables?: string[] | string;
+  deliverables?: Record<string, unknown> | string[] | string;
   stipend?: string | number;
   certificate_provided?: boolean | string;
+  expires_at?: string;
   rules?: { rule_type: string; rule_value: string | number }[];
 }
 
@@ -205,9 +226,10 @@ export interface UpdateJobPayload {
   duration_value?: number | null;
   duration_unit?: string | null;
   hourly_rate?: string | number | null;
-  deliverables?: string[] | string | null;
+  deliverables?: Record<string, unknown> | string[] | string | null;
   stipend?: string | number | null;
   certificate_provided?: boolean | string | null;
+  expires_at?: string | null;
   rules?: { rule_type: string; rule_value: string | number }[];
 }
 
@@ -223,9 +245,13 @@ export interface UpdateRulePayload {
 
 // ─── API Mutation Responses ─────────────────────────────────
 
-export type CreateJobResponse = Job;
+export type CreateJobResponse =
+  | Job
+  | { id: string; status?: string; title?: string; [key: string]: unknown };
 
-export type UpdateJobResponse = Job;
+export type UpdateJobResponse =
+  | Job
+  | { status?: string; salary_range?: string | null; [key: string]: unknown };
 
 export interface DeleteJobResponse {
   job_id: string;
@@ -344,6 +370,7 @@ export interface JobsListParams {
   per_page?: number;
   sort_by?: string;
   sort_order?: "asc" | "desc";
+  job_type?: string;
 }
 
 export interface LearnerDiscoveryParams {

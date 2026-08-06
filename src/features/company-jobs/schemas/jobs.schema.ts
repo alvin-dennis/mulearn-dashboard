@@ -77,7 +77,7 @@ export const JobSchema = z.object({
     .nullable()
     .transform((v) => (v != null ? String(v) : null)),
   deliverables: z
-    .union([z.array(z.string()), z.string()])
+    .union([z.record(z.string(), z.unknown()), z.array(z.string()), z.string()])
     .optional()
     .nullable(),
   stipend: z
@@ -100,14 +100,33 @@ export const JobSchema = z.object({
   total_applicants: z.number().optional().nullable(),
   applicantCount: z.number().optional().nullable(),
   applicationsCount: z.number().optional().nullable(),
+  expires_at: z.string().optional().nullable(),
+  // Computed eligibility (learner view from jobs/all/)
+  eligibility: z
+    .object({
+      eligible: z.boolean(),
+      rules: z
+        .array(
+          z.object({
+            rule_type: z.string(),
+            rule_value: z.string(),
+            met: z.boolean(),
+            message: z.string().optional(),
+          }),
+        )
+        .optional()
+        .default([]),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const PaginationSchema = z
   .object({
-    count: z
-      .number()
-      .nullish()
-      .transform((v) => v ?? 0),
+    page: z.number().optional(),
+    per_page: z.number().optional(),
+    total: z.number().optional(),
+    count: z.number().nullish(),
     totalPages: z.number().nullish(),
     total_pages: z.number().nullish(),
     isNext: z.boolean().nullish(),
@@ -115,23 +134,30 @@ export const PaginationSchema = z
     nextPage: z.number().nullish(),
     current_page: z.number().nullish(),
     currentPage: z.number().nullish(),
-    next: z.string().nullable().optional(),
-    previous: z.string().nullable().optional(),
+    perPage: z.number().nullish(),
+    next: z.union([z.string(), z.number()]).nullable().optional(),
+    previous: z.union([z.string(), z.number()]).nullable().optional(),
   })
   .passthrough()
   .optional()
   .transform((v) => {
-    const cp = v?.current_page ?? v?.currentPage ?? 1;
-    const tp = v?.totalPages ?? v?.total_pages ?? 1;
+    const count = v?.count ?? v?.total ?? 0;
+    const cp = v?.page ?? v?.current_page ?? v?.currentPage ?? 1;
+    const perPage = v?.per_page ?? v?.perPage ?? 10;
+    const tp =
+      v?.totalPages ??
+      v?.total_pages ??
+      (count > 0 ? Math.max(1, Math.ceil(count / perPage)) : 1);
     const hasNext = v?.isNext ?? (v?.next !== undefined ? !!v.next : cp < tp);
     const hasPrev =
       v?.isPrev ?? (v?.previous !== undefined ? !!v.previous : cp > 1);
     return {
-      count: v?.count ?? 0,
+      count,
       totalPages: tp,
       isNext: hasNext,
       isPrev: hasPrev,
       nextPage: v?.nextPage ?? (hasNext ? cp + 1 : null),
+      currentPage: cp,
     };
   });
 
@@ -227,7 +253,7 @@ export const PublicJobSchema = z.object({
     .nullable()
     .transform((v) => (v != null ? String(v) : null)),
   deliverables: z
-    .union([z.array(z.string()), z.string()])
+    .union([z.record(z.string(), z.unknown()), z.array(z.string()), z.string()])
     .optional()
     .nullable(),
   stipend: z
@@ -249,6 +275,24 @@ export const PublicJobSchema = z.object({
     .array(JobRuleSchema)
     .nullish()
     .transform((v) => v ?? []),
+  expires_at: z.string().optional().nullable(),
+  eligibility: z
+    .object({
+      eligible: z.boolean(),
+      rules: z
+        .array(
+          z.object({
+            rule_type: z.string(),
+            rule_value: z.string(),
+            met: z.boolean(),
+            message: z.string().optional(),
+          }),
+        )
+        .optional()
+        .default([]),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const LearnerApplicationSchema = z.object({
@@ -364,43 +408,21 @@ export const PublicJobsResponseSchema = DjangoResponse(
     .object({
       data: z.array(PublicJobSchema).nullish(),
       jobs: z.array(PublicJobSchema).nullish(),
-      pagination: z
-        .object({
-          count: z
-            .number()
-            .nullish()
-            .transform((v) => v ?? 0),
-          // camelCase (new API shape)
-          totalPages: z.number().nullish(),
-          isNext: z.boolean().nullish(),
-          isPrev: z.boolean().nullish(),
-          nextPage: z.number().nullish(),
-          // snake_case (old API shape — kept for backwards compat)
-          total_pages: z.number().nullish(),
-          current_page: z.number().nullish(),
-          per_page: z.number().nullish(),
-          next: z.string().nullable().optional(),
-          previous: z.string().nullable().optional(),
-        })
-        .passthrough()
-        .optional()
-        .transform((v) => ({
-          count: v?.count ?? 0,
-          totalPages: v?.totalPages ?? v?.total_pages ?? 1,
-          isNext: v?.isNext ?? !!v?.next,
-          isPrev: v?.isPrev ?? !!v?.previous,
-          nextPage: v?.nextPage ?? (v?.next ? (v.current_page ?? 1) + 1 : null),
-        })),
+      pagination: PaginationSchema.nullish().transform(
+        (v) =>
+          v ?? {
+            count: 0,
+            totalPages: 1,
+            isNext: false,
+            isPrev: false,
+            nextPage: null,
+            currentPage: 1,
+          },
+      ),
     })
     .transform((val) => ({
       jobs: val.jobs ?? val.data ?? [],
-      pagination: val.pagination ?? {
-        count: 0,
-        totalPages: 1,
-        isNext: false,
-        isPrev: false,
-        nextPage: null,
-      },
+      pagination: val.pagination,
     })),
 );
 
@@ -510,12 +532,21 @@ export const LearnerDiscoveryResponseSchema = DjangoResponse(
 
 // ─── Mutation Response Schemas ──────────────────────────────
 
-export const CreateJobResponseSchema = DjangoResponse(JobSchema);
+export const CreateJobDataSchema = z.union([
+  JobSchema,
+  z.object({ id: z.string() }).passthrough(),
+]);
+
+export const CreateJobResponseSchema = DjangoResponse(CreateJobDataSchema);
 
 export const UpdateJobDataSchema = z
-  .union([z.object({ job: JobSchema }), JobSchema])
+  .union([
+    z.object({ job: JobSchema }),
+    JobSchema,
+    z.record(z.string(), z.unknown()),
+  ])
   .transform((val) => {
-    if ("job" in val && typeof val.job === "object") {
+    if ("job" in val && typeof val.job === "object" && val.job !== null) {
       return val.job;
     }
     return val;

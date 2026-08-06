@@ -38,9 +38,9 @@ import {
   ShortlistMutationResponseSchema,
   TalentPoolAnalyticsResponseSchema,
   TalentPoolInsightsResponseSchema,
+  TasksAnalyticsResponseSchema,
   TaskTemplateDetailResponseSchema,
   TaskTemplatesListResponseSchema,
-  TasksAnalyticsResponseSchema,
   TrackJobViewResponseSchema,
   UpdateApplicantStatusResponseSchema,
   UpdateJobResponseSchema,
@@ -131,18 +131,17 @@ export async function fetchJobs(
 ): Promise<JobsListResponse> {
   const query = new URLSearchParams();
 
-  const page = params?.pageIndex ?? params?.page;
-  if (page !== undefined) query.set("pageIndex", String(page));
+  const page = params?.page ?? params?.pageIndex;
+  if (page !== undefined) query.set("page", String(page));
 
-  const perPage = params?.perPage ?? params?.per_page;
-  if (perPage !== undefined) {
-    query.set("perPage", String(perPage));
-    query.set("per_page", String(perPage));
-  }
+  const perPage = params?.per_page ?? params?.perPage;
+  if (perPage !== undefined) query.set("per_page", String(perPage));
+
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sortBy || params?.sort_by)
-    query.set("sort_by", (params.sort_by ?? params.sortBy) as string);
+  const sortBy = params?.sort_by ?? params?.sortBy;
+  if (sortBy) query.set("sort_by", sortBy);
   if (params?.sort_order) query.set("sort_order", params.sort_order);
+  if (params?.job_type) query.set("job_type", params.job_type);
 
   const queryString = query.toString();
   const url = queryString
@@ -220,8 +219,12 @@ export async function createJobRule(
     { rule_type: payload.rule_type, rule_value: payload.rule_value },
   ];
   const updated = await updateJob(jobId, { rules: newRules });
-  const addedRule = (updated.rules || []).find(
-    (r) =>
+  const rulesList =
+    updated && "rules" in updated && Array.isArray(updated.rules)
+      ? updated.rules
+      : [];
+  const addedRule = rulesList.find(
+    (r: { rule_type?: string; rule_value?: string | number; id?: string }) =>
       r.rule_type === payload.rule_type &&
       String(r.rule_value) === String(payload.rule_value),
   ) || {
@@ -323,10 +326,14 @@ export async function fetchPublicJobs(
 ): Promise<PublicJobsResponse> {
   const query = new URLSearchParams();
 
-  if (params?.pageIndex) query.set("pageIndex", String(params.pageIndex));
-  if (params?.perPage) query.set("perPage", String(params.perPage));
+  const page = params?.page ?? params?.pageIndex;
+  if (page !== undefined) query.set("page", String(page));
+  const perPage = params?.per_page ?? params?.perPage;
+  if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sortBy) query.set("sortBy", params.sortBy);
+  const sortBy = params?.sort_by ?? params?.sortBy;
+  if (sortBy) query.set("sort_by", sortBy);
+  if (params?.job_type) query.set("job_type", params.job_type);
 
   const queryString = query.toString();
   const url = queryString
@@ -396,9 +403,7 @@ export async function fetchJobApplicants(
   params?: {
     status?: string;
     search?: string;
-    sortBy?: string;
-    pageIndex?: number;
-    perPage?: number;
+    sort_by?: string;
     page?: number;
     per_page?: number;
   },
@@ -406,18 +411,11 @@ export async function fetchJobApplicants(
   const query = new URLSearchParams();
 
   if (params?.status) query.set("status", params.status);
-  const p = params?.pageIndex ?? params?.page;
-  if (p !== undefined) {
-    query.set("pageIndex", String(p));
-    query.set("page", String(p));
-  }
-  const pp = params?.perPage ?? params?.per_page;
-  if (pp !== undefined) {
-    query.set("perPage", String(pp));
-    query.set("per_page", String(pp));
-  }
+  if (params?.page !== undefined) query.set("page", String(params.page));
+  if (params?.per_page !== undefined)
+    query.set("per_page", String(params.per_page));
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sortBy) query.set("sortBy", params.sortBy);
+  if (params?.sort_by) query.set("sort_by", params.sort_by);
 
   const queryString = query.toString();
   const url = queryString
@@ -665,14 +663,15 @@ export async function fetchPendingJobs(
   params?: JobsListParams,
 ): Promise<JobsListResponse> {
   const query = new URLSearchParams();
-  const page = params?.pageIndex ?? params?.page;
-  if (page !== undefined) query.set("pageIndex", String(page));
-  const perPage = params?.perPage ?? params?.per_page;
-  if (perPage !== undefined) query.set("perPage", String(perPage));
+  const page = params?.page ?? params?.pageIndex;
+  if (page !== undefined) query.set("page", String(page));
+  const perPage = params?.per_page ?? params?.perPage;
+  if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sortBy || params?.sort_by)
-    query.set("sort_by", (params.sort_by ?? params.sortBy) as string);
+  const sortBy = params?.sort_by ?? params?.sortBy;
+  if (sortBy) query.set("sort_by", sortBy);
   if (params?.sort_order) query.set("sort_order", params.sort_order);
+  if (params?.job_type) query.set("job_type", params.job_type);
 
   const qs = query.toString();
   const url = qs
@@ -683,37 +682,31 @@ export async function fetchPendingJobs(
   return res.response;
 }
 
-export async function approveJob(jobId: string): Promise<Job> {
-  const res = await apiClient.post(
+export async function approveJob(jobId: string): Promise<void> {
+  await apiClient.post(
     endpoints.company.jobApprove(jobId),
     undefined,
-    JobDetailResponseSchema,
+    GenericResponseSchema,
   );
-  const data = res.response;
-  return (data.job ?? data) as Job;
 }
 
-export async function rejectJob(jobId: string, reason?: string): Promise<Job> {
-  const res = await apiClient.post(
+export async function rejectJob(jobId: string, reason: string): Promise<void> {
+  await apiClient.post(
     endpoints.company.jobReject(jobId),
     { reason },
-    JobDetailResponseSchema,
+    GenericResponseSchema,
   );
-  const data = res.response;
-  return (data.job ?? data) as Job;
 }
 
 export async function requestJobChanges(
   jobId: string,
-  comments: string,
-): Promise<Job> {
-  const res = await apiClient.post(
+  note: string,
+): Promise<void> {
+  await apiClient.post(
     endpoints.company.jobRequestChanges(jobId),
-    { comments },
-    JobDetailResponseSchema,
+    { note },
+    GenericResponseSchema,
   );
-  const data = res.response;
-  return (data.job ?? data) as Job;
 }
 
 // ─── Extended Analytics (§5) ────────────────────────────────
