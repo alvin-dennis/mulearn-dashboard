@@ -27,7 +27,8 @@ export const COMPANY_ANALYTICS_KEYS = {
     [...COMPANY_ANALYTICS_KEYS.all, "talent-pool", params ?? {}] as const,
   adminSummary: () => [...COMPANY_ANALYTICS_KEYS.all, "admin-summary"] as const,
   campus: () => [...COMPANY_ANALYTICS_KEYS.all, "campus"] as const,
-  campusTrend: () => [...COMPANY_ANALYTICS_KEYS.all, "campus-trend"] as const,
+  campusTrend: (params?: { campus_id?: string; quarters?: number }) =>
+    [...COMPANY_ANALYTICS_KEYS.all, "campus-trend", params ?? {}] as const,
   tasks: () => [...COMPANY_ANALYTICS_KEYS.all, "tasks"] as const,
 };
 
@@ -99,10 +100,22 @@ export function useCampusAnalytics() {
   });
 }
 
-export function useCampusQuarterTrend() {
+export function useCampusQuarterTrend(params?: {
+  campus_id?: string;
+  quarters?: number;
+}) {
   return useQuery({
-    queryKey: COMPANY_ANALYTICS_KEYS.campusTrend(),
-    queryFn: fetchCampusQuarterTrend,
+    queryKey: COMPANY_ANALYTICS_KEYS.campusTrend(params),
+    queryFn: () => {
+      if (!params?.campus_id) {
+        throw new Error("campus_id is required");
+      }
+      return fetchCampusQuarterTrend({
+        campus_id: params.campus_id,
+        quarters: params.quarters,
+      });
+    },
+    enabled: !!params?.campus_id,
     refetchOnWindowFocus: false,
   });
 }

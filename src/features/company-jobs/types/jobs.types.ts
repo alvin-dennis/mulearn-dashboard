@@ -552,27 +552,56 @@ export interface UserCompanyStatus {
   pending_invitations: CompanyAdminLink[];
 }
 
-export interface CampusHireMetric {
+export interface CampusJobApplicant {
   campus_id: string;
   campus_name: string;
-  hires_count: number;
-  avg_karma: number;
-  top_departments: Array<{ department: string; count: number }>;
+  applicant_count: number;
 }
 
-export interface CampusQuarterTrend {
+export interface CampusTaskCompleter {
+  campus_id: string;
+  campus_name: string;
+  completer_count: number;
+}
+
+export interface CampusEventAttendee {
+  campus_id: string;
+  campus_name: string;
+  attendee_count: number;
+}
+
+export interface CampusAnalytics {
+  job_applicants_by_campus: CampusJobApplicant[];
+  task_completers_by_campus: CampusTaskCompleter[];
+  event_attendees_by_campus: CampusEventAttendee[];
+}
+
+export interface CampusTrendItem {
   quarter: string;
-  hires_count: number;
-  avg_karma: number;
+  active_learners: number;
+  job_applicants: number;
+  karma_earned: number;
+  sessions_held: number;
+}
+
+export interface CampusTrend {
+  campus_id: string;
+  campus_name: string;
+  trend: CampusTrendItem[];
+}
+
+export interface TaskLearnerSatisfaction {
+  average_rating: number;
+  rating_count: number;
 }
 
 export interface TasksAnalytics {
-  total_tasks_created: number;
-  approved_tasks: number;
-  pending_tasks: number;
-  rejected_tasks: number;
+  total_tasks_submitted: number;
+  approval_funnel: Record<string, number>;
   total_completions: number;
+  completion_rate: string;
   karma_distributed: number;
+  learner_satisfaction?: TaskLearnerSatisfaction;
 }
 
 export interface ShortlistedLearner {

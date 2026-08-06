@@ -1060,12 +1060,12 @@ export const ListMentorNominationsResponseSchema = DjangoResponse(
 // ─── Analytics Schemas ────────────────────────────────────────
 
 export const GigAnalyticsSchema = z.object({
-  total_gigs_posted: z.number(),
-  active_gigs: z.number(),
-  closed_gigs: z.number(),
-  average_hourly_rate: z.number(),
-  application_funnel: z.record(z.string(), z.number()),
-  conversion_rate: z.string(),
+  total_gigs_posted: z.coerce.number().default(0),
+  active_gigs: z.coerce.number().default(0),
+  closed_gigs: z.coerce.number().default(0),
+  average_hourly_rate: z.coerce.number().default(0),
+  application_funnel: z.record(z.string(), z.coerce.number()).default({}),
+  conversion_rate: z.string().default("0.00%"),
 });
 
 export const GigAnalyticsResponseSchema = DjangoResponse(GigAnalyticsSchema);
@@ -1126,14 +1126,22 @@ export const TrackJobViewResponseSchema = DjangoResponse(
   z.object({}).passthrough(),
 );
 
-export const JobEngagementAnalyticsSchema = z.object({
-  job_id: z.string(),
-  job_title: z.string(),
-  total_views: z.number(),
-  total_applications: z.number(),
-  total_hired: z.number(),
-  conversion_rate_percentage: z.number(),
-});
+export const JobEngagementAnalyticsSchema = z
+  .object({
+    job_id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    job_title: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    total_views: z.coerce.number().default(0),
+    total_applications: z.coerce.number().default(0),
+    total_hired: z.coerce.number().default(0),
+    conversion_rate_percentage: z.coerce.number().default(0),
+  })
+  .passthrough();
 
 export const JobEngagementAnalyticsResponseSchema = DjangoResponse(
   JobEngagementAnalyticsSchema,
@@ -1219,39 +1227,106 @@ export const UserCompanyStatusResponseSchema = DjangoResponse(
 
 // ─── Campus Analytics ────────────────────────────────────────
 
-export const CampusHireMetricSchema = z.object({
-  campus_id: z.string(),
-  campus_name: z.string(),
-  hires_count: z.number(),
-  avg_karma: z.number(),
-  top_departments: z
-    .array(z.object({ department: z.string(), count: z.number() }))
-    .default([]),
-});
+export const CampusJobApplicantSchema = z
+  .object({
+    campus_id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    campus_name: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    applicant_count: z.coerce.number().default(0),
+  })
+  .passthrough();
+
+export const CampusTaskCompleterSchema = z
+  .object({
+    campus_id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    campus_name: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    completer_count: z.coerce.number().default(0),
+  })
+  .passthrough();
+
+export const CampusEventAttendeeSchema = z
+  .object({
+    campus_id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    campus_name: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    attendee_count: z.coerce.number().default(0),
+  })
+  .passthrough();
+
+export const CampusAnalyticsSchema = z
+  .object({
+    job_applicants_by_campus: z.array(CampusJobApplicantSchema).default([]),
+    task_completers_by_campus: z.array(CampusTaskCompleterSchema).default([]),
+    event_attendees_by_campus: z.array(CampusEventAttendeeSchema).default([]),
+  })
+  .passthrough();
 
 export const CampusAnalyticsResponseSchema = DjangoResponse(
-  z.array(CampusHireMetricSchema),
+  CampusAnalyticsSchema,
 );
 
-export const CampusQuarterTrendSchema = z.object({
-  quarter: z.string(),
-  hires_count: z.number(),
-  avg_karma: z.number(),
-});
+export const CampusTrendItemSchema = z
+  .object({
+    quarter: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    active_learners: z.coerce.number().default(0),
+    job_applicants: z.coerce.number().default(0),
+    karma_earned: z.coerce.number().default(0),
+    sessions_held: z.coerce.number().default(0),
+  })
+  .passthrough();
 
-export const CampusTrendResponseSchema = DjangoResponse(
-  z.array(CampusQuarterTrendSchema),
-);
+export const CampusTrendSchema = z
+  .object({
+    campus_id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    campus_name: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    trend: z.array(CampusTrendItemSchema).default([]),
+  })
+  .passthrough();
+
+export const CampusTrendResponseSchema = DjangoResponse(CampusTrendSchema);
 
 // ─── Tasks Analytics ─────────────────────────────────────────
 
+export const TaskLearnerSatisfactionSchema = z.object({
+  average_rating: z.coerce.number().default(0),
+  rating_count: z.coerce.number().default(0),
+});
+
 export const TasksAnalyticsSchema = z.object({
-  total_tasks_created: z.number(),
-  approved_tasks: z.number(),
-  pending_tasks: z.number(),
-  rejected_tasks: z.number(),
-  total_completions: z.number(),
-  karma_distributed: z.number(),
+  total_tasks_submitted: z.coerce.number().default(0),
+  approval_funnel: z.record(z.string(), z.coerce.number()).default({}),
+  total_completions: z.coerce.number().default(0),
+  completion_rate: z.string().default("0.00%"),
+  karma_distributed: z.coerce.number().default(0),
+  learner_satisfaction: TaskLearnerSatisfactionSchema.optional().default({
+    average_rating: 0,
+    rating_count: 0,
+  }),
 });
 
 export const TasksAnalyticsResponseSchema =

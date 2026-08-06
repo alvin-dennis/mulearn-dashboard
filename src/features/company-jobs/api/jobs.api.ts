@@ -49,8 +49,8 @@ import {
 } from "../schemas";
 import type {
   AdminSummary,
-  CampusHireMetric,
-  CampusQuarterTrend,
+  CampusAnalytics,
+  CampusTrend,
   CompanyAdminLink,
   CompanyCollaboration,
   CompanyDashboardSummary,
@@ -719,20 +719,30 @@ export async function requestJobChanges(
 
 // ─── Extended Analytics (§5) ────────────────────────────────
 
-export async function fetchCampusAnalytics(): Promise<CampusHireMetric[]> {
+export async function fetchCampusAnalytics(): Promise<CampusAnalytics> {
   const res = await apiClient.get(
     endpoints.company.analyticsCampus,
     CampusAnalyticsResponseSchema,
   );
-  return res.response ?? [];
+  return res.response;
 }
 
-export async function fetchCampusQuarterTrend(): Promise<CampusQuarterTrend[]> {
-  const res = await apiClient.get(
-    endpoints.company.analyticsCampusTrend,
-    CampusTrendResponseSchema,
-  );
-  return res.response ?? [];
+export async function fetchCampusQuarterTrend(params: {
+  campus_id: string;
+  quarters?: number;
+}): Promise<CampusTrend> {
+  const query = new URLSearchParams();
+  if (params.campus_id) query.set("campus_id", params.campus_id);
+  if (params.quarters !== undefined)
+    query.set("quarters", String(params.quarters));
+
+  const queryString = query.toString();
+  const url = queryString
+    ? `${endpoints.company.analyticsCampusTrend}?${queryString}`
+    : endpoints.company.analyticsCampusTrend;
+
+  const res = await apiClient.get(url, CampusTrendResponseSchema);
+  return res.response;
 }
 
 export async function fetchTasksAnalytics(): Promise<TasksAnalytics> {
