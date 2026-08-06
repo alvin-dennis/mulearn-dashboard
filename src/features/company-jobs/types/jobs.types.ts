@@ -136,9 +136,21 @@ export interface PublicJob {
   } | null;
 }
 
+export interface LearnerJobSummary {
+  id: string;
+  title: string;
+  company_name?: string | null;
+  company_logo?: string | null;
+  location?: string | null;
+  job_type?: string | null;
+  salary_range?: string | null;
+  experience?: string | null;
+  [key: string]: unknown;
+}
+
 export interface LearnerApplication {
   id: string;
-  job: Job;
+  job: Job | LearnerJobSummary;
   resume_link?: string | null;
   cover_letter?: string | null;
   status: string;
@@ -288,7 +300,12 @@ export interface ApplyJobResponse {
   applied_at?: string;
 }
 
-export interface UpdateApplicantStatusResponse extends JobApplicant {}
+export type UpdateApplicantStatusResponse =
+  | JobApplicant
+  | {
+      status?: string;
+      [key: string]: unknown;
+    };
 
 // ─── Company Profile Sub-types ──────────────────────────────
 

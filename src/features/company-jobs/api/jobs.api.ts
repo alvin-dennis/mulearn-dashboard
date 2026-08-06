@@ -34,6 +34,7 @@ import {
   PublicCompanyProfileResponseSchema,
   PublicJobsBySlugResponseSchema,
   PublicJobsResponseSchema,
+  ResubmitApplicationResponseSchema,
   ShortlistListResponseSchema,
   ShortlistMutationResponseSchema,
   TalentPoolAnalyticsResponseSchema,
@@ -347,15 +348,21 @@ export async function fetchPublicJobs(
 export async function fetchLearnerApplications(params?: {
   search?: string;
   sortBy?: string;
+  sort_by?: string;
   pageIndex?: number;
+  page?: number;
   perPage?: number;
+  per_page?: number;
 }): Promise<LearnerApplicationsResponse> {
   const query = new URLSearchParams();
 
-  if (params?.pageIndex) query.set("pageIndex", String(params.pageIndex));
-  if (params?.perPage) query.set("perPage", String(params.perPage));
+  const page = params?.page ?? params?.pageIndex;
+  if (page !== undefined) query.set("page", String(page));
+  const perPage = params?.per_page ?? params?.perPage;
+  if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sortBy) query.set("sortBy", params.sortBy);
+  const sortBy = params?.sort_by ?? params?.sortBy;
+  if (sortBy) query.set("sort_by", sortBy);
 
   const queryString = query.toString();
   const url = queryString
@@ -388,12 +395,13 @@ export async function withdrawApplication(appId: string): Promise<void> {
 export async function resubmitApplication(
   appId: string,
   payload: { resume_link?: string; cover_letter?: string },
-): Promise<void> {
-  await apiClient.patch(
+): Promise<{ status?: string } | undefined> {
+  const res = await apiClient.patch(
     endpoints.company.applicationResubmit(appId),
     payload,
-    GenericResponseSchema,
+    ResubmitApplicationResponseSchema,
   );
+  return res.response as { status?: string } | undefined;
 }
 
 // ─── Company Applicant Management & Talent Pool ──────────────

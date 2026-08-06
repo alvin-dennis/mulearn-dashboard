@@ -295,34 +295,56 @@ export const PublicJobSchema = z.object({
     .nullable(),
 });
 
-export const LearnerApplicationSchema = z.object({
-  id: z
-    .string()
-    .nullish()
-    .transform((v) => v ?? ""),
-  job: JobSchema,
-  resume_link: z.string().optional().nullable(),
-  cover_letter: z.string().optional().nullable(),
-  status: z
-    .string()
-    .nullish()
-    .transform((v) => {
-      if (!v) return "pending";
-      const lower = v.toLowerCase();
-      if (lower === "pending") return "pending";
-      if (lower === "in-review") return "in-review";
-      if (lower === "shortlisted") return "shortlisted";
-      if (lower === "interview") return "interview";
-      if (lower === "selected" || lower === "accepted") return "selected";
-      if (lower === "rejected") return "rejected";
-      return "pending";
-    }),
-  rejection_reason: z.string().optional().nullable(),
-  applied_at: z
-    .string()
-    .nullish()
-    .transform((v) => v ?? ""),
-});
+export const LearnerApplicationJobSchema = z
+  .object({
+    id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    title: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    company_name: z.string().optional().nullable(),
+    company_logo: z.string().optional().nullable(),
+    location: z.string().optional().nullable(),
+    job_type: z.string().optional().nullable(),
+    salary_range: z.string().optional().nullable(),
+    experience: z.string().optional().nullable(),
+  })
+  .passthrough();
+
+export const LearnerApplicationSchema = z
+  .object({
+    id: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+    job: z.union([JobSchema, LearnerApplicationJobSchema]),
+    resume_link: z.string().optional().nullable(),
+    cover_letter: z.string().optional().nullable(),
+    status: z
+      .string()
+      .nullish()
+      .transform((v) => {
+        if (!v) return "pending";
+        const lower = v.toLowerCase();
+        if (lower === "pending") return "pending";
+        if (lower === "in-review" || lower === "in_review") return "in-review";
+        if (lower === "shortlisted") return "shortlisted";
+        if (lower === "interview") return "interview";
+        if (lower === "selected" || lower === "accepted") return "selected";
+        if (lower === "rejected") return "rejected";
+        if (lower === "withdrawn") return "withdrawn";
+        return lower;
+      }),
+    rejection_reason: z.string().optional().nullable(),
+    applied_at: z
+      .string()
+      .nullish()
+      .transform((v) => v ?? ""),
+  })
+  .passthrough();
 
 export const LevelSchema = z.object({
   id: z
@@ -606,8 +628,26 @@ export const ApplyJobResponseSchema = DjangoResponse(
     .nullable(),
 );
 
-export const UpdateApplicantStatusResponseSchema =
-  DjangoResponse(JobApplicantSchema);
+export const UpdateApplicantStatusResponseSchema = DjangoResponse(
+  z.union([
+    JobApplicantSchema,
+    z
+      .object({
+        status: z.string().optional(),
+      })
+      .passthrough(),
+  ]),
+);
+
+export const ResubmitApplicationResponseSchema = DjangoResponse(
+  z
+    .object({
+      status: z.string().optional(),
+    })
+    .passthrough()
+    .optional()
+    .nullable(),
+);
 
 export const GenericResponseSchema = DjangoResponse(z.unknown());
 
