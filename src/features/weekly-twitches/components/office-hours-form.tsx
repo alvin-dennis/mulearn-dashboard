@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,9 +56,13 @@ function toTimeInput(time?: string | null): string {
 export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
   const { create, update } = useOfficeHoursMutations();
   const { data: igListData } = useInterestGroupsList();
-  const [posterFile, setPosterFile] = useState<File | null>(null);
-  const igOptions = (igListData?.response?.interestGroup ?? []).map((ig) => ({
-    value: ig.code ?? ig.id,
+  const [_posterFile, setPosterFile] = useState<File | null>(null);
+  const igList = useMemo(
+    () => igListData?.response?.interestGroup ?? [],
+    [igListData],
+  );
+  const igOptions = igList.map((ig) => ({
+    value: ig.id,
     label: ig.name,
   }));
 
@@ -78,6 +81,11 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
     if (!isOpen) return;
     setPosterFile(null);
     if (initialData) {
+      // interest_groups comes back from the API as IG names, but the
+      // multiselect (and the write payload) works with IG ids.
+      const selectedIds = (initialData.interest_groups ?? [])
+        .map((name) => igList.find((ig) => ig.name === name)?.id)
+        .filter((id): id is string => Boolean(id));
       reset({
         title: initialData.title,
         date: isoToInputDate(initialData.date),
@@ -86,12 +94,12 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
         designation: initialData.designation ?? "",
         description: initialData.description ?? "",
         link: initialData.link ?? "",
-        interest_groups: initialData.interest_groups ?? [],
+        interest_groups: selectedIds,
       });
     } else {
       reset(DEFAULTS);
     }
-  }, [isOpen, initialData, reset]);
+  }, [isOpen, initialData, reset, igList]);
 
   const onSubmit = async (values: OfficeHoursWrite) => {
     if (initialData) {
@@ -227,7 +235,7 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
 
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
-              Interest Groups
+              Interest Groups <span className="text-destructive">*</span>
             </p>
             <Controller
               control={control}

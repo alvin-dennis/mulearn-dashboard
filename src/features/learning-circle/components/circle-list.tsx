@@ -3,7 +3,7 @@
  *
  * 📍 src/features/learning-circle/components/circle-list.tsx
  *
- * Masonry-style grid of learning circles with refined search and empty states.
+ * Masonry-style grid of Learning Circles with refined search and empty states.
  */
 
 "use client";
@@ -105,7 +105,7 @@ export function CircleList() {
                 {activeInvitesCount === 1 ? "invitation" : "invitations"}!
               </h4>
               <p className="text-[12px] font-medium text-muted-foreground">
-                Accept or reject invitations to join learning circles.
+                Accept or reject invitations to join Learning Circles.
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export function CircleList() {
           description={
             searchQuery
               ? undefined
-              : "Be the first to create a learning circle and start collaborating with peers!"
+              : "Be the first to create a Learning Circle and start collaborating with peers!"
           }
         />
       )}
