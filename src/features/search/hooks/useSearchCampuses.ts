@@ -3,8 +3,16 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { searchCampuses } from "../api";
-import type { CampusSearchData, SearchType } from "../schemas";
+import type { CampusSearchData, CampusSortBy, SearchType } from "../schemas";
 import { searchKeys } from "./query-keys";
+
+export interface CampusSearchFilters {
+  zoneId?: string;
+  stateId?: string;
+  countryId?: string;
+  affiliationId?: string;
+  sortBy?: CampusSortBy;
+}
 
 export function useSearchCampuses(
   initialQuery = "",
@@ -14,17 +22,23 @@ export function useSearchCampuses(
   const [searchType, setSearchType] = useState<SearchType | undefined>(
     initialSearchType,
   );
+  const [filters, setFilters] = useState<CampusSearchFilters>({});
 
   const debouncedQuery = useDebounce(searchQuery, 800);
 
   const query = useInfiniteQuery({
-    queryKey: searchKeys.campuses(debouncedQuery, searchType),
+    queryKey: searchKeys.campuses(debouncedQuery, searchType, filters),
     queryFn: ({ pageParam = 1 }) =>
       searchCampuses({
         search: debouncedQuery,
         pageIndex: pageParam,
         perPage: 30,
         searchType,
+        zoneId: filters.zoneId,
+        stateId: filters.stateId,
+        countryId: filters.countryId,
+        affiliationId: filters.affiliationId,
+        sortBy: filters.sortBy,
       }),
     initialPageParam: 1,
     getNextPageParam: (
@@ -49,6 +63,8 @@ export function useSearchCampuses(
     setSearchQuery,
     searchType,
     setSearchType,
+    filters,
+    setFilters,
     campuses,
   };
 }
