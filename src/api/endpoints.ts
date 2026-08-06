@@ -727,6 +727,33 @@ export const endpoints = {
   },
 
   // ============================================
+  // Impact Projects Endpoints
+  // Base: /api/v1/dashboard/ig/<ig_id>/impact-projects/
+  // ============================================
+  impactProjects: {
+    /** GET - List impact projects for an IG | POST - Create one */
+    list: (igId: string) => `/api/v1/dashboard/ig/${igId}/impact-projects/`,
+    /** PATCH - Update | DELETE - Remove */
+    detail: (igId: string, projectId: string) =>
+      `/api/v1/dashboard/ig/${igId}/impact-projects/${projectId}/`,
+    /** POST - Upload/replace project image (multipart, field: image) */
+    image: (igId: string, projectId: string) =>
+      `/api/v1/dashboard/ig/${igId}/impact-projects/${projectId}/image/`,
+  },
+
+  // ============================================
+  // Community Partner Endpoints
+  // GET/POST  /api/v1/dashboard/community-partner/
+  // GET/PATCH/DELETE /api/v1/dashboard/community-partner/<partner_id>/
+  // ============================================
+  communityPartner: {
+    /** GET - List community partners (optional: ?ig_id=<id>) | POST - Create */
+    list: "/api/v1/dashboard/community-partner/",
+    /** GET/PATCH/DELETE - Community partner by ID */
+    detail: (id: string) => `/api/v1/dashboard/community-partner/${id}/`,
+  },
+
+  // ============================================
   // College Endpoints
   // ============================================
   college: {
@@ -1100,8 +1127,17 @@ export const endpoints = {
       /** PATCH - Update IG request status */
       requestUpdate: (id: string) => `/api/v1/dashboard/ig/request/${id}/`,
 
-      coverImage: (id: string) => `/api/v1/dashboard/ig/${id}/cover/`,
-      iconImage: (id: string) => `/api/v1/dashboard/ig/${id}/icon/`,
+      /** POST/DELETE - Upload/replace or remove an IG's cover image (multipart, field "image") */
+      coverImage: (id: string) => `/api/v1/dashboard/ig/${id}/cover-image/`,
+
+      /** POST/DELETE - Upload/replace or remove an IG's icon image (multipart, field "image") */
+      iconImage: (id: string) => `/api/v1/dashboard/ig/${id}/icon-image/`,
+
+      /** POST - Activate an IG (ADMIN, IG_LEAD) */
+      activate: (id: string) => `/api/v1/dashboard/ig/${id}/activate/`,
+
+      /** POST - Deactivate an IG (ADMIN, IG_LEAD) */
+      deactivate: (id: string) => `/api/v1/dashboard/ig/${id}/deactivate/`,
     },
   },
 
@@ -1245,6 +1281,26 @@ export const endpoints = {
     /** POST - Bulk assign from Excel upload */
     bulkAssignExcel: "/api/v1/dashboard/roles/bulk-assign-excel/",
   },
+
+  // ============================================
+  // Career Lab Endpoints
+  // ============================================
+  careerLab: {
+    hiring: {
+      /** GET - List hiring postings (paginated, filterable) | POST - Create */
+      list: "/api/v1/dashboard/career-lab/hiring/",
+      create: "/api/v1/dashboard/career-lab/hiring/",
+      /** GET/PUT/DELETE - Retrieve, update, delete a hiring posting */
+      detail: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      update: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      delete: (id: string) => `/api/v1/dashboard/career-lab/hiring/${id}/`,
+      /** GET - Download hiring postings as CSV */
+      csvExport: "/api/v1/dashboard/career-lab/hiring/csv/",
+      /** POST - Bulk import hiring postings from CSV (multipart, field "file") */
+      csvImport: "/api/v1/dashboard/career-lab/hiring/csv/",
+    },
+  },
+
   // channels
   channels: {
     List: "/api/v1/dashboard/channels/",
@@ -1480,17 +1536,6 @@ export const endpoints = {
       delete: (id: string) =>
         `/api/v1/dashboard/media-content/grab-your-superpowers/${id}/`,
     },
-  },
-
-  // ============================================
-  // Impact Projects Endpoints
-  // ============================================
-  impactProjects: {
-    list: (igId: string) => `/api/v1/dashboard/ig/${igId}/impact-projects/`,
-    detail: (igId: string, projectId: string) =>
-      `/api/v1/dashboard/ig/${igId}/impact-projects/${projectId}/`,
-    image: (igId: string, projectId: string) =>
-      `/api/v1/dashboard/ig/${igId}/impact-projects/${projectId}/image/`,
   },
 
   // ============================================
