@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Combobox } from "@/components/ui/combobox";
 import {
   Form,
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import {
   useCountries,
   useDistricts,

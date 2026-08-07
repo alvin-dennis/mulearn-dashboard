@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import type { OnboardingFormValues } from "../schemas";
-
 import { persist } from "zustand/middleware";
+import type { OnboardingFormValues } from "../schemas";
 
 interface DraftStore {
   draft: Partial<OnboardingFormValues> | null;
