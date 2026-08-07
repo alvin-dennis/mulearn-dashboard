@@ -129,21 +129,29 @@ export function RegisterClient({
 
   // ─── Details submit: diverges by role ───────────────────────
 
-  const handleDetailsSubmit = async (
-    values: {
-      // Student / Enabler
-      college?: string;
-      customCollege?: string;
-      // Student / Mentor (College type) / Student (Company type)
-      department?: string;
-      graduationYear?: number;
-      // Mentor / Student (Company type)
-      organization?: string;
-      customOrganization?: string;
-      organizationType?: "College" | "Company";
-      role?: string;
-    } & CompanyDetailsValues,
-  ) => {
+  const handleDetailsSubmit = async (values: {
+    // Student / Enabler
+    college?: string;
+    customCollege?: string;
+    // Student / Mentor (College type) / Student (Company type)
+    department?: string;
+    graduationYear?: number;
+    // Mentor / Student (Company type)
+    organization?: string;
+    customOrganization?: string;
+    organizationType?: "College" | "Company";
+    role?: string;
+    // Mentor-specific
+    mentorType?: "ig" | "company";
+    isFreelancer?: boolean;
+    // Company
+    companyName?: string;
+    companyDescription?: string;
+    industrySector?: string;
+    websiteLink?: string;
+    pocPhone?: string;
+    companyLocation?: string;
+  }) => {
     if (!basicData || !selectedRole) return;
 
     try {
@@ -272,6 +280,8 @@ export function RegisterClient({
     customOrganization?: string;
     organizationType?: "College" | "Company";
     role?: string;
+    mentorType?: "ig" | "company";
+    isFreelancer?: boolean;
   }) {
     if (!basicData || !selectedRole) return;
 
@@ -379,6 +389,37 @@ export function RegisterClient({
           graduation_year: values.graduationYear ?? null,
           is_student: false,
         });
+      }
+
+      // Persist the mentor tier choice, company name, and org UUID to localStorage
+      // so the "Apply to become a mentor" form can pre-fill them immediately.
+      if (typeof window !== "undefined") {
+        const tier =
+          values.isFreelancer || values.mentorType === "ig"
+            ? "IG_MENTOR"
+            : "COMPANY_MENTOR";
+        localStorage["mentor_onboarding_tier"] = tier;
+
+        // Resolve the company name and org UUID:
+        //  • custom entry → typed text (no UUID yet, pending admin review)
+        //  • existing company selected → look up title + use the ID as the UUID
+        let companyName = "";
+        let orgId = "";
+        if (values.organization === "others" && values.customOrganization) {
+          companyName = values.customOrganization;
+          // No UUID for pending-review orgs; org field will be omitted
+        } else if (values.organization) {
+          orgId = values.organization;
+          companyName =
+            companies.data?.find((c) => c.id === values.organization)?.title ??
+            "";
+        }
+        if (companyName) {
+          localStorage["mentor_onboarding_company"] = companyName;
+        }
+        if (orgId) {
+          localStorage["mentor_onboarding_org_id"] = orgId;
+        }
       }
     }
 

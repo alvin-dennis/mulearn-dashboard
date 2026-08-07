@@ -181,12 +181,25 @@ export function MentorHome() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            {application?.organization && (
+            {application?.mentor_tier && (
               <p>
                 Applying as{" "}
                 <span className="font-medium text-foreground">
-                  {application.organization}
+                  {application.mentor_tier === "IG_MENTOR"
+                    ? "IG Mentor"
+                    : application.mentor_tier === "COMPANY_MENTOR"
+                      ? "Company Mentor"
+                      : application.mentor_tier}
                 </span>
+                {application.organization ? (
+                  <>
+                    {" "}
+                    on behalf of{" "}
+                    <span className="font-medium text-foreground">
+                      {application.organization}
+                    </span>
+                  </>
+                ) : null}
                 .
               </p>
             )}

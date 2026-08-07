@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { OnboardingFormValues } from "../schemas";
 
 interface DraftStore {
@@ -7,8 +8,15 @@ interface DraftStore {
   clearDraft: () => void;
 }
 
-export const useOnboardingDraftStore = create<DraftStore>((set) => ({
-  draft: null,
-  setDraft: (draft) => set({ draft }),
-  clearDraft: () => set({ draft: null }),
-}));
+export const useOnboardingDraftStore = create<DraftStore>()(
+  persist(
+    (set) => ({
+      draft: null,
+      setDraft: (draft) => set({ draft }),
+      clearDraft: () => set({ draft: null }),
+    }),
+    {
+      name: "mentor-onboarding-draft",
+    },
+  ),
+);
