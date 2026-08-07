@@ -686,8 +686,9 @@ export interface IgSponsorshipMetrics {
 export interface EventTemplate {
   id: string;
   title: string;
-  description: string;
+  description?: string | null;
   event_type: string;
-  mode: string;
-  created_at: string;
+  default_duration_minutes?: number | null;
+  mode?: string | null;
+  created_at?: string | null;
 }

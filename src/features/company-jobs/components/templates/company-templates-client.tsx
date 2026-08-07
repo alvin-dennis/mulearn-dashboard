@@ -3,6 +3,7 @@
 import {
   CalendarCheck,
   CheckSquare,
+  Clock,
   Coins,
   Copy,
   Hash,
@@ -80,8 +81,9 @@ export function CompanyTemplatesPageClient() {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
   const [eventDescription, setEventDescription] = useState("");
-  const [eventType, setEventType] = useState("WORKSHOP");
+  const [eventType, setEventType] = useState("tech_talk");
   const [eventMode, setEventMode] = useState("ONLINE");
+  const [eventDuration, setEventDuration] = useState("90");
 
   const handleCreateTaskTemplate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,11 +139,13 @@ export function CompanyTemplatesPageClient() {
         title: eventTitle.trim(),
         description: eventDescription.trim(),
         event_type: eventType,
+        default_duration_minutes: Number(eventDuration) || 90,
         mode: eventMode,
       });
       toast.success("Event template created successfully!");
       setEventTitle("");
       setEventDescription("");
+      setEventDuration("90");
       setIsCreateEventOpen(false);
     } catch {
       toast.error("Failed to create event template.");
@@ -329,7 +333,7 @@ export function CompanyTemplatesPageClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="event-t-type">Event Type</Label>
                     <Select value={eventType} onValueChange={setEventType}>
@@ -337,14 +341,11 @@ export function CompanyTemplatesPageClient() {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="WORKSHOP">
-                          Hands-on Workshop
-                        </SelectItem>
-                        <SelectItem value="AMA">Mentor AMA / Q&A</SelectItem>
-                        <SelectItem value="TECH_TALK">
-                          Tech Talk / Webinar
-                        </SelectItem>
-                        <SelectItem value="HACKATHON">Hackathon</SelectItem>
+                        <SelectItem value="tech_talk">Tech Talk</SelectItem>
+                        <SelectItem value="workshop">Workshop</SelectItem>
+                        <SelectItem value="ama">Mentor AMA</SelectItem>
+                        <SelectItem value="hackathon">Hackathon</SelectItem>
+                        <SelectItem value="webinar">Webinar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -356,13 +357,23 @@ export function CompanyTemplatesPageClient() {
                         <SelectValue placeholder="Select mode" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ONLINE">Online (Virtual)</SelectItem>
-                        <SelectItem value="OFFLINE">
-                          Offline (In-Person)
-                        </SelectItem>
+                        <SelectItem value="ONLINE">Online</SelectItem>
+                        <SelectItem value="OFFLINE">Offline</SelectItem>
                         <SelectItem value="HYBRID">Hybrid</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-t-duration">Duration (mins)</Label>
+                    <Input
+                      id="event-t-duration"
+                      type="number"
+                      min="1"
+                      placeholder="90"
+                      value={eventDuration}
+                      onChange={(e) => setEventDuration(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -568,17 +579,33 @@ export function CompanyTemplatesPageClient() {
                   className="flex flex-col justify-between"
                 >
                   <CardHeader className="space-y-2 pb-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {template.event_type}
-                      </Badge>
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <Badge
-                        variant="secondary"
-                        className="text-xs flex items-center gap-1"
+                        variant="outline"
+                        className="text-xs uppercase font-medium"
                       >
-                        <Radio className="h-3 w-3" />
-                        {template.mode}
+                        {template.event_type.replace(/_/g, " ")}
                       </Badge>
+                      <div className="flex items-center gap-1.5">
+                        {template.default_duration_minutes && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs flex items-center gap-1 font-normal"
+                          >
+                            <Clock className="h-3 w-3" />
+                            {template.default_duration_minutes}m
+                          </Badge>
+                        )}
+                        {template.mode && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs flex items-center gap-1 font-normal"
+                          >
+                            <Radio className="h-3 w-3" />
+                            {template.mode}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <CardTitle className="text-base font-bold line-clamp-1">
                       {template.title}

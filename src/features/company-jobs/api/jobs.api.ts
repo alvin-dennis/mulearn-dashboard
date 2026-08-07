@@ -975,21 +975,37 @@ export async function fetchEventTemplates(): Promise<EventTemplate[]> {
     endpoints.company.eventTemplates,
     EventTemplatesListResponseSchema,
   );
-  return res.response ?? [];
+  if ("response" in res && res.response) {
+    if (Array.isArray(res.response)) return res.response;
+    if ("data" in res.response && Array.isArray(res.response.data)) {
+      return res.response.data;
+    }
+  }
+  if ("data" in res && Array.isArray(res.data)) {
+    return res.data;
+  }
+  if (Array.isArray(res)) {
+    return res;
+  }
+  return [];
 }
 
 export async function createEventTemplate(payload: {
   title: string;
-  description: string;
+  description?: string;
   event_type: string;
-  mode: string;
+  default_duration_minutes?: number;
+  mode?: string;
 }): Promise<EventTemplate> {
   const res = await apiClient.post(
     endpoints.company.eventTemplates,
     payload,
     EventTemplateDetailResponseSchema,
   );
-  return res.response;
+  if ("response" in res && res.response) {
+    return res.response as EventTemplate;
+  }
+  return res as unknown as EventTemplate;
 }
 
 export async function deleteEventTemplate(templateId: string): Promise<void> {

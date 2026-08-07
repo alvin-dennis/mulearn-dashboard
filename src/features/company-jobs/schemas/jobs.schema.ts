@@ -1489,17 +1489,39 @@ export const IgSponsorshipMetricsResponseSchema = DjangoResponse(
 
 // ─── Event Templates ─────────────────────────────────────────
 
-export const EventTemplateSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  event_type: z.string(),
-  mode: z.string(),
-  created_at: z.string(),
-});
+export const EventTemplateSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().optional().nullable().default(""),
+    event_type: z.string(),
+    default_duration_minutes: z.coerce.number().optional().nullable(),
+    mode: z.string().optional().nullable(),
+    created_at: z.string().optional().nullable(),
+  })
+  .passthrough();
 
-export const EventTemplatesListResponseSchema = DjangoResponse(
+export const EventTemplatesListResponseSchema = z.union([
+  DjangoResponse(
+    z.object({
+      data: z.array(EventTemplateSchema),
+    }),
+  ),
+  DjangoResponse(z.array(EventTemplateSchema)),
+  z.object({
+    response: z.object({
+      data: z.array(EventTemplateSchema),
+    }),
+  }),
+  z.object({
+    data: z.array(EventTemplateSchema),
+  }),
   z.array(EventTemplateSchema),
-);
-export const EventTemplateDetailResponseSchema =
-  DjangoResponse(EventTemplateSchema);
+]);
+
+export const EventTemplateDetailResponseSchema = z.union([
+  DjangoResponse(EventTemplateSchema),
+  DjangoResponse(z.object({ id: z.string() }).passthrough()),
+  DjangoResponse(z.object({}).passthrough()),
+  EventTemplateSchema,
+]);

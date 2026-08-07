@@ -77,9 +77,10 @@ export function useCreateEventTemplate() {
   return useMutation({
     mutationFn: (payload: {
       title: string;
-      description: string;
+      description?: string;
       event_type: string;
-      mode: string;
+      default_duration_minutes?: number;
+      mode?: string;
     }) => createEventTemplate(payload),
     onSuccess: () => {
       toast.success("Event template created");
