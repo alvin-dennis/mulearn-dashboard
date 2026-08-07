@@ -21,6 +21,7 @@ export type {
   PublicJobBySlug,
   PublicJobsBySlugData,
   RuleFormValues,
+  UpdateCompanyProfilePayload,
 } from "./jobs.schema";
 export {
   AdminSummaryResponseSchema,
@@ -113,6 +114,8 @@ export {
   TaskTemplatesListResponseSchema,
   TrackJobViewResponseSchema,
   UpdateApplicantStatusResponseSchema,
+  UpdateCompanyProfilePayloadSchema,
+  UpdateCompanyProfileResponseSchema,
   UpdateJobResponseSchema,
   UpdateRuleResponseSchema,
   UserCompanyStatusResponseSchema,

@@ -39,8 +39,10 @@ export {
 export {
   COMPANY_KEYS,
   useCompanyProfile,
+  usePatchCompanyProfile,
   usePublicCompanyJobs,
   usePublicCompanyProfile,
+  useUpdateCompanyProfile,
 } from "./use-company-profile";
 export {
   COMPANY_TASKS_KEYS,

@@ -334,18 +334,37 @@ export interface CompanyProfile {
   status?: string;
   logo?: string | null;
   description?: string | null;
+  short_pitch?: string | null;
   industry_sector?: string | null;
   website_link?: string | null;
   email?: string | null;
   slug: string;
   location?: string | null;
+  country?: string | null;
+  state?: string | null;
+  district?: string | null;
+  country_name?: string | null;
+  state_name?: string | null;
+  district_name?: string | null;
   // Extended fields from the full backend schema
   company_size?: string | null;
   linkedin_url?: string | null;
   legal_name?: string | null;
   verified_at?: string | null;
+  verified_since?: string | null;
+  verified_by?: string | null;
+  verification_requested_at?: string | null;
   created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
   rejection_reason?: string | null;
+  profile_completeness?: number | null;
+  collaboration_summary?: {
+    total_partnerships?: number;
+    campus_partnerships?: number;
+    ig_partnerships?: number;
+  } | null;
+  impact_summary?: unknown;
   // Frontend-only permission flags (not from API)
   can_edit_profile?: boolean;
   can_access_advanced_features?: boolean;
@@ -356,8 +375,8 @@ export interface CompanyProfile {
   founded_year?: number | null;
   remote_policy?: string | null;
   culture_text?: string | null;
-  tech_stack?: string[];
-  perks?: string[];
+  tech_stack?: string[] | null;
+  perks?: string[] | null;
   testimonials?: CompanyTestimonial[];
   gallery?: CompanyGalleryItem[];
   hire_count?: number;

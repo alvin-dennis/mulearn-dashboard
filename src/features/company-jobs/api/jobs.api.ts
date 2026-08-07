@@ -44,6 +44,7 @@ import {
   TaskTemplatesListResponseSchema,
   TrackJobViewResponseSchema,
   UpdateApplicantStatusResponseSchema,
+  UpdateCompanyProfileResponseSchema,
   UpdateJobResponseSchema,
   UserCompanyStatusResponseSchema,
 } from "../schemas";
@@ -124,6 +125,32 @@ export async function fetchCompanyProfile(): Promise<CompanyProfile> {
     status: "verified",
   };
 }
+
+/**
+ * PATCH company/profile/ (owner only)
+ * Update company profile fields (short_pitch, tech_stack, etc.)
+ */
+export async function updateCompanyProfile(
+  payload: Partial<CompanyProfile>,
+): Promise<{
+  data: Partial<CompanyProfile>;
+  message: string;
+}> {
+  const res = await apiClient.patch(
+    endpoints.company.profile,
+    payload,
+    UpdateCompanyProfileResponseSchema,
+  );
+  return {
+    data: res.response as Partial<CompanyProfile>,
+    message:
+      res.general_message ||
+      (res as { message?: { general?: string[] } }).message?.general?.[0] ||
+      "Company profile updated successfully.",
+  };
+}
+
+export const patchCompanyProfile = updateCompanyProfile;
 
 // ─── Jobs CRUD (§4) ─────────────────────────────────────────
 

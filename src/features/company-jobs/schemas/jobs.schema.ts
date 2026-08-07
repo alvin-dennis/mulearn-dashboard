@@ -654,6 +654,7 @@ export const GenericResponseSchema = DjangoResponse(z.unknown());
 // ─── Company Profile Response ───────────────────────────────
 
 export const CompanyTestimonialSchema = z.object({
+  id: z.string().optional(),
   learner_name: z
     .string()
     .optional()
@@ -669,28 +670,41 @@ export const CompanyTestimonialSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => v ?? ""),
+  author_avatar: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
+  author_level: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
+  author_ig: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
+  created_at: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
 });
 
-export const CompanyGalleryItemSchema = z.union([
-  z.string().transform((url) => ({
-    image_url: url,
-    caption: undefined,
-    sort_order: undefined,
-  })),
-  z.object({
-    image_url: z.string(),
-    caption: z
-      .string()
-      .optional()
-      .nullable()
-      .transform((v) => v ?? undefined),
-    sort_order: z
-      .number()
-      .optional()
-      .nullable()
-      .transform((v) => v ?? undefined),
-  }),
-]);
+export const CompanyGalleryItemSchema = z.object({
+  image_url: z.string(),
+  caption: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
+  sort_order: z
+    .number()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? undefined),
+});
 
 export const CompanyProfileSchema = z.object({
   id: z.string(),
@@ -698,12 +712,19 @@ export const CompanyProfileSchema = z.object({
   name: z.string(),
   logo: z.string().nullable().optional(),
   description: z.string().optional().nullable(),
+  short_pitch: z.string().optional().nullable(),
   industry_sector: z.string().optional().nullable(),
   website_link: z.string().optional().nullable(),
   email: z.string().optional().nullable(),
   slug: z.string(),
   status: z.string(),
   location: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  district: z.string().optional().nullable(),
+  country_name: z.string().optional().nullable(),
+  state_name: z.string().optional().nullable(),
+  district_name: z.string().optional().nullable(),
   legal_name: z.string().optional().nullable(),
   registration_number: z.string().optional().nullable(),
   tax_id: z.string().optional().nullable(),
@@ -712,8 +733,20 @@ export const CompanyProfileSchema = z.object({
   verification_document_url: z.string().optional().nullable(),
   verification_requested_at: z.string().optional().nullable(),
   verified_at: z.string().optional().nullable(),
+  verified_since: z.string().optional().nullable(),
   verified_by: z.string().optional().nullable(),
   rejection_reason: z.string().optional().nullable(),
+  profile_completeness: z.number().nullable().optional(),
+  collaboration_summary: z
+    .object({
+      total_partnerships: z.number().optional().default(0),
+      campus_partnerships: z.number().optional().default(0),
+      ig_partnerships: z.number().optional().default(0),
+    })
+    .passthrough()
+    .nullable()
+    .optional(),
+  impact_summary: z.unknown().nullable().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
   deleted_at: z.string().optional().nullable(),
@@ -779,11 +812,6 @@ export const PublicCompanyProfileSchema = CompanyProfileSchema.omit({
   verified_at: true,
   verified_by: true,
   rejection_reason: true,
-}).extend({
-  short_pitch: z.string().nullable().optional(),
-  district_name: z.string().nullable().optional(),
-  state_name: z.string().nullable().optional(),
-  country_name: z.string().nullable().optional(),
 });
 export type PublicCompanyProfile = z.infer<typeof PublicCompanyProfileSchema>;
 
@@ -831,22 +859,12 @@ export const PublicJobsBySlugDataSchema = z.object({
   data: z.array(PublicJobBySlugSchema),
   pagination: z
     .object({
-      count: z
-        .number()
-        .nullish()
-        .transform((v) => v ?? 0),
-      total_pages: z
-        .number()
-        .nullish()
-        .transform((v) => v ?? 1),
-      current_page: z
-        .number()
-        .nullish()
-        .transform((v) => v ?? 1),
-      per_page: z
-        .number()
-        .nullish()
-        .transform((v) => v ?? 10),
+      page: z.number().optional(),
+      current_page: z.number().optional(),
+      per_page: z.number().optional(),
+      total: z.number().optional(),
+      count: z.number().optional(),
+      total_pages: z.number().optional(),
       next: z.string().nullable().optional(),
       previous: z.string().nullable().optional(),
     })
@@ -855,8 +873,55 @@ export const PublicJobsBySlugDataSchema = z.object({
 });
 export type PublicJobsBySlugData = z.infer<typeof PublicJobsBySlugDataSchema>;
 
-export const PublicJobsBySlugResponseSchema = DjangoResponse(
-  PublicJobsBySlugDataSchema,
+export const PublicJobsBySlugResponseSchema = z.union([
+  DjangoResponse(PublicJobsBySlugDataSchema),
+  PublicJobsBySlugDataSchema.extend({
+    hasError: z.boolean().optional(),
+    statusCode: z.number().optional(),
+    message: z.unknown().optional(),
+    general_message: z.string().optional().nullable(),
+  }).transform((data) => ({
+    hasError: false,
+    statusCode: 200,
+    message: null,
+    general_message: null,
+    response: {
+      data: data.data,
+      pagination: data.pagination,
+    },
+  })),
+]);
+
+export const UpdateCompanyProfilePayloadSchema = z
+  .object({
+    name: z.string().optional(),
+    description: z.string().optional().nullable(),
+    short_pitch: z.string().optional().nullable(),
+    industry_sector: z.string().optional().nullable(),
+    website_link: z.string().optional().nullable(),
+    email: z.string().optional().nullable(),
+    location: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
+    state: z.string().optional().nullable(),
+    district: z.string().optional().nullable(),
+    company_size: z.string().optional().nullable(),
+    linkedin_url: z.string().optional().nullable(),
+    founded_year: z.number().optional().nullable(),
+    remote_policy: z.string().optional().nullable(),
+    culture_text: z.string().optional().nullable(),
+    tech_stack: z.array(z.string()).optional().nullable(),
+    perks: z.array(z.string()).optional().nullable(),
+    testimonials: z.array(CompanyTestimonialSchema).optional().nullable(),
+    gallery: z.array(CompanyGalleryItemSchema).optional().nullable(),
+    logo: z.string().optional().nullable(),
+  })
+  .passthrough();
+export type UpdateCompanyProfilePayload = z.infer<
+  typeof UpdateCompanyProfilePayloadSchema
+>;
+
+export const UpdateCompanyProfileResponseSchema = DjangoResponse(
+  z.union([CompanyProfileSchema, z.record(z.string(), z.unknown())]),
 );
 
 // ─── Form Schemas (per-step validation) ─────────────────────
