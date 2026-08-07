@@ -1,9 +1,11 @@
 export type {
+  ApplyMentorPayload,
   CompanyMentor,
   MentorStatus,
   NominateMentorPayload,
 } from "./company-mentor.api";
 export {
+  applyAsCompanyMentor,
   CompanyMentorSchema,
   fetchCompanyMentors,
   MENTOR_STATUSES,
@@ -23,7 +25,6 @@ export {
 } from "./eligibility-refs.api";
 export {
   addLearnerToShortlist,
-  applyAsCompanyMentor,
   applyToJob,
   approveJob,
   cancelCollaboration,

@@ -1015,17 +1015,3 @@ export async function deleteEventTemplate(templateId: string): Promise<void> {
     GenericResponseSchema,
   );
 }
-
-// ─── Company Mentor Apply (§12) ─────────────────────────────
-
-export async function applyAsCompanyMentor(payload: {
-  company_id?: string;
-  creator_code?: string;
-  bio?: string;
-}): Promise<void> {
-  await apiClient.post(
-    endpoints.company.mentorApply,
-    payload,
-    GenericResponseSchema,
-  );
-}
