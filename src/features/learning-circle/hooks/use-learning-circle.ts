@@ -703,7 +703,7 @@ export function useRsvpMeeting() {
     },
     onError: (error, meetingId) => {
       const msg = getApiResponseError(error, { fallback: "" }).toLowerCase();
-      const alreadyRsvpd = msg.includes("already") || msg.includes("rsvp");
+      const alreadyRsvpd = msg.includes("already") && msg.includes("rsvp");
 
       if (alreadyRsvpd) {
         // The user IS already RSVP'd but the list API has stale data returning

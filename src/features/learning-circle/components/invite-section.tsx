@@ -403,7 +403,9 @@ export function InviteManagerCard({
                         {isAccepted
                           ? "Accepted"
                           : isRejected
-                            ? "Revoked"
+                            ? invite.status?.toLowerCase() === "revoked"
+                              ? "Revoked"
+                              : "Rejected"
                             : "Pending"}
                       </span>
                       {!isAccepted && !isRejected && linkId && (

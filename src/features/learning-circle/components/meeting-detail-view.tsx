@@ -346,7 +346,6 @@ export function MeetingDetailView({
     (listMeetingInfo !== undefined
       ? listMeetingInfo.can_remove_rsvp !== false
       : true);
-  const _canCancelAttendance = false;
   const canLeave = hasJoined && isActive;
   const status = getStatus(meeting);
 

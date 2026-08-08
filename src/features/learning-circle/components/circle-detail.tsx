@@ -82,7 +82,9 @@ export function CircleDetail({ circleId }: CircleDetailProps) {
   const isPendingJoinHook = useIsCirclePendingJoin(circleId);
 
   const permissions = useCirclePermissions(circle ?? undefined, members);
-  const statusStr = ((circle as { status?: string })?.status || "").toLowerCase();
+  const statusStr = (
+    (circle as { status?: string })?.status || ""
+  ).toLowerCase();
   const isPendingJoin = statusStr === "pending" || isPendingJoinHook;
 
   const rsvpdMeetingIds = useMemo(() => {

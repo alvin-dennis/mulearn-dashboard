@@ -225,13 +225,14 @@ export function CircleCard({ circle, hideJoin = false }: CircleCardProps) {
   const isPendingJoinHook = useIsCirclePendingJoin(circle.id);
 
   const statusStr = (circle.status || "").toLowerCase();
-  const isPendingJoin = statusStr === "pending" || isPendingJoinHook;
   const isJoined =
     statusStr === "joined" ||
     statusStr === "lead" ||
     statusStr === "owner" ||
     circle.is_joined ||
     circle.is_creator;
+  const isPendingJoin =
+    !isJoined && (statusStr === "pending" || isPendingJoinHook);
   const canJoin = !hideJoin && !isJoined && !isPendingJoin;
 
   const memberCount = circle.total_members || circle.attendees?.length || 0;
