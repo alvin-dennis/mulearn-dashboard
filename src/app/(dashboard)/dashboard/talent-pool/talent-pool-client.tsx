@@ -340,7 +340,7 @@ export function TalentPoolPageClient() {
     skill: filters.skill,
     achievement: filters.achievement,
     task: filters.task,
-    sort_by: filters.sortBy,
+    sort_by: filters.sortBy || "-karma",
     page: pageIndex,
     per_page: 24,
   };

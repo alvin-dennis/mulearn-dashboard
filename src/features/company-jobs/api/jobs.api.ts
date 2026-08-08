@@ -497,7 +497,7 @@ export async function fetchLearnerDiscovery(
   if (params?.achievement) query.set("achievement", params.achievement);
   if (params?.task) query.set("task", params.task);
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sort_by) query.set("sort_by", params.sort_by);
+  if (params?.sort_by) query.set("sortBy", params.sort_by);
   if (params?.sort_order) query.set("sort_order", params.sort_order);
 
   const page = params?.page ?? params?.pageIndex;
