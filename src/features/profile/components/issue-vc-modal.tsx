@@ -59,7 +59,7 @@ export function IssueVCModal({
 
   const [overrideDID, setOverrideDID] = useState<string | null>(null);
 
-  const { achievement: achievementData, is_issued, vc_url } = achievement;
+  const { achievement: achievementData, vc_url } = achievement;
   const availableDIDs = didsData?.dids || [];
   const selectedDID = overrideDID ?? availableDIDs[0] ?? "";
   const issuedCredential =
@@ -73,14 +73,12 @@ export function IssueVCModal({
     const subjectInfo: VCSubjectInfo = {
       type: "Badge",
       did: selectedDID,
-      name: userName,
+      full_name: userName,
       email: userEmail,
     };
 
     const credentialInfo: VCCredentialInfo = {
-      course_name: achievementData.achievement_name,
       name: achievementData.achievement_name,
-      tags: achievementData.tags,
       description: achievementData.description || "",
     };
 
@@ -99,7 +97,7 @@ export function IssueVCModal({
 
   const renderContent = () => {
     // Viewing already issued VC
-    if (is_issued && vc_url && !issuedCredential) {
+    if (vc_url && !issuedCredential) {
       return (
         <div className="space-y-4">
           <div className="rounded-lg bg-success/10 p-4 text-center">
@@ -121,6 +119,12 @@ export function IssueVCModal({
               className="rounded-lg border"
             />
           </div>
+
+          {achievementData.description && (
+            <p className="text-center text-sm text-muted-foreground leading-relaxed">
+              {achievementData.description}
+            </p>
+          )}
 
           <div className="flex flex-wrap justify-center gap-2">
             <span className="rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
@@ -164,6 +168,12 @@ export function IssueVCModal({
               className="rounded-lg border"
             />
           </div>
+
+          {achievementData.description && (
+            <p className="text-center text-sm text-muted-foreground leading-relaxed">
+              {achievementData.description}
+            </p>
+          )}
 
           <div className="flex flex-wrap justify-center gap-2">
             <span className="rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
@@ -308,7 +318,7 @@ export function IssueVCModal({
 
   const renderFooter = () => {
     // Already issued or just issued - show close button
-    if (is_issued || issuedCredential) {
+    if (vc_url || issuedCredential) {
       return (
         <Button variant="secondary" onClick={() => handleOpenChange(false)}>
           Close
@@ -343,7 +353,7 @@ export function IssueVCModal({
   };
 
   const getTitle = () => {
-    if (is_issued && !issuedCredential) return "View Credential";
+    if (vc_url && !issuedCredential) return "View Credential";
     if (issuedCredential) return "Credential Issued";
     if (availableDIDs.length === 0) return "Link Your DID";
     return "Issue Verifiable Credential";
