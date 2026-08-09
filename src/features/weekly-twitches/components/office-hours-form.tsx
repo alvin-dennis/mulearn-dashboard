@@ -181,7 +181,9 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Performer</p>
+              <p className="text-sm font-medium text-foreground">
+                Performer <span className="text-destructive">*</span>
+              </p>
               <Input
                 className="rounded-xl border-border bg-background"
                 placeholder="e.g. Alice Thomas"
@@ -195,7 +197,9 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Designation</p>
+              <p className="text-sm font-medium text-foreground">
+                Designation <span className="text-destructive">*</span>
+              </p>
               <Input
                 className="rounded-xl border-border bg-background"
                 placeholder="e.g. Senior Developer"
@@ -210,13 +214,20 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Description</p>
+            <p className="text-sm font-medium text-foreground">
+              Description <span className="text-destructive">*</span>
+            </p>
             <Textarea
               className="rounded-xl border-border bg-background"
               placeholder="Session description..."
               rows={3}
               {...register("description")}
             />
+            {errors.description && (
+              <p className="text-xs text-destructive">
+                {errors.description.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -250,6 +261,11 @@ export function OfficeHoursForm({ isOpen, onClose, initialData }: Props) {
                 />
               )}
             />
+            {errors.interest_groups && (
+              <p className="text-xs text-destructive">
+                {errors.interest_groups.message}
+              </p>
+            )}
           </div>
 
           {/* TODO: Poster upload disabled — backend conflict */}
