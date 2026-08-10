@@ -232,3 +232,62 @@ export async function getMentorOverview() {
     { skipAuthRedirectOn403: true },
   );
 }
+
+// ─── Persona ─────────────────────────────────────────────────────────────────
+
+export interface PersonaScope {
+  scope_type: string;
+  scope_id: string;
+}
+
+export interface PersonaCurrent {
+  active_persona: "mentor" | "learner";
+  active_scope_type: string | null;
+  active_scope_id: string | null;
+  available_scopes: PersonaScope[];
+}
+
+export interface PersonaStatus {
+  active_persona: "mentor" | "learner";
+  active_scope_type: string | null;
+  active_scope_id: string | null;
+  active_scope_name: string | null;
+}
+
+export interface SwitchPersonaPayload {
+  persona: "mentor" | "learner";
+  scope_type?: string;
+  scope_id?: string;
+}
+
+const PersonaCurrentSchema = ApiResponseOf(z.unknown());
+const PersonaStatusSchema = ApiResponseOf(z.unknown());
+
+/** GET /mentor/persona/current/ — broad view with available_scopes list */
+export async function getPersonaCurrent(): Promise<PersonaCurrent> {
+  const res = await apiClient.get(
+    endpoints.mentor.personaCurrent,
+    PersonaCurrentSchema,
+    { skipAuthRedirectOn403: true },
+  );
+  return res.response as PersonaCurrent;
+}
+
+/** GET /mentor/persona/status/ — mentor-only display-ready status */
+export async function getPersonaStatus(): Promise<PersonaStatus> {
+  const res = await apiClient.get(
+    endpoints.mentor.personaStatus,
+    PersonaStatusSchema,
+    { skipAuthRedirectOn403: true },
+  );
+  return res.response as PersonaStatus;
+}
+
+/** POST /mentor/persona/switch/ — switch active persona */
+export async function switchPersona(
+  payload: SwitchPersonaPayload,
+): Promise<void> {
+  await apiClient.post(endpoints.mentor.personaSwitch, payload, z.unknown(), {
+    skipAuthRedirectOn403: true,
+  });
+}
