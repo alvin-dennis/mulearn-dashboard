@@ -8,6 +8,7 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -296,7 +297,7 @@ export function MentorHome() {
   const statCards = [
     {
       key: "active_mentees",
-      label: "Active Mentees",
+      label: "Active Learners",
       value: activeLearners,
       delta: 0,
       delta_type: "neutral" as const,
@@ -384,32 +385,39 @@ export function MentorHome() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Task Requests */}
-        <Card className="rounded-2xl border bg-card shadow-sm">
-          <CardHeader className="px-5 py-4">
-            <div className="flex flex-row items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-warning/10">
-                <BookOpen className="size-4 text-warning" />
-              </div>
-              <CardTitle className="text-base font-bold text-foreground">
-                Task Requests
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 pt-0">
-            {overviewLoading ? (
-              <Skeleton className="h-12 w-full rounded-lg" />
-            ) : (
-              <div className="flex gap-4 text-sm">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-warning">—</p>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                    Pending
-                  </p>
+        <Link
+          href="/dashboard/mentor/task-requests"
+          className="block outline-none hover:opacity-90 transition-opacity"
+        >
+          <Card className="rounded-2xl border bg-card shadow-sm h-full hover:border-primary/50 transition-colors">
+            <CardHeader className="px-5 py-4">
+              <div className="flex flex-row items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-warning/10">
+                  <BookOpen className="size-4 text-warning" />
                 </div>
+                <CardTitle className="text-base font-bold text-foreground">
+                  Task Requests
+                </CardTitle>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 pt-0">
+              {overviewLoading ? (
+                <Skeleton className="h-12 w-full rounded-lg" />
+              ) : (
+                <div className="flex gap-4 text-sm">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-warning">
+                      {pendingReviews}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
+                      Pending
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
         <EventCalendarCard
           events={flattenDashboardCalendar(calendarData)}
           isLoading={loadingCalendar}
@@ -469,7 +477,7 @@ export function MentorHome() {
         <CardContent className="px-5 pb-5 pt-0">
           {schedLoading ? (
             <div className="grid grid-cols-2 gap-2 md:grid-cols-7">
-              {["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map(
+              {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map(
                 (d, index) => (
                   <div
                     key={d}
