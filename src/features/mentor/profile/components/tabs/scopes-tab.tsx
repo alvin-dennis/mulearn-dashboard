@@ -23,8 +23,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTaskIgDropdown } from "@/features/mentor/tasks/hooks/use-mentor-tasks";
 import type { MentorApplication } from "@/features/mentor/onboarding/schemas";
+import { useTaskIgDropdown } from "@/features/mentor/tasks/hooks/use-mentor-tasks";
 import type { MentorOverview, MentorScope } from "@/features/mentor/types";
 
 interface ScopesTabProps {
