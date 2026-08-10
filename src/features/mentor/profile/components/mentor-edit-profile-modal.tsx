@@ -73,6 +73,15 @@ const MentorEditSchema = z.object({
     .array(z.string())
     .min(1, "You must mentor at least one Interest Group"),
   org: z.string().optional(),
+  linkedin: z
+    .string()
+    .trim()
+    .regex(
+      /^https?:\/\/(www\.)?linkedin\.com\/.*$/,
+      "Enter a valid LinkedIn URL",
+    )
+    .optional()
+    .or(z.literal("")),
   profile_pic: z.instanceof(File).optional(),
 });
 
@@ -121,6 +130,7 @@ export function MentorEditProfileModal({
         : [],
       preferred_ig_ids: mentorProfile.preferred_ig_ids ?? [],
       org: mentorProfile.org ?? "",
+      linkedin: mentorProfile.linkedin ?? mentorProfile.linkedin_url ?? "",
       profile_pic: undefined,
     },
   });
@@ -139,6 +149,7 @@ export function MentorEditProfileModal({
           : [],
         preferred_ig_ids: mentorProfile.preferred_ig_ids ?? [],
         org: mentorProfile.org ?? "",
+        linkedin: mentorProfile.linkedin ?? mentorProfile.linkedin_url ?? "",
         profile_pic: undefined,
       });
       setPreviewUrl(null);
@@ -150,6 +161,8 @@ export function MentorEditProfileModal({
     mentorProfile.expertise,
     mentorProfile.preferred_ig_ids,
     mentorProfile.org,
+    mentorProfile.linkedin,
+    mentorProfile.linkedin_url,
     form,
   ]);
 
@@ -196,12 +209,21 @@ export function MentorEditProfileModal({
       const isIgsChanged =
         JSON.stringify(values.preferred_ig_ids ?? []) !==
         JSON.stringify(mentorProfile.preferred_ig_ids ?? []);
+      const isLinkedinChanged =
+        values.linkedin !==
+        (mentorProfile.linkedin ?? mentorProfile.linkedin_url ?? "");
 
-      if (isAboutChanged || isExpertiseChanged || isIgsChanged) {
+      if (
+        isAboutChanged ||
+        isExpertiseChanged ||
+        isIgsChanged ||
+        isLinkedinChanged
+      ) {
         const payload: Partial<MentorProfileWrite> = {};
         if (isAboutChanged) payload.about = values.about ?? "";
         if (isExpertiseChanged) payload.expertise = newExpertise;
         if (isIgsChanged) payload.preferred_ig_ids = values.preferred_ig_ids;
+        if (isLinkedinChanged) payload.linkedin = values.linkedin ?? "";
 
         await updateMentorProfileMutation.mutateAsync(payload);
       }
@@ -313,6 +335,24 @@ export function MentorEditProfileModal({
                 )}
               />
 
+              {/* LinkedIn */}
+              <FormField
+                control={form.control}
+                name="linkedin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="https://www.linkedin.com/in/username"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Bio */}
               <FormField
                 control={form.control}
@@ -376,7 +416,7 @@ export function MentorEditProfileModal({
               {/* Affiliation */}
               <div className="space-y-2">
                 <div className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Company / Campus Affiliation
+                  Company
                 </div>
                 <TooltipProvider>
                   <Tooltip>

@@ -398,7 +398,7 @@ export function RegisterClient({
           values.isFreelancer || values.mentorType === "ig"
             ? "IG_MENTOR"
             : "COMPANY_MENTOR";
-        localStorage["mentor_onboarding_tier"] = tier;
+        localStorage.mentor_onboarding_tier = tier;
 
         // Resolve the company name and org UUID:
         //  • custom entry → typed text (no UUID yet, pending admin review)
@@ -415,10 +415,10 @@ export function RegisterClient({
             "";
         }
         if (companyName) {
-          localStorage["mentor_onboarding_company"] = companyName;
+          localStorage.mentor_onboarding_company = companyName;
         }
         if (orgId) {
-          localStorage["mentor_onboarding_org_id"] = orgId;
+          localStorage.mentor_onboarding_org_id = orgId;
         }
       }
     }
