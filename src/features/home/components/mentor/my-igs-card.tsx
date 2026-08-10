@@ -54,9 +54,13 @@ export function MyIgsCard() {
         ) : (
           <div className="flex flex-wrap gap-2">
             {igRoles.map((r) => (
-              <Badge key={r.id} variant="outline" className="text-sm">
+              <Link
+                key={r.id}
+                href={`/dashboard/interest-groups/${r.id}`}
+                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer shadow-sm"
+              >
                 {r.name}
-              </Badge>
+              </Link>
             ))}
           </div>
         )}
