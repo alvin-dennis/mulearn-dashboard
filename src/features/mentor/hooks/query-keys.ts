@@ -2,6 +2,10 @@ export const mentorKeys = {
   all: ["mentor"] as const,
   overview: () => [...mentorKeys.all, "overview"] as const,
   availability: () => [...mentorKeys.all, "availability"] as const,
+  persona: {
+    current: () => [...mentorKeys.all, "persona", "current"] as const,
+    status: () => [...mentorKeys.all, "persona", "status"] as const,
+  },
   // Public mentor endpoints (auth required, by mentor UUID)
   public: {
     profile: (mentorId: string) =>
