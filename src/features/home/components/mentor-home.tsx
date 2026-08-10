@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   AvailabilitySlotPicker,
   scheduleHasOverlap,
@@ -29,6 +30,7 @@ import {
   useMentorApplication,
   useMentorProfile,
 } from "@/features/mentor/onboarding/hooks/use-onboarding";
+import type { MentorApplication } from "@/features/mentor/onboarding/schemas";
 import type { WeeklySchedule } from "@/features/mentor/types";
 import { useDashboardCalendar, useMentorSessions } from "../hooks";
 import { flattenDashboardCalendar } from "../utils";
@@ -60,7 +62,8 @@ export function MentorHome() {
   );
 
   const { data: mentorProfile, isLoading: profileLoading } = useMentorProfile(
-    onboardingState === "rejected",
+    onboardingState === "rejected" ||
+      onboardingState === "pending_verification",
   );
 
   const {
@@ -86,6 +89,7 @@ export function MentorHome() {
 
   const [localSchedule, setLocalSchedule] = useState<WeeklySchedule>([]);
   const [savedSchedule, setSavedSchedule] = useState<WeeklySchedule>([]);
+  const [isEditingApplication, setIsEditingApplication] = useState(false);
 
   useEffect(() => {
     if (serverSchedule) {
@@ -98,7 +102,12 @@ export function MentorHome() {
   const hasOverlap = scheduleHasOverlap(localSchedule);
 
   // Step 1: wait for application to load
-  if (appLoading || (onboardingState === "rejected" && profileLoading)) {
+  if (
+    appLoading ||
+    ((onboardingState === "rejected" ||
+      onboardingState === "pending_verification") &&
+      profileLoading)
+  ) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-32 w-full" />
@@ -172,7 +181,7 @@ export function MentorHome() {
   // (Rejected applications already returned above with the rejection banner + reapply form.)
   if (!isVerified) {
     return (
-      <div className="mx-auto max-w-2xl py-8">
+      <div className="mx-auto max-w-2xl py-8 space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -180,7 +189,7 @@ export function MentorHome() {
               Application submitted
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
             {application?.mentor_tier && (
               <p>
                 Applying as{" "}
@@ -208,8 +217,44 @@ export function MentorHome() {
               decision is made. You can keep using μLearn as a learner in the
               meantime.
             </p>
+
+            <div className="flex items-center justify-between rounded-lg border p-4 mt-4">
+              <div className="space-y-0.5">
+                <label
+                  htmlFor="modify-application-switch"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Do you want to modify your application?
+                </label>
+                <p className="text-[13px] text-muted-foreground">
+                  Enable this to edit your submitted details.
+                </p>
+              </div>
+              <Switch
+                id="modify-application-switch"
+                checked={isEditingApplication}
+                onCheckedChange={setIsEditingApplication}
+              />
+            </div>
           </CardContent>
         </Card>
+
+        {isEditingApplication && (
+          <MentorOnboardingForm
+            existing={
+              {
+                ...(mentorProfile || {}),
+                id:
+                  mentorProfile?.id ??
+                  application?.id ??
+                  application?.mentor_id ??
+                  "",
+              } as MentorApplication
+            }
+            isEdit
+            isPendingEdit
+          />
+        )}
       </div>
     );
   }
