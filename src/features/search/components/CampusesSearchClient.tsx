@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -17,7 +18,7 @@ import {
   useStatesDropdown,
 } from "@/features/organizations/hooks";
 import { useInfiniteScroll, useSearchCampuses } from "../hooks";
-import type { CampusSortBy } from "../schemas";
+import type { CampusSortBy, SearchType } from "../schemas";
 import { CampusSearchCard } from "./CampusSearchCard";
 import { SearchInput } from "./SearchInput";
 import { SearchTabsClient } from "./SearchTabsClient";
@@ -31,6 +32,10 @@ const searchTabs = [
 const NONE = "__all__";
 
 export function CampusesSearchClient() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const {
     campuses,
     isLoading,
@@ -44,9 +49,33 @@ export function CampusesSearchClient() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useSearchCampuses();
+  } = useSearchCampuses(
+    searchParams.get("q") ?? "",
+    (searchParams.get("type") as SearchType | null) ?? undefined,
+    {
+      countryId: searchParams.get("countryId") ?? undefined,
+      stateId: searchParams.get("stateId") ?? undefined,
+      zoneId: searchParams.get("zoneId") ?? undefined,
+      affiliationId: searchParams.get("affiliationId") ?? undefined,
+      sortBy: (searchParams.get("sortBy") as CampusSortBy | null) ?? undefined,
+    },
+  );
 
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("q", searchQuery);
+    if (searchType) params.set("type", searchType);
+    if (filters.countryId) params.set("countryId", filters.countryId);
+    if (filters.stateId) params.set("stateId", filters.stateId);
+    if (filters.zoneId) params.set("zoneId", filters.zoneId);
+    if (filters.affiliationId)
+      params.set("affiliationId", filters.affiliationId);
+    if (filters.sortBy) params.set("sortBy", filters.sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [searchQuery, searchType, filters, pathname, router]);
 
   const loadMoreRef = useInfiniteScroll({
     onLoadMore: fetchNextPage,
@@ -228,6 +257,7 @@ export function CampusesSearchClient() {
               <CampusSearchCard
                 key={campus.id || campus.code}
                 campus={campus}
+                searchType={searchType}
               />
             ))}
           </div>
