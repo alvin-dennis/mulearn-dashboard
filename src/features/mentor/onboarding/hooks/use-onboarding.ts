@@ -12,6 +12,8 @@ import {
   updateMentorApplication,
   updateMentorProfile,
 } from "../api/onboarding.api";
+import { changeCompany } from "@/features/mentor/api/mentor.api";
+import type { ChangeCompanyPayload } from "@/features/mentor/api/mentor.api";
 import type { MentorProfileWrite, OnboardingState } from "../schemas";
 
 const ONBOARDING_KEYS = {
@@ -136,3 +138,24 @@ export function useUpdateMentorProfile() {
 
 // ─── Backward compat alias ────────────────────────────────────────────────────
 export const useMentorApplication = useMentorApplicationStatus;
+
+// ─── POST /mentor/change-company/ ─────────────────────────────────────────────
+export function useChangeCompany() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ChangeCompanyPayload) => changeCompany(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ONBOARDING_KEYS.all });
+      void queryClient.invalidateQueries({ queryKey: mentorKeys.overview() });
+      toast.success(
+        "Company change request submitted. It is pending admin approval.",
+      );
+    },
+    onError: (error) =>
+      toast.error(
+        getApiResponseError(error, {
+          fallback: "Failed to submit company change request",
+        }),
+      ),
+  });
+}
