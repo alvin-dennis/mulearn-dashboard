@@ -156,6 +156,7 @@ export function PublicProfilePageClient({
               <Achievements
                 muid={profile.muid}
                 userName={profile.full_name}
+                userEmail={profile?.email}
                 isOwnProfile={isOwnProfile}
               />
             )}
