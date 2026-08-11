@@ -305,3 +305,40 @@ export async function changeCompany(
     skipAuthRedirectOn403: true,
   });
 }
+
+// ─── Profile Completion ───────────────────────────────────────────────────────
+
+export interface ProfileCompletionChecklist {
+  about: boolean;
+  expertise: boolean;
+  hours: boolean;
+  linkedin: boolean;
+  preferred_igs: boolean;
+}
+
+export interface ProfileCompletionData {
+  percentage: number;
+  checklist: ProfileCompletionChecklist;
+}
+
+const ProfileCompletionSchema = ApiResponseOf(
+  z.object({
+    percentage: z.number(),
+    checklist: z.object({
+      about: z.boolean(),
+      expertise: z.boolean(),
+      hours: z.boolean(),
+      linkedin: z.boolean(),
+      preferred_igs: z.boolean(),
+    }),
+  }),
+);
+
+/** GET /mentor/profile/completion/ — profile fill percentage + checklist */
+export async function getProfileCompletion(): Promise<ProfileCompletionData> {
+  const { response } = await apiClient.get(
+    endpoints.mentor.profileCompletion,
+    ProfileCompletionSchema,
+  );
+  return response as ProfileCompletionData;
+}

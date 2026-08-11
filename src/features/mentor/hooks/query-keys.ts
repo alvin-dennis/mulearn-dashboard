@@ -2,6 +2,7 @@ export const mentorKeys = {
   all: ["mentor"] as const,
   overview: () => [...mentorKeys.all, "overview"] as const,
   availability: () => [...mentorKeys.all, "availability"] as const,
+  profileCompletion: () => [...mentorKeys.all, "profile-completion"] as const,
   persona: {
     current: () => [...mentorKeys.all, "persona", "current"] as const,
     status: () => [...mentorKeys.all, "persona", "status"] as const,
