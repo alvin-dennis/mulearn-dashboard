@@ -17,12 +17,13 @@ export interface CampusSearchFilters {
 export function useSearchCampuses(
   initialQuery = "",
   initialSearchType?: SearchType,
+  initialFilters: CampusSearchFilters = {},
 ) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [searchType, setSearchType] = useState<SearchType | undefined>(
     initialSearchType,
   );
-  const [filters, setFilters] = useState<CampusSearchFilters>({});
+  const [filters, setFilters] = useState<CampusSearchFilters>(initialFilters);
 
   const debouncedQuery = useDebounce(searchQuery, 800);
 

@@ -56,9 +56,9 @@ export const OfficeHoursWriteSchema = z.object({
   title: z.string().min(1, "Title is required").max(300),
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
-  performer: z.string().max(200).optional().or(z.literal("")),
-  designation: z.string().max(200).optional().or(z.literal("")),
-  description: z.string().optional(),
+  performer: z.string().min(1, "Performer is required").max(200),
+  designation: z.string().min(1, "Designation is required").max(200),
+  description: z.string().min(1, "Description is required"),
   link: z
     .string()
     .min(1, "Meeting link is required")
@@ -102,7 +102,7 @@ export const CampusContentWriteSchema = z.object({
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
   zone: ZoneSchema.optional(),
-  description: z.string().optional(),
+  description: z.string().min(1, "Description is required"),
   link: z
     .string()
     .min(1, "Streaming link is required")
@@ -139,9 +139,9 @@ export const GysWriteSchema = z.object({
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
   campus: z.string().min(1, "Campus is required").max(200),
-  performer: z.string().max(200).optional().or(z.literal("")),
-  designation: z.string().max(200).optional().or(z.literal("")),
-  description: z.string().optional(),
+  performer: z.string().min(1, "Performer is required").max(200),
+  designation: z.string().min(1, "Designation is required").max(200),
+  description: z.string().min(1, "Description is required"),
   link: z
     .string()
     .min(1, "Meeting link is required")
