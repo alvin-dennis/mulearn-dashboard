@@ -291,3 +291,17 @@ export async function switchPersona(
     skipAuthRedirectOn403: true,
   });
 }
+
+/** POST /mentor/change-company/ — request a company affiliation change */
+export interface ChangeCompanyPayload {
+  org_id: string;
+  reason?: string;
+}
+
+export async function changeCompany(
+  payload: ChangeCompanyPayload,
+): Promise<void> {
+  await apiClient.post(endpoints.mentor.changeCompany, payload, z.unknown(), {
+    skipAuthRedirectOn403: true,
+  });
+}
