@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { ChangeCompanyPayload } from "@/features/mentor/api/mentor.api";
+import { changeCompany } from "@/features/mentor/api/mentor.api";
 import { mentorKeys } from "@/features/mentor/hooks";
 import { mentorTaskKeys } from "@/features/mentor/tasks/hooks/use-mentor-tasks";
 import { getApiResponseError } from "@/hooks/use-get-error";
@@ -12,8 +14,6 @@ import {
   updateMentorApplication,
   updateMentorProfile,
 } from "../api/onboarding.api";
-import { changeCompany } from "@/features/mentor/api/mentor.api";
-import type { ChangeCompanyPayload } from "@/features/mentor/api/mentor.api";
 import type { MentorProfileWrite, OnboardingState } from "../schemas";
 
 const ONBOARDING_KEYS = {
