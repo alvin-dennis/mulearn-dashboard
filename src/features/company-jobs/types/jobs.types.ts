@@ -405,7 +405,6 @@ export interface JobsListParams {
   page?: number;
   per_page?: number;
   sort_by?: string;
-  sort_order?: "asc" | "desc";
   job_type?: string;
 }
 
