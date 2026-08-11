@@ -160,7 +160,10 @@ export async function fetchJobs(
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
 
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
@@ -355,7 +358,10 @@ export async function fetchPublicJobs(
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
@@ -384,7 +390,10 @@ export async function fetchLearnerApplications(params?: {
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
@@ -446,7 +455,10 @@ export async function fetchJobApplicants(
   const query = new URLSearchParams();
 
   if (params?.status) query.set("status", params.status);
-  if (params?.page !== undefined) query.set("page", String(params.page));
+  if (params?.page !== undefined) {
+    query.set("page", String(params.page));
+    query.set("pageIndex", String(params.page));
+  }
   if (params?.per_page !== undefined)
     query.set("per_page", String(params.per_page));
   if (params?.search?.trim()) query.set("search", params.search.trim());
@@ -699,7 +711,10 @@ export async function fetchPendingJobs(
 ): Promise<JobsListResponse> {
   const query = new URLSearchParams();
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
