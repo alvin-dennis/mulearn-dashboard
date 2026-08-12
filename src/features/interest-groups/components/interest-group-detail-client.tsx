@@ -548,8 +548,8 @@ export function InterestGroupDetailClient() {
               </div>
             )}
 
-            {/* Community Partners */}
-            {group.community_partners &&
+            {/* ── Community Partners ── */}
+            {/*   {group.community_partners &&
               group.community_partners.length > 0 && (
                 <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-sm">
                   <div className="border-b border-border/50 bg-muted/30 px-4 sm:px-6 py-3 sm:py-4">
@@ -664,7 +664,7 @@ export function InterestGroupDetailClient() {
                     })}
                   </div>
                 </div>
-              )}
+              )} */}
 
             {/* Support / Help Box */}
             <div className="rounded-3xl bg-linear-to-br from-muted/50 to-muted/10 p-4 sm:p-6 border border-border/50 text-center">
