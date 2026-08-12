@@ -28,14 +28,7 @@ export const mentorPageTours: readonly PageTourConfig[] = [
         id: "mentees-search",
         elementId: "page:mentor-mentees:search",
         title: "Find a Mentee",
-        description: "Search by name or MU ID, or join an ongoing session.",
-      },
-      {
-        id: "mentees-join-session",
-        elementId: "page:mentor-mentees:join-session",
-        title: "Join a Session",
-        description:
-          "Enter a session ID here to jump straight into an active mentoring session.",
+        description: "Search by name or MU ID.",
       },
       {
         id: "mentees-table",
