@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,15 @@ export function MentorHome() {
     isLoading: appLoading,
     error: appError,
   } = useMentorApplication();
+
+  // Read mentor prefill params forwarded from the registration flow via URL.
+  // Must be called unconditionally at the top level (Rules of Hooks).
+  const searchParams = useSearchParams();
+  const prefillData = {
+    mentor_tier: searchParams.get("mentor_tier") ?? undefined,
+    company: searchParams.get("mentor_company") ?? undefined,
+    org: searchParams.get("mentor_org_id") ?? undefined,
+  };
 
   const onboardingState = deriveOnboardingState(
     application,
@@ -121,7 +131,7 @@ export function MentorHome() {
   if (onboardingState === "not_applied") {
     return (
       <div className="mx-auto max-w-2xl py-8">
-        <MentorOnboardingForm />
+        <MentorOnboardingForm prefillData={prefillData} />
       </div>
     );
   }

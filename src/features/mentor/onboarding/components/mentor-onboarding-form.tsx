@@ -46,6 +46,15 @@ interface MentorOnboardingFormProps {
   isEdit?: boolean;
   isReapply?: boolean;
   isPendingEdit?: boolean;
+  /**
+   * Prefill data forwarded from the registration flow via URL params.
+   * Replaces the old localStorage approach to satisfy the Husky no-localStorage rule.
+   */
+  prefillData?: {
+    mentor_tier?: string;
+    company?: string;
+    org?: string;
+  };
 }
 
 export function MentorOnboardingForm({
@@ -53,6 +62,7 @@ export function MentorOnboardingForm({
   isEdit = false,
   isReapply = false,
   isPendingEdit = false,
+  prefillData,
 }: MentorOnboardingFormProps) {
   const { data: igList = [] } = useInterestGroupsList();
   const { data: companies = [] } = useCompanies();
@@ -63,21 +73,12 @@ export function MentorOnboardingForm({
 
   const isPending = isSubmitting || isUpdating;
 
-  // Read the mentor tier, company name, and org UUID the user chose during
-  // onboarding registration. All three are written to localStorage by
-  // register-client right after sign-up and cleared here once consumed.
-  const savedOnboardingTier =
-    typeof window !== "undefined"
-      ? localStorage.getItem("mentor_onboarding_tier")
-      : null;
-  const savedOnboardingCompany =
-    typeof window !== "undefined"
-      ? localStorage.getItem("mentor_onboarding_company")
-      : null;
-  const savedOnboardingOrgId =
-    typeof window !== "undefined"
-      ? localStorage.getItem("mentor_onboarding_org_id")
-      : null;
+  // Read mentor prefill data from the prop (forwarded via URL params from
+  // register-client.tsx → interests-client.tsx → mentor-home.tsx).
+  // The old localStorage approach was replaced to satisfy the Husky rule.
+  const savedOnboardingTier = prefillData?.mentor_tier ?? null;
+  const savedOnboardingCompany = prefillData?.company ?? null;
+  const savedOnboardingOrgId = prefillData?.org ?? null;
 
   // Draft must be declared BEFORE defaultValues so it's in scope when used below.
   const {
@@ -169,9 +170,7 @@ export function MentorOnboardingForm({
     clearDraft();
     // On a successful reapply the old snapshot is no longer needed.
     if (isReapply) clearSnapshot();
-    localStorage.removeItem("mentor_onboarding_tier");
-    localStorage.removeItem("mentor_onboarding_company");
-    localStorage.removeItem("mentor_onboarding_org_id");
+    // No localStorage cleanup needed — prefill data now travels via URL params.
   };
 
   function onSubmit(values: OnboardingFormValues) {
