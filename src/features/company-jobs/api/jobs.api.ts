@@ -160,15 +160,17 @@ export async function fetchJobs(
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
 
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
 
   if (params?.search?.trim()) query.set("search", params.search.trim());
   const sortBy = params?.sort_by ?? params?.sortBy;
-  if (sortBy) query.set("sort_by", sortBy);
-  if (params?.sort_order) query.set("sort_order", params.sort_order);
+  if (sortBy) query.set("sortBy", sortBy);
   if (params?.job_type) query.set("job_type", params.job_type);
 
   const queryString = query.toString();
@@ -355,12 +357,15 @@ export async function fetchPublicJobs(
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
   const sortBy = params?.sort_by ?? params?.sortBy;
-  if (sortBy) query.set("sort_by", sortBy);
+  if (sortBy) query.set("sortBy", sortBy);
   if (params?.job_type) query.set("job_type", params.job_type);
 
   const queryString = query.toString();
@@ -384,12 +389,15 @@ export async function fetchLearnerApplications(params?: {
   const query = new URLSearchParams();
 
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
   const sortBy = params?.sort_by ?? params?.sortBy;
-  if (sortBy) query.set("sort_by", sortBy);
+  if (sortBy) query.set("sortBy", sortBy);
 
   const queryString = query.toString();
   const url = queryString
@@ -446,7 +454,10 @@ export async function fetchJobApplicants(
   const query = new URLSearchParams();
 
   if (params?.status) query.set("status", params.status);
-  if (params?.page !== undefined) query.set("page", String(params.page));
+  if (params?.page !== undefined) {
+    query.set("page", String(params.page));
+    query.set("pageIndex", String(params.page));
+  }
   if (params?.per_page !== undefined)
     query.set("per_page", String(params.per_page));
   if (params?.search?.trim()) query.set("search", params.search.trim());
@@ -497,7 +508,7 @@ export async function fetchLearnerDiscovery(
   if (params?.achievement) query.set("achievement", params.achievement);
   if (params?.task) query.set("task", params.task);
   if (params?.search?.trim()) query.set("search", params.search.trim());
-  if (params?.sort_by) query.set("sort_by", params.sort_by);
+  if (params?.sort_by) query.set("sortBy", params.sort_by);
   if (params?.sort_order) query.set("sort_order", params.sort_order);
 
   const page = params?.page ?? params?.pageIndex;
@@ -699,13 +710,15 @@ export async function fetchPendingJobs(
 ): Promise<JobsListResponse> {
   const query = new URLSearchParams();
   const page = params?.page ?? params?.pageIndex;
-  if (page !== undefined) query.set("page", String(page));
+  if (page !== undefined) {
+    query.set("page", String(page));
+    query.set("pageIndex", String(page));
+  }
   const perPage = params?.per_page ?? params?.perPage;
   if (perPage !== undefined) query.set("per_page", String(perPage));
   if (params?.search?.trim()) query.set("search", params.search.trim());
   const sortBy = params?.sort_by ?? params?.sortBy;
-  if (sortBy) query.set("sort_by", sortBy);
-  if (params?.sort_order) query.set("sort_order", params.sort_order);
+  if (sortBy) query.set("sortBy", sortBy);
   if (params?.job_type) query.set("job_type", params.job_type);
 
   const qs = query.toString();
