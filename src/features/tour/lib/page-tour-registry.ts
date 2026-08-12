@@ -12,12 +12,12 @@
  * the sidebar-shell home tour (`TOUR_STEP_REGISTRY`/`useTour`).
  */
 
-import { studentPageTours } from "../steps/pages/student";
-import { mentorPageTours } from "../steps/pages/mentor";
+import { campusPageTours } from "../steps/pages/campus";
 import { companyPageTours } from "../steps/pages/company";
 import { igLeadPageTours } from "../steps/pages/ig-lead";
 import { internPageTours } from "../steps/pages/intern";
-import { campusPageTours } from "../steps/pages/campus";
+import { mentorPageTours } from "../steps/pages/mentor";
+import { studentPageTours } from "../steps/pages/student";
 import type { PageTourConfig } from "../types";
 
 const ALL_PAGE_TOURS: readonly PageTourConfig[] = [

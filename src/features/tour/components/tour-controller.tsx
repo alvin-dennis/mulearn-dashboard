@@ -9,8 +9,8 @@
  * manages its own overlay DOM; this just wires up the launch-condition hook.
  */
 
-import type { TourCookiePayload } from "../types";
 import { usePageTour, useTour } from "../hooks/use-tour";
+import type { TourCookiePayload } from "../types";
 
 interface TourControllerProps {
   initialState: TourCookiePayload;

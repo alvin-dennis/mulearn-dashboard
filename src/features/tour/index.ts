@@ -8,10 +8,10 @@ export {
   TOUR_VERSIONS,
 } from "./constants";
 export {
+  usePageTour,
   useReplayPageTour,
   useReplayTour,
   useTour,
-  usePageTour,
 } from "./hooks/use-tour";
 export { buildSteps } from "./lib/build-steps";
 export {
