@@ -333,6 +333,7 @@ export function ProfilePageClient() {
               <Achievements
                 muid={profile.muid}
                 userName={profile.full_name}
+                userEmail={editableProfile?.email}
                 isOwnProfile={true}
               />
             )}
