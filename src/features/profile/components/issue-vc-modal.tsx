@@ -90,7 +90,8 @@ export function IssueVCModal({
         subjectInfo,
         credentialInfo,
         templateId,
-        achievementId: achievement.id,
+
+        achievementId: achievementData.id,
       },
       { onSuccess: () => onSuccess?.() },
     );
