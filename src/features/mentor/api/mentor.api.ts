@@ -311,7 +311,7 @@ export async function changeCompany(
 export interface ProfileCompletionChecklist {
   about: boolean;
   expertise: boolean;
-  hours: boolean;
+  hours?: boolean;
   linkedin: boolean;
   preferred_igs: boolean;
 }
@@ -327,7 +327,7 @@ const ProfileCompletionSchema = ApiResponseOf(
     checklist: z.object({
       about: z.boolean(),
       expertise: z.boolean(),
-      hours: z.boolean(),
+      hours: z.boolean().optional(),
       linkedin: z.boolean(),
       preferred_igs: z.boolean(),
     }),
