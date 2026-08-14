@@ -304,7 +304,6 @@ function RosterTable({
 // ─── Public component ─────────────────────────────────────────────────────────
 
 export function MentorRosterTab() {
-  const [tierFilter, setTierFilter] = useState<string>("all");
   const [lowRating, setLowRating] = useState(false);
   const [page, setPage] = useState(1);
   const [deactivateFor, setDeactivateFor] = useState<MentorRosterItem | null>(
@@ -312,16 +311,10 @@ export function MentorRosterTab() {
   );
 
   const { data, isLoading } = useMentorRoster({
-    mentor_tier: tierFilter === "all" ? undefined : tierFilter,
     low_rating: lowRating || undefined,
     page,
     per_page: PER_PAGE,
   });
-
-  function handleTierChange(value: string) {
-    setTierFilter(value);
-    setPage(1);
-  }
 
   function handleLowRatingToggle() {
     setLowRating((prev) => !prev);
@@ -333,20 +326,6 @@ export function MentorRosterTab() {
       <div className="space-y-4">
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3">
-          <Select value={tierFilter} onValueChange={handleTierChange}>
-            <SelectTrigger className="w-48" id="roster-tier-filter">
-              <SelectValue placeholder="All tiers" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All tiers</SelectItem>
-              {MENTOR_TIERS.map((tier) => (
-                <SelectItem key={tier} value={tier}>
-                  {TIER_LABELS[tier] ?? tier}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <Button
             id="roster-low-rating-toggle"
             variant={lowRating ? "default" : "outline"}
@@ -360,13 +339,12 @@ export function MentorRosterTab() {
             </span>
           </Button>
 
-          {(tierFilter !== "all" || lowRating) && (
+          {lowRating && (
             <Button
               variant="ghost"
               size="sm"
               className="text-muted-foreground"
               onClick={() => {
-                setTierFilter("all");
                 setLowRating(false);
                 setPage(1);
               }}
