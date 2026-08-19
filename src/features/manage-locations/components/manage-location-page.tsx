@@ -174,6 +174,16 @@ function LocationContent() {
   const showCountryField = activeTab === "states";
   const showStateField = activeTab === "zones";
 
+  const readOnlyCountry =
+    editingItem && (activeTab === "zones" || activeTab === "districts")
+      ? ((editingItem as LocationRow & { country?: string | null }).country ??
+        "—")
+      : null;
+  const readOnlyState =
+    editingItem && activeTab === "districts"
+      ? ((editingItem as LocationRow & { state?: string | null }).state ?? "—")
+      : null;
+
   const needsCountry = open && activeTab === "states";
   const needsState = open && activeTab === "zones";
   const needsZone = open && activeTab === "districts";
@@ -512,6 +522,42 @@ function LocationContent() {
                 {...register("label")}
               />
             </div>
+
+            {/* Country (read-only context, derived from the parent chain) */}
+            {readOnlyCountry !== null && (
+              <div className="space-y-1">
+                <label
+                  htmlFor="location-country-readonly"
+                  className="text-sm text-muted-foreground"
+                >
+                  Country
+                </label>
+                <Input
+                  id="location-country-readonly"
+                  value={readOnlyCountry}
+                  disabled
+                  readOnly
+                />
+              </div>
+            )}
+
+            {/* State (read-only context, derived from the parent chain) */}
+            {readOnlyState !== null && (
+              <div className="space-y-1">
+                <label
+                  htmlFor="location-state-readonly"
+                  className="text-sm text-muted-foreground"
+                >
+                  State
+                </label>
+                <Input
+                  id="location-state-readonly"
+                  value={readOnlyState}
+                  disabled
+                  readOnly
+                />
+              </div>
+            )}
 
             {/* Country */}
             {showCountryField && (
