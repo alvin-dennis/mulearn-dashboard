@@ -76,17 +76,16 @@ export function OfficeHoursCards() {
             </SelectContent>
           </Select>
           <Select
-            value={sortBy || "default"}
+            value={sortBy || undefined}
             onValueChange={(v) => {
               setPage(1);
-              setSortBy(v === "default" ? "" : v);
+              setSortBy(v);
             }}
           >
             <SelectTrigger className="w-[170px] rounded-xl border-border bg-background">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="default">Default order</SelectItem>
               <SelectItem value="date">Date (Soonest first)</SelectItem>
               <SelectItem value="-date">Date (Latest first)</SelectItem>
               <SelectItem value="time">Time (Earliest first)</SelectItem>
