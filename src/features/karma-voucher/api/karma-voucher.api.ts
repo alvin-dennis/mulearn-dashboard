@@ -55,8 +55,6 @@ export async function deleteKarmaVoucher(id: string): Promise<void> {
 
 // ─── Bulk Import Vouchers (XLSX) ────────────────────────────────────────────
 
-const EMPTY_IMPORT_RESULT: BulkImportResponse = { Success: [], Failed: [] };
-
 export async function importVouchers(file: File): Promise<BulkImportResponse> {
   const formData = new FormData();
   formData.append("voucher_log", file);
@@ -69,7 +67,8 @@ export async function importVouchers(file: File): Promise<BulkImportResponse> {
       { isFormData: true },
     );
 
-    return response.response || response.data || EMPTY_IMPORT_RESULT;
+    const nestedResult = response.response || response.data;
+    return nestedResult ?? BulkImportResponseSchema.parse(response);
   } catch (error) {
     if (
       error instanceof ApiError &&
