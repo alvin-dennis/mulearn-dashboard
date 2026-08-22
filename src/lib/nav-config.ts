@@ -41,9 +41,11 @@ import type { Permission } from "@/lib/auth/permissions";
 import {
   CAMPUS_MANAGEMENT_ROLES,
   DISTRICT_ROLES,
+  MANAGEMENT_ROLES,
   hasIgLeadRole,
   IG_ROLES,
-  MANAGEMENT_ROLES,
+  MANAGEMENT_HUB_ROLES,
+  ASSOCIATE_MANAGEMENT_ROLES,
   ROLES,
   ZONAL_ROLES,
 } from "@/lib/auth/roles";
@@ -331,7 +333,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard/management",
     icon: Shield,
     section: "management",
-    roles: MANAGEMENT_ROLES,
+    roles: MANAGEMENT_HUB_ROLES,
   },
   {
     id: "url-shortener",
@@ -347,7 +349,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   //   href: "/dashboard/reports",
   //   icon: LineChart,
   //   section: "management",
-  //   roles: MANAGEMENT_ROLES,
+  //   roles: ASSOCIATE_MANAGEMENT_ROLES,
   // },
   {
     id: "manage-events",
@@ -363,7 +365,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard/management/weekly-twitches",
     icon: Radio,
     section: "management",
-    roles: MANAGEMENT_ROLES,
+    roles: ASSOCIATE_MANAGEMENT_ROLES,
     dynamicCheck: (roles) =>
       roles.includes(ROLES.ADMIN) ||
       roles.includes(ROLES.ASSOCIATE) ||
