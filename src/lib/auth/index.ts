@@ -29,14 +29,22 @@ export { getRoleHomePath } from "./role-routing";
 export {
   ADMIN_ROLES,
   CAMPUS_MANAGEMENT_ROLES,
+  COMMUNITY_SETTINGS_HUB_ROLES,
+  DISCORD_MODERATION_ROLES,
   DISTRICT_ROLES,
+  MANAGEMENT_ROLES,
+  FELLOW_MANAGEMENT_ROLES,
   igCampusLeadRole,
   igLeadRole,
-  MANAGEMENT_ROLES,
+  INTERN_MANAGEMENT_ROLES,
+  MANAGEMENT_HUB_ROLES,
+  ASSOCIATE_MANAGEMENT_ROLES,
   ROLES,
   type RoleKey,
   type RoleValue,
+  SYSTEM_CONFIG_HUB_ROLES,
   TECH_ROLES,
+  USER_MANAGEMENT_HUB_ROLES,
   ZONAL_ROLES,
 } from "./roles";
 // Route Access (used by middleware)
