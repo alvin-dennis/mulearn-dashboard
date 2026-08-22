@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertCircle,
   Award,
   BookOpen,
   Coins,
@@ -9,10 +10,10 @@ import {
   Sparkles,
   Users,
   Zap,
-  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button as UIButton } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,7 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   useIgSponsorshipMetrics,
   useSubmitIgSponsorship,
