@@ -39,10 +39,8 @@ export const ROLES = {
   LEAD_ENABLER: "Lead Enabler",
 } as const;
 
-/** Union type of all role string values */
 export type RoleValue = (typeof ROLES)[keyof typeof ROLES];
 
-/** Union type of all role keys */
 export type RoleKey = keyof typeof ROLES;
 
 // ─── Dynamic Role Helpers ──────────────────────────────────
@@ -77,45 +75,27 @@ export function hasIgLeadRole(roles: readonly string[]): boolean {
 // Commonly used role combinations. Use these instead of
 // repeating arrays of roles across the codebase.
 
-/** Roles with full platform administration access */
 export const ADMIN_ROLES = [ROLES.ADMIN] as const;
 
-/** Admin + Associate — roles that can perform management tasks (admin-level) */
 export const ASSOCIATE_MANAGEMENT_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
 ] as const;
 
-/**
- * Admin + Fellow — access to select /management verification & config
- * cards (Role Verification, Organization Verification/Departments,
- * Interest Groups, College Levels, Karma Voucher).
- */
 export const FELLOW_MANAGEMENT_ROLES = [ROLES.ADMIN, ROLES.FELLOW] as const;
 
-/**
- * Admin + Associate + Fellow — the broadest /management card access tier
- * (Homepage, Career Labs, Channels, Organization Affiliation, Feature
- * Flags, URL Shortener).
- */
 export const MANAGEMENT_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
   ROLES.FELLOW,
 ] as const;
 
-/** Admin + Associate + Intern Lead — access to Manage Interns and its sub-pages. */
 export const INTERN_MANAGEMENT_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
   ROLES.INTERN_LEAD,
 ] as const;
 
-/**
- * Union of every role with access to at least one card on the User
- * Management hub (Manage Interns → Associate/Intern Lead; Role
- * Verification → Fellow).
- */
 export const USER_MANAGEMENT_HUB_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
@@ -123,11 +103,6 @@ export const USER_MANAGEMENT_HUB_ROLES = [
   ROLES.FELLOW,
 ] as const;
 
-/**
- * Union of every role with access to at least one card on the Community
- * Settings hub (Interest Groups/College Levels → Fellow; Channels →
- * Fellow+Associate; Discord Moderation → Discord Moderator).
- */
 export const COMMUNITY_SETTINGS_HUB_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
@@ -135,11 +110,6 @@ export const COMMUNITY_SETTINGS_HUB_ROLES = [
   ROLES.DISCORD_MODERATOR,
 ] as const;
 
-/**
- * Union of every role with access to at least one card on the System &
- * Configurations hub (Features/Karma Voucher → Fellow(+Associate); Error
- * Log → Tech Team).
- */
 export const SYSTEM_CONFIG_HUB_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
@@ -147,18 +117,11 @@ export const SYSTEM_CONFIG_HUB_ROLES = [
   ROLES.TECH_TEAM,
 ] as const;
 
-/** Admin + Discord Moderator — Discord Moderation card/route. */
 export const DISCORD_MODERATION_ROLES = [
   ROLES.ADMIN,
   ROLES.DISCORD_MODERATOR,
 ] as const;
 
-/**
- * Union of every role with access to at least one card on the
- * /dashboard/management hub page. Gates the page itself and the sidebar
- * "Management" nav entry — kept in step with the per-card role lists in
- * route-access.ts and each hub page's ITEMS array.
- */
 export const MANAGEMENT_HUB_ROLES = [
   ROLES.ADMIN,
   ROLES.ASSOCIATE,
