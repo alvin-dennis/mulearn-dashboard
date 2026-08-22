@@ -39,13 +39,13 @@ import {
 } from "lucide-react";
 import type { Permission } from "@/lib/auth/permissions";
 import {
+  ASSOCIATE_MANAGEMENT_ROLES,
   CAMPUS_MANAGEMENT_ROLES,
   DISTRICT_ROLES,
-  MANAGEMENT_ROLES,
   hasIgLeadRole,
   IG_ROLES,
   MANAGEMENT_HUB_ROLES,
-  ASSOCIATE_MANAGEMENT_ROLES,
+  MANAGEMENT_ROLES,
   ROLES,
   ZONAL_ROLES,
 } from "@/lib/auth/roles";
