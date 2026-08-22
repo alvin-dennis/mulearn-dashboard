@@ -17,8 +17,8 @@ import { hasAnyRole } from "@/lib/auth/permissions";
 import {
   ADMIN_ROLES,
   COMMUNITY_SETTINGS_HUB_ROLES,
-  MANAGEMENT_ROLES,
   FELLOW_MANAGEMENT_ROLES,
+  MANAGEMENT_ROLES,
   SYSTEM_CONFIG_HUB_ROLES,
   USER_MANAGEMENT_HUB_ROLES,
 } from "@/lib/auth/roles";

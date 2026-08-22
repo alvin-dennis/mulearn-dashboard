@@ -15,8 +15,8 @@ import { hasAnyRole } from "@/lib/auth/permissions";
 import {
   ADMIN_ROLES,
   DISCORD_MODERATION_ROLES,
-  MANAGEMENT_ROLES,
   FELLOW_MANAGEMENT_ROLES,
+  MANAGEMENT_ROLES,
 } from "@/lib/auth/roles";
 import { requireAuth } from "@/lib/auth/server";
 
