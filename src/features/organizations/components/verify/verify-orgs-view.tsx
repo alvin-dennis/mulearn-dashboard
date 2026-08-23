@@ -21,16 +21,17 @@ const COLUMNS = [
   { column: "created_at", Label: "Created At", isSortable: true },
 ];
 
-const PER_PAGE = 10;
+const DEFAULT_PER_PAGE = 10;
 
 export default function VerifyOrgsView() {
   const [searchInput, setSearchInput] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [sortBy, setSortBy] = useState("");
 
   const { data, isLoading } = useUnverifiedOrgs({
     pageIndex: currentPage,
-    perPage: PER_PAGE,
+    perPage,
     search: searchInput,
     sortBy,
   });
@@ -47,6 +48,11 @@ export default function VerifyOrgsView() {
   const handleSearch = (value: string) => {
     setCurrentPage(1);
     setSearchInput(value);
+  };
+
+  const handlePerPage = (value: number) => {
+    setCurrentPage(1);
+    setPerPage(value);
   };
 
   const handleSort = (column: string) => {
@@ -115,8 +121,8 @@ export default function VerifyOrgsView() {
       <CardContent className="space-y-6 px-0">
         <TableTop
           onSearchText={handleSearch}
-          onPerPageNumber={() => {}}
-          perPage={PER_PAGE}
+          onPerPageNumber={handlePerPage}
+          perPage={perPage}
           perPageOptions={[10, 25, 50]}
           CSV=""
           searchPlaceholder="Search by name, type, or submitter…"
@@ -132,7 +138,7 @@ export default function VerifyOrgsView() {
             rows={rows as unknown as Data[]}
             isLoading={isLoading}
             page={currentPage}
-            perPage={PER_PAGE}
+            perPage={perPage}
             columnOrder={COLUMNS}
             id={["id"]}
             customActionRender={renderActions}
@@ -154,7 +160,7 @@ export default function VerifyOrgsView() {
                   handlePreviousClick={() =>
                     setCurrentPage((p) => Math.max(p - 1, 1))
                   }
-                  perPage={PER_PAGE}
+                  perPage={perPage}
                   totalCount={totalCount}
                 />
               )}

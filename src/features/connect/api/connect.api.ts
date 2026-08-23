@@ -21,5 +21,5 @@ export const fetchQseverseInfo = async (
 };
 
 export const connectDiscord = async (code: string): Promise<void> => {
-  await apiClient.post(endpoints.register.connectDiscord, { code });
+  await apiClient.get(`${endpoints.register.connectDiscord}?code=${code}`);
 };
