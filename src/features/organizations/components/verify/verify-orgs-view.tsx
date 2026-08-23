@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Pagination from "@/components/dashboard/table/pagination";
 import Table, { type Data } from "@/components/dashboard/table/Table";
 import TableTop from "@/components/dashboard/table/TableTop";
@@ -39,6 +39,12 @@ export default function VerifyOrgsView() {
   const orgs = data?.data ?? [];
   const totalPages = data?.pagination.totalPages ?? 0;
   const totalCount = data?.pagination.count ?? 0;
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
 
   const [selectedOrg, setSelectedOrg] = useState<UnverifiedOrgItem | null>(
     null,
