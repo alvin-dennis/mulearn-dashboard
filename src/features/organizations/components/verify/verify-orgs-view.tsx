@@ -46,6 +46,12 @@ export default function VerifyOrgsView() {
     }
   }, [totalPages, currentPage]);
 
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
   const [selectedOrg, setSelectedOrg] = useState<UnverifiedOrgItem | null>(
     null,
   );
