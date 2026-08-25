@@ -408,6 +408,7 @@ export function useLeaveCircle() {
   return useMutation({
     mutationFn: (circleId: string) => leaveCircle(circleId),
     onSuccess: (_, circleId) => {
+      unmarkCircleAsRequested(circleId);
       queryClient.invalidateQueries({
         queryKey: learningCircleKeys.circleDetail(circleId),
       });
@@ -441,6 +442,13 @@ const pendingJoinListeners = new Set<() => void>();
 
 export function markCircleAsRequested(circleId: string) {
   pendingJoinCircleIds.add(circleId);
+  pendingJoinListeners.forEach((listener) => {
+    listener();
+  });
+}
+
+export function unmarkCircleAsRequested(circleId: string) {
+  pendingJoinCircleIds.delete(circleId);
   pendingJoinListeners.forEach((listener) => {
     listener();
   });
