@@ -50,13 +50,13 @@ export function EditVoucherDialog({
     formState: { errors },
   } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(UpdateVoucherFormSchema),
-    defaultValues: { new_task: "#", new_karma: 0 },
+    defaultValues: { new_task: "", new_karma: 0 },
   });
 
   useEffect(() => {
     if (voucher) {
       reset({
-        new_task: voucher.hashtag ?? "#",
+        new_task: voucher.hashtag ?? "",
         new_karma: voucher.karma,
       });
     }
