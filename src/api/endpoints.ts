@@ -468,6 +468,10 @@ export const endpoints = {
   events: {
     base: "/api/v1/dashboard/events/",
     featured: "/api/v1/dashboard/events/featured/",
+    public: {
+      base: "/api/v1/public/events/",
+      featured: "/api/v1/public/events/featured/",
+    },
     manage: "/api/v1/dashboard/events/manage/",
     myInvites: "/api/v1/dashboard/events/my-invites/",
     admin: "/api/v1/dashboard/events/admin/",
