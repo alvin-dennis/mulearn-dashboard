@@ -943,6 +943,10 @@ export const endpoints = {
     karmaVoucher: {
       /** GET - List karma vouchers (paginated, sortable, searchable) */
       list: "/api/v1/dashboard/karma-voucher/",
+      /** POST - Create a single karma voucher */
+      create: "/api/v1/dashboard/karma-voucher/create/",
+      /** PATCH - Update a karma voucher's task/karma */
+      update: (id: string) => `/api/v1/dashboard/karma-voucher/update/${id}/`,
       /** DELETE - Delete a karma voucher */
       delete: (id: string) => `/api/v1/dashboard/karma-voucher/delete/${id}/`,
       /** GET - Export voucher log as CSV */

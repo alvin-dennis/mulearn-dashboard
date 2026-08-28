@@ -3,9 +3,16 @@ import { endpoints } from "@/api/endpoints";
 import {
   ApiResponseSchema,
   BulkImportResponseSchema,
+  CreateVoucherResponseSchema,
   KarmaVoucherListResponseSchema,
 } from "../schemas";
-import type { BulkImportResponse, KarmaVoucherListData } from "../types";
+import type {
+  BulkImportResponse,
+  CreateVoucherPayload,
+  CreateVoucherResponse,
+  KarmaVoucherListData,
+  UpdateVoucherPayload,
+} from "../types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -45,6 +52,33 @@ export async function fetchKarmaVouchers(
       pagination: { count: 0, totalPages: 1, isNext: false, isPrev: false },
     }
   );
+}
+
+// ─── Create Voucher ─────────────────────────────────────────────────────────
+
+export async function createVoucher(
+  payload: CreateVoucherPayload,
+): Promise<CreateVoucherResponse> {
+  const response = await apiClient.post(
+    endpoints.admin.karmaVoucher.create,
+    payload,
+    ApiResponseSchema(CreateVoucherResponseSchema),
+  );
+
+  const voucher = response.response ?? response.data;
+  if (!voucher) {
+    throw new Error("Voucher creation failed. Please try again.");
+  }
+  return voucher;
+}
+
+// ─── Update Voucher ─────────────────────────────────────────────────────────
+
+export async function updateVoucher({
+  id,
+  ...payload
+}: UpdateVoucherPayload): Promise<void> {
+  await apiClient.patch(endpoints.admin.karmaVoucher.update(id), payload);
 }
 
 // ─── Delete Voucher ─────────────────────────────────────────────────────────
