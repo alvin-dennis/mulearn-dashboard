@@ -109,9 +109,12 @@ export async function importVouchers(file: File): Promise<BulkImportResponse> {
       error.data &&
       typeof error.data === "object"
     ) {
-      const payload = (error.data as { response?: unknown }).response;
-      const parsed = BulkImportResponseSchema.safeParse(payload);
-      if (parsed.success) return parsed.data;
+      const envelope = error.data as { response?: unknown; data?: unknown };
+      const candidates = [envelope.response, envelope.data, error.data];
+      for (const candidate of candidates) {
+        const parsed = BulkImportResponseSchema.safeParse(candidate);
+        if (parsed.success) return parsed.data;
+      }
     }
     throw error;
   }
