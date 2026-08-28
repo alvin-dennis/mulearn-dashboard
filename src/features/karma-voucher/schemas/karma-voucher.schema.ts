@@ -37,6 +37,7 @@ export const KarmaVoucherSchema = z.object({
     }),
   claimed: z.boolean(),
   task: z.string().nullable().optional(),
+  hashtag: z.string().nullable().optional(),
   week: z.string().nullable().optional(),
   month: z.string().nullable().optional(),
   updated_by: z.string().nullable().optional(),
