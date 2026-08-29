@@ -50,13 +50,13 @@ export function EditVoucherDialog({
     formState: { errors },
   } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(UpdateVoucherFormSchema),
-    defaultValues: { new_task: "", new_karma: 0 },
+    defaultValues: { hashtag: "", new_karma: 0 },
   });
 
   useEffect(() => {
     if (voucher) {
       reset({
-        new_task: voucher.hashtag ?? "",
+        hashtag: voucher.hashtag ?? "",
         new_karma: voucher.karma,
       });
     }
@@ -78,15 +78,15 @@ export function EditVoucherDialog({
 
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="new_task">Task Hashtag</Label>
+            <Label htmlFor="hashtag">Task Hashtag</Label>
             <Input
-              id="new_task"
+              id="hashtag"
               placeholder="#task-hashtag"
-              {...register("new_task")}
+              {...register("hashtag")}
             />
-            {errors.new_task && (
+            {errors.hashtag && (
               <p className="text-sm text-destructive">
-                {errors.new_task.message}
+                {errors.hashtag.message}
               </p>
             )}
           </div>
