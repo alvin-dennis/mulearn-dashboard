@@ -80,6 +80,6 @@ export interface CreateVoucherResponse {
 
 export interface UpdateVoucherPayload {
   id: string;
-  new_task: string;
+  hashtag: string;
   new_karma: number;
 }
