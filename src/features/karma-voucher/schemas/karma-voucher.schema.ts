@@ -139,6 +139,6 @@ export const CreateVoucherResponseSchema = z.object({
  * Update Voucher — form input
  */
 export const UpdateVoucherFormSchema = z.object({
-  new_task: z.string().min(1, "Task hashtag is required"),
+  hashtag: z.string().min(1, "Task hashtag is required"),
   new_karma: z.coerce.number().int().positive("Enter a valid karma"),
 });

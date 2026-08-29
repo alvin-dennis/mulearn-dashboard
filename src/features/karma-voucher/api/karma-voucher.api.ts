@@ -102,7 +102,10 @@ export async function importVouchers(file: File): Promise<BulkImportResponse> {
     );
 
     const nestedResult = response.response || response.data;
-    return nestedResult ?? BulkImportResponseSchema.parse(response);
+    if (!nestedResult) {
+      throw new Error("Import failed. Please try again.");
+    }
+    return nestedResult;
   } catch (error) {
     if (
       error instanceof ApiError &&
