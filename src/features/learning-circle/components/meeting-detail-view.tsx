@@ -143,11 +143,10 @@ function getStatus(meeting: {
   // shown as Ended even when the meeting is part of a recurring series.
   if (meeting.is_ended) return STATUS_CONFIG.ended;
   if (meeting.is_started) return STATUS_CONFIG.live;
-  // Flip to "Live Now" up to 2 hours before start, even if nobody has
-  // manually marked the meeting as started yet.
   if (meeting.meet_time.getTime() - Date.now() <= LIVE_SOON_WINDOW_MS) {
-    // Start time has passed but the organiser hasn't marked it started.
-    if (isFuture(meeting.meet_time)) return STATUS_CONFIG.live;
+    // Start time has passed but the organiser hasn't marked it started yet.
+    if (!isFuture(meeting.meet_time)) return STATUS_CONFIG.live;
+    // Still upcoming, within 2h of start — show as "starting soon", not live.
     return STATUS_CONFIG.scheduled;
   }
   if (meeting.is_recurring) return STATUS_CONFIG.recurring;
