@@ -81,12 +81,20 @@ const STATUS_CONFIG = {
     label: "Recurring",
     dot: false,
   },
+  scheduled: {
+    gradient: "from-[#B45309] via-[#D97706] to-[#F59E0B]",
+    label: "Scheduled",
+    dot: false,
+  },
   ended: {
     gradient: "from-[#6B7280] via-[#9CA3AF] to-[#D1D5DB]",
     label: "Ended",
     dot: false,
   },
 } as const;
+
+/** How early a meeting flips to "Live Now" ahead of its scheduled start time. */
+const LIVE_SOON_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 function formatMeetingDuration(duration?: number): string {
   if (!duration || duration <= 0) return "1h";
@@ -129,11 +137,18 @@ function getStatus(meeting: {
   is_ended: boolean;
   is_started: boolean;
   is_recurring?: boolean;
+  meet_time: Date;
 }) {
   // "Ended" takes precedence over "Recurring": an occurrence that has ended is
   // shown as Ended even when the meeting is part of a recurring series.
   if (meeting.is_ended) return STATUS_CONFIG.ended;
   if (meeting.is_started) return STATUS_CONFIG.live;
+  if (meeting.meet_time.getTime() - Date.now() <= LIVE_SOON_WINDOW_MS) {
+    // Start time has passed but the organiser hasn't marked it started yet.
+    if (!isFuture(meeting.meet_time)) return STATUS_CONFIG.live;
+    // Still upcoming, within 2h of start — show as "starting soon", not live.
+    return STATUS_CONFIG.scheduled;
+  }
   if (meeting.is_recurring) return STATUS_CONFIG.recurring;
   return STATUS_CONFIG.upcoming;
 }
@@ -356,7 +371,7 @@ export function MeetingDetailView({
       ? listMeetingInfo.can_remove_rsvp !== false
       : true);
   const canLeave = hasJoined && isActive;
-  const status = getStatus(meeting);
+  const status = getStatus({ ...meeting, meet_time: meetTime });
 
   return (
     <div className="space-y-6">
