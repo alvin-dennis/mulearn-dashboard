@@ -15,7 +15,7 @@ import {
   getMeetTimeErrorMessage,
   isMeetTimeValid,
 } from "../utils/meet-time-validation";
-import { ApiResponseSchema } from "./circle.schema";
+import { ApiResponseSchema, PaginationSchema } from "./circle.schema";
 
 // ============================================
 // Meeting Schemas
@@ -138,7 +138,7 @@ export const CreateMeetingRequestSchema = z
       .enum(["Zoom", "Google Meet", "Microsoft Teams", "Discord"])
       .optional()
       .nullable(),
-    meet_place: z.string().min(1).max(100),
+    meet_place: z.string().min(1).max(200),
     meet_link: z.string().url().optional().nullable(),
     /**
      * UTC ISO-8601 string.  Must be at least MIN_BUFFER_MINUTES in the future
@@ -226,7 +226,10 @@ export type MeetingReportRequest = z.infer<typeof MeetingReportRequestSchema>;
 // ============================================
 
 export const MeetingListResponseSchema = ApiResponseSchema(
-  z.array(MeetingSchema),
+  z.object({
+    data: z.array(MeetingSchema),
+    pagination: PaginationSchema,
+  }),
 );
 
 export const MeetingDetailResponseSchema =
