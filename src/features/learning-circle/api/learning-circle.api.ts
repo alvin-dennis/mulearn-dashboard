@@ -265,7 +265,7 @@ export async function revokeInvite(
 ): Promise<void> {
   await respondToJoinRequest(circleId, {
     link_id: linkId,
-    action: "revoke",
+    action: "reject",
   });
 }
 
