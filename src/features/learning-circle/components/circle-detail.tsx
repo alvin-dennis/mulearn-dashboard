@@ -343,7 +343,10 @@ export function CircleDetail({ circleId }: CircleDetailProps) {
                         onRemoveRsvp={handleRemoveRsvp}
                         onCancelRsvp={handleCancelRsvp}
                         isRsvpLoading={
-                          rsvpMeeting.isPending || removeRsvpMeeting.isPending
+                          (rsvpMeeting.isPending &&
+                            rsvpMeeting.variables === meeting.id) ||
+                          (removeRsvpMeeting.isPending &&
+                            removeRsvpMeeting.variables === meeting.id)
                         }
                       />
                     );
