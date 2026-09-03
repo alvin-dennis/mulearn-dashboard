@@ -54,6 +54,7 @@ import {
   useCirclePermissions,
   useLeaveMeeting,
   useMeetingDetail,
+  usePendingRsvpMeetingIds,
   useRemoveRsvpMeeting,
   useRsvpMeeting,
 } from "../hooks";
@@ -205,6 +206,8 @@ export function MeetingDetailView({
   const { data: circleMeetings } = useCircleMeetings(circleId);
   const rsvpMeeting = useRsvpMeeting();
   const removeRsvpMeeting = useRemoveRsvpMeeting();
+  const pendingRsvpMeetingIds = usePendingRsvpMeetingIds();
+  const isRsvpLoading = pendingRsvpMeetingIds.has(meetingId);
   const { data: userInfo } = useUserInfo();
   const leaveMeeting = useLeaveMeeting();
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -473,26 +476,28 @@ export function MeetingDetailView({
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => rsvpMeeting.mutate(meetingId)}
-                disabled={rsvpMeeting.isPending}
+                onClick={() => {
+                  if (isRsvpLoading) return;
+                  rsvpMeeting.mutate(meetingId);
+                }}
+                disabled={isRsvpLoading}
                 className="text-xs font-bold uppercase tracking-wide"
               >
-                {rsvpMeeting.isPending ? (
-                  <Spinner className="h-3.5 w-3.5" />
-                ) : (
-                  "RSVP"
-                )}
+                {isRsvpLoading ? <Spinner className="h-3.5 w-3.5" /> : "RSVP"}
               </Button>
             )}
             {canRemoveRsvp && (
               <button
                 type="button"
-                onClick={() => removeRsvpMeeting.mutate(meetingId)}
-                disabled={removeRsvpMeeting.isPending}
-                className="text-xs font-bold text-success bg-success/15 border border-success/30 hover:bg-destructive/15 hover:text-destructive hover:border-destructive/30 transition-all uppercase tracking-wide px-3 py-1.5 rounded-lg flex items-center gap-1.5 group/rsvp cursor-pointer"
+                onClick={() => {
+                  if (isRsvpLoading) return;
+                  removeRsvpMeeting.mutate(meetingId);
+                }}
+                disabled={isRsvpLoading}
+                className="text-xs font-bold text-success bg-success/15 border border-success/30 hover:bg-destructive/15 hover:text-destructive hover:border-destructive/30 transition-all uppercase tracking-wide px-3 py-1.5 rounded-lg flex items-center gap-1.5 group/rsvp cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Click to remove RSVP"
               >
-                {removeRsvpMeeting.isPending ? (
+                {isRsvpLoading ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
                   <>
