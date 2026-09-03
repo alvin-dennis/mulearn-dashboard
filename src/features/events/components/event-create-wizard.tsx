@@ -615,6 +615,12 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
       return trigger(fields);
     }
 
+    if (stepIndex === 5) {
+      // Registration URL had no validation at all: a link without a scheme
+      // passed straight through to the API and saved as a dead relative link.
+      return trigger(["registration_url"]);
+    }
+
     return true;
   };
 
@@ -1415,7 +1421,20 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
                       <p className="text-sm font-medium text-foreground">
                         Registration URL
                       </p>
-                      <Input {...register("registration_url")} />
+                      <Input
+                        placeholder="https://example.com/register"
+                        {...register("registration_url")}
+                      />
+                      {errors.registration_url?.message ? (
+                        <p className="text-xs text-destructive">
+                          {errors.registration_url.message}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Include https:// at the start, or the link will not
+                          open.
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">

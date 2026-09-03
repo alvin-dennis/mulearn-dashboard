@@ -494,6 +494,11 @@ export function EventInlineEditForm({
                 {errors.category.message}
               </p>
             ) : null}
+            {errors.event_type?.message ? (
+              <p className="text-xs text-destructive">
+                {errors.event_type.message}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -679,8 +684,18 @@ export function EventInlineEditForm({
             </p>
             <Input
               className="rounded-xl border-border bg-background text-foreground"
+              placeholder="https://example.com/register"
               {...register("registration_url")}
             />
+            {errors.registration_url?.message ? (
+              <p className="text-xs text-destructive">
+                {errors.registration_url.message}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Include https:// at the start, or the link will not open.
+              </p>
+            )}
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
