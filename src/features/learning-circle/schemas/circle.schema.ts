@@ -274,10 +274,10 @@ export const JoinRequestListResponseSchema = ApiResponseSchema(
   z.array(JoinRequestSchema),
 );
 
-/** Body for PATCH join/<circle_id>/ — accept, reject, or revoke a pending request. */
+/** Body for PATCH join/<circle_id>/ — accept or reject a pending request. */
 export const RespondJoinRequestSchema = z.object({
   link_id: z.string(),
-  action: z.enum(["accept", "reject", "revoke"]),
+  action: z.enum(["accept", "reject"]),
 });
 
 export type RespondJoinRequest = z.infer<typeof RespondJoinRequestSchema>;
