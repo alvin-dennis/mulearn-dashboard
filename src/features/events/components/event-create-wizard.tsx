@@ -59,6 +59,26 @@ const MAX_WIZARD_UPLOAD_BYTES = 900 * 1024;
 const MAX_SINGLE_IMAGE_BYTES = 450 * 1024;
 const MAX_IMAGE_DIMENSION = 1600;
 
+/** What actually happened, per the status the publish endpoint returned.
+ *  An event whose dates have passed is recorded rather than published, and
+ *  one that needs a reviewer is submitted rather than live. */
+function describePublishOutcome(status: string | undefined): string {
+  switch (status) {
+    case "completed":
+      return "Past event recorded";
+    case "ongoing":
+      return "Event published — it's happening now";
+    case "pending_campus_approval":
+      return "Event sent to your campus lead for approval";
+    case "pending_mentor_approval":
+      return "Event sent to your mentor for approval";
+    case "pending_approval":
+      return "Event submitted for approval";
+    default:
+      return "Event published";
+  }
+}
+
 function formatReviewEnum(value: unknown): string {
   if (typeof value !== "string") return "Not set";
 
@@ -720,12 +740,16 @@ export function EventCreateWizard({ open, onClose }: EventCreateWizardProps) {
       const created = await createEvent.mutateAsync(requestBody as never);
       createdEventId = created.id;
 
+      let publishedStatus: string | undefined;
       if (action === "publish") {
-        await eventsApi.publish(created.id);
+        const published = await eventsApi.publish(created.id);
+        publishedStatus = published?.status;
       }
 
       toast.success(
-        action === "publish" ? "Event published" : "Event saved as draft",
+        action === "draft"
+          ? "Event saved as draft"
+          : describePublishOutcome(publishedStatus),
       );
       resetWizard();
       onClose();
