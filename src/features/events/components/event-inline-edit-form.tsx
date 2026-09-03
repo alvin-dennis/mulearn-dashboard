@@ -586,6 +586,24 @@ export function EventInlineEditForm({
             }}
           />
         ) : null}
+
+        {/* The schema raises the missing-target issue against these paths.
+            Without them the form refuses to save and says nothing. */}
+        {errors.target_campus_id?.message ? (
+          <p className="text-xs text-destructive">
+            {errors.target_campus_id.message}
+          </p>
+        ) : null}
+        {errors.target_ig_id?.message ? (
+          <p className="text-xs text-destructive">
+            {errors.target_ig_id.message}
+          </p>
+        ) : null}
+        {errors.target_campus_ig_id?.message ? (
+          <p className="text-xs text-destructive">
+            {errors.target_campus_ig_id.message}
+          </p>
+        ) : null}
       </section>
 
       <section className={eventEditSectionClassName()}>

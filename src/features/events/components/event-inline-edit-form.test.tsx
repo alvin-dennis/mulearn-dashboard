@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -49,14 +50,21 @@ const event = {
   tags: [],
 } as never;
 
-function renderForm() {
+function renderForm(overrides: Record<string, unknown> = {}) {
+  // The campus/IG target pickers run their own search queries, so the tree
+  // needs a client even though this test never asserts on their results.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   return render(
-    <EventInlineEditForm
-      event={event}
-      onSave={vi.fn()}
-      onDiscard={vi.fn()}
-      onDirtyChange={vi.fn()}
-    />,
+    <QueryClientProvider client={queryClient}>
+      <EventInlineEditForm
+        event={{ ...(event as object), ...overrides } as never}
+        onSave={vi.fn()}
+        onDiscard={vi.fn()}
+        onDirtyChange={vi.fn()}
+      />
+    </QueryClientProvider>,
   );
 }
 
@@ -84,6 +92,21 @@ describe("EventInlineEditForm registration URL", () => {
     // so the Save button appeared to do nothing at all.
     await waitFor(() => {
       expect(screen.getByText(/starting with https:\/\//i)).toBeInTheDocument();
+    });
+    expect(patchMutate).not.toHaveBeenCalled();
+  });
+
+  it("says which target is missing when the scope has none", async () => {
+    // scope=campus with no scope_org: the schema raises the issue against
+    // target_campus_id, a path no form rendered, so Save did nothing.
+    renderForm({ scope: "campus", scope_org: null });
+
+    submit();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/target campus is required/i),
+      ).toBeInTheDocument();
     });
     expect(patchMutate).not.toHaveBeenCalled();
   });
