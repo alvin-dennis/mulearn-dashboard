@@ -156,11 +156,13 @@ export function EventCard({ event, isManageView, onView }: EventCardProps) {
         />
       ) : null}
 
-      <div className="relative aspect-[3/4] w-full overflow-hidden">
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
         <Image
           src={event.cover_image ?? "/images/fallback.webp"}
           alt={event.title}
           fill
+          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          quality={90}
           className="object-cover"
         />
 
