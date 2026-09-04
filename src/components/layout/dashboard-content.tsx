@@ -33,7 +33,7 @@ export function DashboardContent({ children }: DashboardContentProps) {
         isSidebarExpanded ? "md:pl-62" : "md:pl-14",
       )}
     >
-      <div className="bg-background rounded-2xl shadow-sm p-2 min-h-[calc(100vh-6rem)]">
+      <div className="bg-background rounded-2xl shadow-sm p-2 md:p-3 min-h-[calc(100vh-6rem)]">
         {children}
         <ConnectAccountsBanner />
       </div>
