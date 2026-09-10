@@ -1,6 +1,13 @@
 "use client";
 
-import { CalendarDays, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  MapPin,
+  Radio,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,6 +16,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FEATURED_SLIDE_INTERVAL } from "../constants";
 import { formatEventDate, useFeaturedEvents } from "../hooks";
 import { InterestButton } from "./interest-button";
+
+function VenueIcon({
+  venueType,
+  className,
+}: {
+  venueType?: string;
+  className?: string;
+}) {
+  if (venueType === "online") return <Globe className={className} />;
+  if (venueType === "hybrid") return <Radio className={className} />;
+  return <MapPin className={className} />;
+}
 
 export function FeaturedEventsCarousel() {
   const { data, isLoading } = useFeaturedEvents({ pageIndex: 1, perPage: 10 });
@@ -46,10 +65,11 @@ export function FeaturedEventsCarousel() {
   if (featuredEvents.length === 0) return null;
 
   const event = featuredEvents[activeIndex];
+  const venueType = event.venue.type;
   const venueDisplay =
-    event.venue_type === "online"
+    venueType === "online"
       ? "Online Event"
-      : event.venue_type === "hybrid"
+      : venueType === "hybrid"
         ? "Hybrid Event"
         : "Physical Event";
   return (
@@ -110,7 +130,7 @@ export function FeaturedEventsCarousel() {
               <CalendarDays className="h-4 w-4" />
               <span>{formatEventDate(event.start_datetime)}</span>
               <span>|</span>
-              <MapPin className="h-4 w-4" />
+              <VenueIcon venueType={venueType} className="h-4 w-4" />
               <span>{venueDisplay}</span>
             </div>
           </div>
