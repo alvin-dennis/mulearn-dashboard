@@ -571,10 +571,21 @@ export const campusManageApi = {
       .filter((r) => r.label && r.value);
   },
 
-  async createExecomRole(roleTitle: string): Promise<unknown> {
-    return apiClient.post<unknown>(endpoints.campusManage.execomRoles, {
-      role_title: roleTitle,
-    });
+  async createExecomRole(
+    roleTitle: string,
+  ): Promise<{ label: string; value: string }> {
+    const raw = await apiClient.post<unknown>(
+      endpoints.campusManage.execomRoles,
+      {
+        role_title: roleTitle,
+      },
+    );
+    const data = unwrapDataObject(raw);
+    const title = safeToString(
+      data.title ?? data.role_title ?? data.name ?? roleTitle,
+      roleTitle,
+    );
+    return { label: title, value: title };
   },
 
   async addExecomMember(data: {

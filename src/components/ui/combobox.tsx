@@ -6,7 +6,7 @@
 
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import * as React from "react";
 
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ interface ComboboxProps {
   onSearchChange?: (search: string) => void;
   selectedLabel?: string;
   loading?: boolean;
+  searchInDropdown?: boolean;
 }
 
 export function Combobox({
@@ -38,7 +39,7 @@ export function Combobox({
   value,
   onValueChange,
   placeholder = "Select an option",
-  searchPlaceholder: _searchPlaceholder = "Search...",
+  searchPlaceholder = "Search...",
   emptyText = "No results found.",
   disabled = false,
   className,
@@ -47,6 +48,7 @@ export function Combobox({
   onSearchChange,
   selectedLabel,
   loading = false,
+  searchInDropdown = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -131,6 +133,26 @@ export function Combobox({
       {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-2 w-full rounded-xl border bg-popover shadow-md">
+          {searchInDropdown && (
+            <div className="border-b p-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={searchPlaceholder}
+                  value={search}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSearch(newValue);
+                    onSearchChange?.(newValue);
+                  }}
+                  className="h-9 rounded-lg border-border bg-background pl-9"
+                  autoComplete="off"
+                  autoFocus
+                />
+              </div>
+            </div>
+          )}
           <div className="max-h-75 overflow-y-auto">
             {loading ? (
               <div className="py-4 text-center text-sm text-muted-foreground">
