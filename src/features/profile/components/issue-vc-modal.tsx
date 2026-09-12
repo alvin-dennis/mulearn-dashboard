@@ -11,7 +11,7 @@
 
 import { ExternalLink, Maximize2, RefreshCw } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +28,35 @@ import type {
   VCCredentialInfo,
   VCSubjectInfo,
 } from "../schemas";
+
+function TruncatedDescription({ text }: { text: string }) {
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    setIsOverflowing(el.scrollHeight > el.clientHeight);
+  }, []);
+
+  return (
+    <div className="text-left text-sm text-muted-foreground leading-relaxed">
+      <p ref={textRef} className={expanded ? "" : "line-clamp-3"}>
+        {text}
+      </p>
+      {isOverflowing && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="mt-1 text-xs font-medium text-brand-blue hover:underline"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 interface IssueVCModalProps {
   open: boolean;
@@ -59,7 +88,6 @@ export function IssueVCModal({
 
   const [overrideDID, setOverrideDID] = useState<string | null>(null);
   const [expandedImageSrc, setExpandedImageSrc] = useState<string | null>(null);
-  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const { achievement: achievementData, vc_url } = achievement;
   const availableDIDs = didsData?.dids || [];
@@ -124,18 +152,7 @@ export function IssueVCModal({
           </div>
 
           {achievementData.description && (
-            <div className="text-left text-sm text-muted-foreground leading-relaxed">
-              <p className={showFullDescription ? "" : "line-clamp-3"}>
-                {achievementData.description}
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowFullDescription((prev) => !prev)}
-                className="mt-1 text-xs font-medium text-brand-blue hover:underline"
-              >
-                {showFullDescription ? "Show less" : "Read more"}
-              </button>
-            </div>
+            <TruncatedDescription text={achievementData.description} />
           )}
         </div>
       );
@@ -166,18 +183,7 @@ export function IssueVCModal({
           </div>
 
           {achievementData.description && (
-            <div className="text-left text-sm text-muted-foreground leading-relaxed">
-              <p className={showFullDescription ? "" : "line-clamp-3"}>
-                {achievementData.description}
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowFullDescription((prev) => !prev)}
-                className="mt-1 text-xs font-medium text-brand-blue hover:underline"
-              >
-                {showFullDescription ? "Show less" : "Read more"}
-              </button>
-            </div>
+            <TruncatedDescription text={achievementData.description} />
           )}
         </div>
       );
