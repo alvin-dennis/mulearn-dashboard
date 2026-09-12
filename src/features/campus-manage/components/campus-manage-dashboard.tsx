@@ -832,14 +832,14 @@ export function CampusManageDashboard() {
 
     if (isCampusLead) {
       toast.error(
-        "Campus Lead can't be assigned here.Use transfer-lead-role instead.",
+        "Campus Lead can't be assigned here. Use transfer-lead-role instead.",
       );
       return;
     }
 
     if (!selectedRoleExists) {
       toast.error(
-        `'${roleTitle}' is not a recognized execom role.Create it in the role directory first.`,
+        `'${roleTitle}' is not a recognized execom role. Create it in the role directory first.`,
       );
       return;
     }
@@ -861,7 +861,7 @@ export function CampusManageDashboard() {
 
     if (title.toLowerCase() === "campus lead") {
       toast.error(
-        "Campus Lead can't be assigned here.Use transfer-lead-role instead.",
+        "Campus Lead can't be assigned here. Use transfer-lead-role instead.",
       );
       return;
     }
