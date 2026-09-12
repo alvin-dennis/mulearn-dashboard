@@ -68,8 +68,10 @@ export function Combobox({
     );
   }, [options, search, isServerSearch]);
 
-  // Display value in input (handle custom values not in options)
-  const displayValue = search || selectedOption?.title || value || "";
+  // Keep the trigger display independent from the dropdown search query.
+  const displayValue = searchInDropdown
+    ? selectedOption?.title || value || ""
+    : search || selectedOption?.title || value || "";
 
   const handleSelect = (option: Option) => {
     onValueChange(option.id);
@@ -85,6 +87,7 @@ export function Combobox({
         !containerRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
+        setSearch("");
       }
     };
 
@@ -106,6 +109,7 @@ export function Combobox({
           value={displayValue}
           onChange={(e) => {
             const newValue = e.target.value;
+            if (searchInDropdown) return;
             setSearch(newValue);
             onSearchChange?.(newValue);
             if (!open) setOpen(true);

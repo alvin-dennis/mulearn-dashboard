@@ -583,6 +583,10 @@ export function CampusManageDashboard() {
     useState<string>("Enabler");
   const [isCreateRoleOpen, setIsCreateRoleOpen] = useState(false);
   const [newRoleTitle, setNewRoleTitle] = useState("");
+  const [pendingCreatedRole, setPendingCreatedRole] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
 
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: overview, isLoading: isOverviewLoading } = useCampusOverview();
@@ -655,8 +659,18 @@ export function CampusManageDashboard() {
       }
     }
 
+    if (
+      pendingCreatedRole &&
+      !knownIds.has(pendingCreatedRole.value.toLowerCase())
+    ) {
+      roles.push({
+        id: pendingCreatedRole.value,
+        title: pendingCreatedRole.label,
+      });
+    }
+
     return roles;
-  }, [execomRoles]);
+  }, [execomRoles, pendingCreatedRole]);
 
   const assignableRoleOptions = useMemo(
     () =>
@@ -675,6 +689,17 @@ export function CampusManageDashboard() {
       setSelectedExecomRole(assignableRoleOptions[0].id);
     }
   }, [assignableRoleOptions, selectedExecomRole]);
+
+  useEffect(() => {
+    if (!pendingCreatedRole) return;
+    const isSynced = execomRoles.some(
+      (role) =>
+        role.value.toLowerCase() === pendingCreatedRole.value.toLowerCase(),
+    );
+    if (isSynced) {
+      setPendingCreatedRole(null);
+    }
+  }, [execomRoles, pendingCreatedRole]);
 
   const selectedRoleExists = assignableRoleOptions.some(
     (role) => role.id.toLowerCase() === selectedExecomRole.toLowerCase(),
@@ -829,6 +854,7 @@ export function CampusManageDashboard() {
     createExecomRole(title, {
       onSuccess: (role) => {
         toast.success(`Role "${role.label}" is ready`);
+        setPendingCreatedRole(role);
         setSelectedExecomRole(role.value);
         setNewRoleTitle("");
         setIsCreateRoleOpen(false);
