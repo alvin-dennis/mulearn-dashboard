@@ -831,12 +831,16 @@ export function CampusManageDashboard() {
     const isCampusLead = roleTitle.toLowerCase() === "campus lead";
 
     if (isCampusLead) {
-      toast.error("Campus Lead must be assigned using Transfer Campus Lead.");
+      toast.error(
+        "Campus Lead can't be assigned here.Use transfer-lead-role instead.",
+      );
       return;
     }
 
     if (!selectedRoleExists) {
-      toast.error("Select a role from the role directory before assigning.");
+      toast.error(
+        `'${roleTitle}' is not a recognized execom role.Create it in the role directory first.`,
+      );
       return;
     }
 
@@ -856,13 +860,21 @@ export function CampusManageDashboard() {
     if (!title) return;
 
     if (title.toLowerCase() === "campus lead") {
-      toast.error("Campus Lead must be assigned using Transfer Campus Lead.");
+      toast.error(
+        "Campus Lead can't be assigned here.Use transfer-lead-role instead.",
+      );
       return;
     }
 
+    const existingRole = comboboxRoleOptions.find(
+      (role) => role.id.toLowerCase() === title.toLowerCase(),
+    );
+
     createExecomRole(title, {
       onSuccess: (role) => {
-        toast.success(`Role "${role.label}" is ready`);
+        toast.success(
+          existingRole ? "Role already exists" : "Role created successfully",
+        );
         setPendingCreatedRole(role);
         setSelectedExecomRole(role.value);
         setNewRoleTitle("");

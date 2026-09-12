@@ -555,7 +555,7 @@ export const campusManageApi = {
     );
     return unwrapDataArray(raw)
       .map((item) => {
-        // Backend returns a flat array of role title strings like ["Campus Lead", "Enabler", ...]
+        // Backend returns a flat array of assignable role title strings like ["Enabler", ...]
         if (typeof item === "string") {
           const trimmed = item.trim();
           return { label: trimmed, value: trimmed };
