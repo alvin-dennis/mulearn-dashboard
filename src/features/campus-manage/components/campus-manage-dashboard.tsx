@@ -41,6 +41,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -587,6 +588,7 @@ export function CampusManageDashboard() {
     label: string;
     value: string;
   } | null>(null);
+  const hasInitializedExecomRole = useRef(false);
 
   // ─── Queries ────────────────────────────────────────────────────────────
   const { data: overview, isLoading: isOverviewLoading } = useCampusOverview();
@@ -681,7 +683,14 @@ export function CampusManageDashboard() {
   );
 
   useEffect(() => {
-    if (assignableRoleOptions.length === 0) return;
+    if (
+      hasInitializedExecomRole.current ||
+      assignableRoleOptions.length === 0
+    ) {
+      return;
+    }
+
+    hasInitializedExecomRole.current = true;
     const hasSelectedRole = assignableRoleOptions.some(
       (role) => role.id.toLowerCase() === selectedExecomRole.toLowerCase(),
     );
@@ -1921,7 +1930,6 @@ export function CampusManageDashboard() {
                                 placeholder="Search roles..."
                                 searchPlaceholder="Search roles..."
                                 emptyText="No matching roles."
-                                searchInDropdown
                                 disabled={
                                   isAssigningExecomRole || isCreatingRole
                                 }
