@@ -1,6 +1,7 @@
 import { ExternalLink, Globe, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildGoogleMapEmbedUrl } from "../hooks";
+import { isHttpUrl } from "../lib/events.url";
 import type { EventVenue } from "../types";
 
 interface EventVenueSectionProps {
@@ -11,9 +12,14 @@ export function EventVenueSection({ venue }: EventVenueSectionProps) {
   const isPhysical = venue.type === "physical" || venue.type === "hybrid";
   const isOnline = venue.type === "online" || venue.type === "hybrid";
 
+  const validMapsUrl = isHttpUrl(venue.maps_url) ? venue.maps_url : null;
+  const validOnlineLink = isHttpUrl(venue.online_link)
+    ? venue.online_link
+    : null;
+
   const mapQuery = [venue.address, venue.city].filter(Boolean).join(", ");
-  const hasPhysicalInfo = Boolean(mapQuery || venue.maps_url);
-  const hasOnlineInfo = Boolean(venue.online_link || venue.platform);
+  const hasPhysicalInfo = Boolean(mapQuery || validMapsUrl);
+  const hasOnlineInfo = Boolean(validOnlineLink || venue.platform);
 
   if (!hasPhysicalInfo && !hasOnlineInfo) return null;
 
@@ -60,7 +66,7 @@ export function EventVenueSection({ venue }: EventVenueSectionProps) {
               </p>
             )}
 
-            {venue.maps_url && (
+            {validMapsUrl && (
               <Button
                 variant="outline"
                 size="sm"
@@ -68,7 +74,7 @@ export function EventVenueSection({ venue }: EventVenueSectionProps) {
                 className="shrink-0 rounded-full ml-auto"
               >
                 <a
-                  href={venue.maps_url}
+                  href={validMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -94,10 +100,10 @@ export function EventVenueSection({ venue }: EventVenueSectionProps) {
               </div>
             </div>
 
-            {venue.online_link ? (
+            {validOnlineLink ? (
               <Button size="sm" asChild className="rounded-full">
                 <a
-                  href={venue.online_link}
+                  href={validOnlineLink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

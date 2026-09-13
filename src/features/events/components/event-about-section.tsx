@@ -2,9 +2,11 @@
 
 import { FileText } from "lucide-react";
 import { useState } from "react";
-
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
-import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { isHttpUrl } from "../lib/events.url";
 
 interface EventAboutSectionProps {
   description: string | null;
@@ -27,9 +29,38 @@ export function EventAboutSection({ description }: EventAboutSectionProps) {
       </div>
       <div className="relative px-5 pb-5 pt-0">
         <div
-          className={`whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80 ${!isExpanded ? "line-clamp-15" : ""}`}
+          className={`markdown-body whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80 ${!isExpanded ? "line-clamp-15" : ""}`}
         >
-          <MarkdownRenderer content={description} />
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeSanitize]}
+            disallowedElements={["img"]}
+            unwrapDisallowed={true}
+            components={{
+              a: ({ children, href, ...props }) => {
+                const isSafe = isHttpUrl(href);
+                if (!isSafe) {
+                  return <span>{children}</span>;
+                }
+                return (
+                  <a
+                    {...props}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {children}
+                  </a>
+                );
+              },
+              img: ({ alt }) =>
+                alt ? (
+                  <span className="text-muted-foreground italic">[{alt}]</span>
+                ) : null,
+            }}
+          >
+            {description}
+          </ReactMarkdown>
         </div>
 
         {!isExpanded && (

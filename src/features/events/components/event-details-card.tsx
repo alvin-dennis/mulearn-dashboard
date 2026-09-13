@@ -2,6 +2,7 @@
 
 import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isHttpUrl } from "../lib/events.url";
 import type { EventDetail } from "../types";
 
 interface EventDetailsCardProps {
@@ -93,10 +94,7 @@ export function EventDetailsCard({ event }: EventDetailsCardProps) {
       <CardContent>
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
           {details.map((detail) => {
-            const isUrl =
-              typeof detail.value === "string" &&
-              (detail.value.startsWith("http://") ||
-                detail.value.startsWith("https://"));
+            const isUrl = isHttpUrl(detail.value);
 
             return (
               <div key={detail.label} className="space-y-0.5">
