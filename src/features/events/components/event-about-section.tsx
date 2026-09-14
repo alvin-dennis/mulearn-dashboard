@@ -17,6 +17,9 @@ export function EventAboutSection({ description }: EventAboutSectionProps) {
 
   if (!description) return null;
 
+  const lineCount = description.trim().split(/\r\n|\r|\n/).length;
+  const isExpandable = description.length >= 2000 || lineCount > 6;
+
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex items-center gap-2.5 px-5 py-4">
@@ -29,7 +32,7 @@ export function EventAboutSection({ description }: EventAboutSectionProps) {
       </div>
       <div className="relative px-5 pb-5 pt-0">
         <div
-          className={`markdown-body whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80 ${!isExpanded ? "line-clamp-15" : ""}`}
+          className={`markdown-body whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80 ${isExpandable && !isExpanded ? "line-clamp-6" : ""}`}
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -63,18 +66,20 @@ export function EventAboutSection({ description }: EventAboutSectionProps) {
           </ReactMarkdown>
         </div>
 
-        {!isExpanded && (
+        {isExpandable && !isExpanded && (
           <div className="pointer-events-none absolute inset-x-0 bottom-5 h-16 bg-gradient-to-t from-card to-transparent" />
         )}
 
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="relative z-10 mt-2 px-0 text-xs font-semibold"
-        >
-          {isExpanded ? "Read less" : "Read more"}
-        </Button>
+        {isExpandable && (
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="relative z-10 mt-2 px-0 text-xs font-semibold"
+          >
+            {isExpanded ? "Read less" : "Read more"}
+          </Button>
+        )}
       </div>
     </div>
   );
