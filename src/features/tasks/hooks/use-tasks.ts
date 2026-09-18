@@ -19,6 +19,7 @@ import type {
   PublicTaskListParams,
   TaskListParams,
 } from "../types/tasks.types";
+import { tasksKeys } from "./query-keys";
 import { useTaskQueryErrorToast } from "./task-error";
 
 export const useActiveTasks = (
@@ -26,7 +27,7 @@ export const useActiveTasks = (
   options?: { enabled?: boolean },
 ) => {
   const query = useQuery({
-    queryKey: ["tasks", "active", params],
+    queryKey: tasksKeys.active(params),
     queryFn: () => fetchActiveTasks(params),
     placeholderData: (prev) => prev,
     ...options,
@@ -41,7 +42,7 @@ export const useInactiveTasks = (
   options?: { enabled?: boolean },
 ) => {
   const query = useQuery({
-    queryKey: ["tasks", "inactive", params],
+    queryKey: tasksKeys.inactive(params),
     queryFn: () => fetchInactiveTasks(params),
     placeholderData: (prev) => prev,
     ...options,
@@ -83,7 +84,7 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: createTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all, exact: false });
       queryClient.invalidateQueries({
         queryKey: ["public-tasks"],
         exact: false,
@@ -109,7 +110,7 @@ export const useUpdateTask = () => {
       data: Partial<TaskCreateRequest>;
     }) => updateTask(id, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all, exact: false });
       queryClient.invalidateQueries({
         queryKey: ["public-tasks"],
         exact: false,
@@ -133,7 +134,7 @@ export const useDeleteTask = () => {
   return useMutation({
     mutationFn: deleteTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all, exact: false });
       queryClient.invalidateQueries({
         queryKey: ["public-tasks"],
         exact: false,
@@ -153,7 +154,7 @@ export const useImportTasks = () => {
   return useMutation({
     mutationFn: importTasks,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all, exact: false });
       queryClient.invalidateQueries({
         queryKey: ["public-tasks"],
         exact: false,
