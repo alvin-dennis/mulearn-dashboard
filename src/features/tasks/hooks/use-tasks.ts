@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { endpoints } from "@/api/endpoints";
+import { useCsvDownload } from "@/hooks/use-csv-download";
 import { getApiResponseError } from "@/hooks/use-get-error";
 import {
   createTask,
   deleteTask,
-  downloadTasksCsv,
-  downloadTasksTemplate,
+  fetchActiveTasks,
+  fetchInactiveTasks,
   fetchPublicTasks,
   fetchTaskDetail,
   fetchTaskReferences,
-  fetchTasks,
   importTasks,
   updateTask,
 } from "../api/tasks.api";
@@ -20,13 +21,28 @@ import type {
 } from "../types/tasks.types";
 import { useTaskQueryErrorToast } from "./task-error";
 
-export const useTasks = (
+export const useActiveTasks = (
   params: TaskListParams,
   options?: { enabled?: boolean },
 ) => {
   const query = useQuery({
-    queryKey: ["tasks", params],
-    queryFn: () => fetchTasks(params),
+    queryKey: ["tasks", "active", params],
+    queryFn: () => fetchActiveTasks(params),
+    placeholderData: (prev) => prev,
+    ...options,
+  });
+
+  useTaskQueryErrorToast(query.error, "Failed to load tasks.");
+  return query;
+};
+
+export const useInactiveTasks = (
+  params: TaskListParams,
+  options?: { enabled?: boolean },
+) => {
+  const query = useQuery({
+    queryKey: ["tasks", "inactive", params],
+    queryFn: () => fetchInactiveTasks(params),
     placeholderData: (prev) => prev,
     ...options,
   });
@@ -163,28 +179,8 @@ export const useTaskReferences = (options?: { enabled?: boolean }) => {
   return query;
 };
 
-export const useDownloadTasksCsv = () => {
-  return useMutation({
-    mutationFn: downloadTasksCsv,
-    onError: (error) => {
-      toast.error(
-        getApiResponseError(error, {
-          fallback: "Failed to download tasks CSV.",
-        }),
-      );
-    },
-  });
-};
+export const useDownloadTasksCsv = () =>
+  useCsvDownload(endpoints.admin.tasks.csv, "tasks.csv");
 
-export const useDownloadTasksTemplate = () => {
-  return useMutation({
-    mutationFn: downloadTasksTemplate,
-    onError: (error) => {
-      toast.error(
-        getApiResponseError(error, {
-          fallback: "Failed to download task template.",
-        }),
-      );
-    },
-  });
-};
+export const useDownloadTasksTemplate = () =>
+  useCsvDownload(endpoints.admin.tasks.template, "tasks_template.xlsx");
