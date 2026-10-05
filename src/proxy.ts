@@ -190,6 +190,25 @@ function extractRolesFromToken(token: string): string[] | null {
 
 // ─── Middleware ─────────────────────────────────────────────
 
+/**
+ * True for Next.js `<Link>` prefetch requests and other speculative
+ * `Purpose: prefetch` fetches.
+ *
+ * These must never be routed into the refresh flow (D7): the provider
+ * revokes the ENTIRE session if the same refresh token is presented twice,
+ * and a prefetch firing alongside a real navigation — or just several
+ * prefetched links on one page — is exactly the kind of concurrent trigger
+ * that causes it. A prefetch that 307s to /api/auth/refresh would spend the
+ * refresh token for a request whose response is going to be thrown away.
+ */
+function isPrefetchRequest(request: NextRequest): boolean {
+  return (
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("Purpose") === "prefetch" ||
+    request.headers.get("Sec-Purpose") === "prefetch"
+  );
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -201,6 +220,11 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {
+    return NextResponse.next();
+  }
+
+  // Let prefetches through untouched — never trigger a refresh for one (D7).
+  if (isPrefetchRequest(request)) {
     return NextResponse.next();
   }
 

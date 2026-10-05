@@ -8,11 +8,15 @@
  *
  * Flow:
  *   1. Read refreshToken from cookies.
- *   2. Exchange it for a new accessToken via the backend.
+ *   2. Exchange it for a new accessToken via the backend (lib/auth/refresh-session.ts
+ *      — branches on token kind (D3) and retries once on a transient error (D5)).
  *   3. Set the new accessToken as a server-side cookie.
  *   4. Redirect the user back to the originally requested route (ruri param).
  *
- * If refresh fails, redirect to /login.
+ * If refresh fails outright, redirect to /login. If it's merely a transient
+ * provider error, keep the session and render a small retry page instead
+ * (see the "temporary" branch below) — this is a full-page navigation
+ * triggered by the proxy, so a plain fetch retry isn't an option here.
  *
  * The `ruri` round trip preserves the original query string (see
  * lib/auth/return-path.ts). An OAuth callback like
@@ -21,8 +25,7 @@
 
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { refreshAccessTokenServer } from "@/api/refresh.server";
-import { refreshOidcSession } from "@/lib/auth/oidc-refresh";
+import { performRefresh } from "@/lib/auth/refresh-session";
 import { sanitizeReturnPath } from "@/lib/auth/return-path";
 
 /**
@@ -80,64 +83,62 @@ export async function GET(request: NextRequest) {
     return redirectToPath(loginPathWithReturn(returnPath));
   }
 
-  const issuer = process.env.NEXT_PUBLIC_OIDC_ISSUER;
-  const clientId = process.env.NEXT_PUBLIC_OIDC_CLIENT_ID;
-  const useOidc = process.env.OIDC_ENABLED === "true" && issuer && clientId;
+  const outcome = await performRefresh(refreshToken);
 
-  try {
-    let newAccessToken: string | null;
-    let accessTokenMaxAgeMs = 15 * 60 * 1000;
+  if (outcome.kind === "temporary") {
+    // 429/5xx/timeout/Redis-down, even after one retry — transient, not a
+    // dead session (D5). Do NOT clear cookies and do NOT bounce to /login.
+    // A redirect back to returnPath would loop forever (the proxy would see
+    // the same missing/expired accessToken and send them right back here),
+    // so render a small "retrying" page instead — a 200, not a redirect —
+    // that waits a few seconds and then retries the original URL.
+    const target = `/${returnPath}`;
+    return new NextResponse(
+      `<!doctype html><html><head><meta http-equiv="refresh" content="5;url=${target}"></head>` +
+        `<body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;color:#555">` +
+        `<p>Connection problem, retrying…</p></body></html>`,
+      { status: 200, headers: { "Content-Type": "text/html" } },
+    );
+  }
 
-    if (useOidc) {
-      // ROTATION: the provider consumes this refresh token and returns a
-      // replacement. The new one MUST be stored — presenting a spent token is
-      // treated as theft and revokes the whole family, signing the person out
-      // everywhere. See lib/auth/oidc-refresh.ts.
-      const session = await refreshOidcSession(refreshToken, {
-        issuer,
-        clientId,
-      });
-      newAccessToken = session.accessToken;
-      accessTokenMaxAgeMs = session.expiresIn * 1000;
-
-      cookieStore.set("refreshToken", session.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60,
-      });
-    } else {
-      newAccessToken = await refreshAccessTokenServer(refreshToken);
-    }
-
-    if (!newAccessToken) {
-      throw new Error("No access token in refresh response");
-    }
-
-    const isProduction = process.env.NODE_ENV === "production";
-
-    cookieStore.set("accessToken", newAccessToken, {
-      httpOnly: false,
-      // Must match authStore.setTokens' 15-minute accessToken lifetime —
-      // otherwise the cookie outlives the JWT it holds and browsers keep
-      // presenting an already-expired token until this cookie itself expires.
-      expires: new Date(Date.now() + accessTokenMaxAgeMs),
-      secure: isProduction,
-      sameSite: "lax",
-      path: "/",
-    });
-
-    cookieStore.set("isAuthenticated", "true", {
-      expires: new Date(Date.now() + 86_400_000),
-      secure: isProduction,
-      sameSite: "lax",
-      path: "/",
-    });
-
-    return redirectToPath(`/${returnPath}`);
-  } catch {
+  if (outcome.kind === "failed") {
     clearAuthCookies();
     return redirectToPath(loginPathWithReturn(returnPath));
   }
+
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (outcome.refreshToken) {
+    // ROTATION: the provider consumed the presented refresh token and
+    // returned a replacement. The new one MUST be stored — presenting a
+    // spent token is treated as theft and revokes the whole family, signing
+    // the person out everywhere. See lib/auth/oidc-refresh.ts.
+    cookieStore.set("refreshToken", outcome.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+  }
+
+  cookieStore.set("accessToken", outcome.accessToken, {
+    httpOnly: false,
+    // Must match authStore.setTokens' 15-minute accessToken lifetime —
+    // otherwise the cookie outlives the JWT it holds and browsers keep
+    // presenting an already-expired token until this cookie itself expires.
+    expires: new Date(Date.now() + outcome.maxAgeMs),
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  cookieStore.set("isAuthenticated", "true", {
+    expires: new Date(Date.now() + 86_400_000),
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return redirectToPath(`/${returnPath}`);
 }

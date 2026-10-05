@@ -26,7 +26,7 @@ import { VersionBadge } from "@/components/ui/version-badge";
 import { useCompanyProfile } from "@/features/company-jobs/hooks/use-company-profile";
 import { useUserProfile } from "@/features/profile";
 import { useFilteredNav } from "@/hooks/use-filtered-nav";
-import { authStore } from "@/lib/auth";
+import { authStore, postLogout } from "@/lib/auth";
 import { ROLES } from "@/lib/auth/roles";
 import type { NavItem } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
@@ -52,12 +52,12 @@ export function AppSidebar() {
     // Clear cookies server-side first: the HttpOnly refreshToken can't be removed
     // by client js-cookie, and if it lingers the proxy refreshes a new accessToken
     // and bounces /login back to /dashboard.
-    await fetch("/api/auth/logout", { method: "POST" });
+    const nextUrl = await postLogout();
     await authStore.clearTokens();
     useUIStore.getState().resetUI();
     toast.success("Logged out successfully");
     // Hard redirect so the proxy re-evaluates with the cookies actually gone.
-    window.location.href = "/login";
+    window.location.href = nextUrl;
   }, []);
 
   const isActive = useCallback(

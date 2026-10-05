@@ -50,6 +50,14 @@ export const getApiResponseError = (
   const { fallback = "An unexpected error occurred" } = options;
 
   if (error instanceof ApiError) {
+    // 0. 429 throttle (D13) — backend's raw body is
+    // `{"detail": "Request was throttled. Expected available in N seconds."}`,
+    // correct and intended (email-check 20/min, password reset 5/hr,
+    // registration 10/hr, all per-IP) but not something to show verbatim.
+    if (error.status === 429) {
+      return "Too many attempts. Please wait a bit and try again.";
+    }
+
     // 1. Django-style message extraction
     const djangoMessage = extractDjangoMessage(error.data);
     if (djangoMessage) return djangoMessage;

@@ -24,7 +24,24 @@ const BASE_HEADERS: Record<string, string> = {
   "Content-Type": "application/json",
 };
 
-/** Detect a token-expiry response (mirrors the old BFF proxy logic). */
+/**
+ * Detect a token-expiry response.
+ *
+ * Covers two backend error shapes that both mean "re-auth, don't just retry":
+ *   - legacy: 401, or statusCode 1000, or message.general containing "token
+ *     expired"/"invalid token" text.
+ *   - feat/new-auth (utils/token_verification.py + utils/permission.py):
+ *     403 { "detail": "<string>" }, with detail strings exactly: "Token
+ *     expired", "Invalid token: <pyjwt msg>", "Invalid token header",
+ *     "Unsupported token algorithm", "Token has no subject". "Token does not
+ *     have the scope for this request" is a permission error, not expiry, and
+ *     is deliberately excluded — refreshing won't fix a missing scope.
+ *
+ * "Could not retrieve signing keys" is deliberately excluded too: that's
+ * authserver/JWKS being unreachable (infra), not an invalid token. A silent
+ * refresh would hit the same unreachable JWKS and fail again — this is a
+ * normal ApiError instead, not a forced re-auth.
+ */
 function isTokenExpired(status: number, data: unknown): boolean {
   if (status === 401) return true;
   if (
@@ -37,7 +54,7 @@ function isTokenExpired(status: number, data: unknown): boolean {
   }
   if (data && typeof data === "object" && "message" in data) {
     const msg = data as { message?: { general?: (string | unknown)[] } };
-    return (
+    if (
       msg.message?.general?.some(
         (m) =>
           typeof m === "string" &&
@@ -45,7 +62,17 @@ function isTokenExpired(status: number, data: unknown): boolean {
             m.toLowerCase().includes("token invalid") ||
             m.toLowerCase().includes("invalid token")),
       ) === true
-    );
+    ) {
+      return true;
+    }
+  }
+  if (status === 403 && data && typeof data === "object" && "detail" in data) {
+    const detail = (data as { detail: unknown }).detail;
+    if (typeof detail === "string" && !/signing keys/i.test(detail)) {
+      return /token (expired|invalid)|invalid token|token header|unsupported token algorithm|token has no subject/i.test(
+        detail,
+      );
+    }
   }
   return false;
 }

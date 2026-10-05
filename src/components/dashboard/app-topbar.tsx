@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUserInfo } from "@/features/auth/hooks/use-session";
 import { useCompanyProfile } from "@/features/company-jobs/hooks";
 import { GameProgressBar } from "@/features/mujourney/components/GameProgressBar";
-import { authStore, ROLES } from "@/lib/auth";
+import { authStore, postLogout, ROLES } from "@/lib/auth";
 import { useUIStore } from "@/stores/ui-store";
 
 function getInitials(name: string) {
@@ -48,12 +48,14 @@ export function AppTopbar() {
     // Clear cookies server-side first: the HttpOnly refreshToken can't be removed
     // by client js-cookie, and if it lingers the proxy refreshes a new accessToken
     // and bounces /login back to /dashboard.
-    await fetch("/api/auth/logout", { method: "POST" });
+    const nextUrl = await postLogout();
     await authStore.clearTokens();
     useUIStore.getState().resetUI();
     toast.success("Logged out successfully");
     // Hard redirect so the proxy re-evaluates with the cookies actually gone.
-    window.location.href = "/login";
+    // nextUrl is the provider's /oauth/logout/ URL for an OIDC session (ends
+    // the authserver session too, not just this app's) or "/login" otherwise.
+    window.location.href = nextUrl;
   }, []);
 
   // Company accounts: show the company profile (name + logo) in the topbar,

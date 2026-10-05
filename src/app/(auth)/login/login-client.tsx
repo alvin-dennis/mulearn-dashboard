@@ -12,6 +12,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   LoginForm,
   OTPLoginForm,
@@ -23,9 +24,28 @@ import { sanitizeReturnPath } from "@/lib/auth/return-path";
 
 interface LoginClientProps {
   redirectUri?: string;
+  error?: string;
+  loggedOut?: boolean;
+  oidcEnabled?: boolean;
 }
 
-export function LoginClient({ redirectUri }: LoginClientProps) {
+/** D8 — one friendly message per callback failure reason, never the raw provider text. */
+const ERROR_MESSAGES: Record<string, string> = {
+  signin_expired:
+    "Your sign-in took too long or was started in another tab. Please try again.",
+  signin_mismatch:
+    "Your sign-in took too long or was started in another tab. Please try again.",
+  signin_unavailable:
+    "Sign-in is temporarily unavailable. Please try again in a moment.",
+  signin_failed: "We could not sign you in. Please try again.",
+};
+
+export function LoginClient({
+  redirectUri,
+  error,
+  loggedOut,
+  oidcEnabled,
+}: LoginClientProps) {
   const router = useRouter();
   const [loginMode, setLoginMode] = useState<"password" | "otp">("password");
 
@@ -67,6 +87,26 @@ export function LoginClient({ redirectUri }: LoginClientProps) {
       router.push(getRedirectPath());
     } catch {}
   };
+
+  // D8/D2: rendered instead of the form when the page declined to
+  // auto-redirect to the provider (see page.tsx) — a persistent provider
+  // error or a just-completed sign-out, either of which must stop at an
+  // explicit button rather than looping or silently re-authenticating.
+  if (oidcEnabled && (error || loggedOut)) {
+    const signInHref = redirectUri
+      ? `/api/auth/oidc/start?${new URLSearchParams({ ruri: redirectUri })}`
+      : "/api/auth/oidc/start";
+    return (
+      <div className="flex flex-col items-center gap-4 text-center">
+        <p className="text-muted-foreground">
+          {error
+            ? (ERROR_MESSAGES[error] ?? ERROR_MESSAGES.signin_failed)
+            : "You are signed out."}
+        </p>
+        <Button onClick={() => router.push(signInHref)}>Sign in</Button>
+      </div>
+    );
+  }
 
   if (loginMode === "otp") {
     return (

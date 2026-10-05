@@ -1609,6 +1609,43 @@ export const endpoints = {
     verification: (uorgId: string) =>
       `/api/v1/dashboard/organisation/verify/${uorgId}/`,
   },
+
+  // ============================================
+  // Auth Admin — "Sign in with μLearn" admin console (D11)
+  // Base: /api/v1/dashboard/auth-admin/ — Admin-role only, proxied by
+  // mulearnbackend to authserver. Every mutating call is audited server-side
+  // (SystemActionLog AUTH_CLIENT_*/AUTH_POLICY_UPDATE/AUTH_SESSION_REVOKE).
+  // See docs/sign-in-with-mulearn-backend-verification.md §5.
+  // ============================================
+  authAdmin: {
+    /** GET - Security posture overview */
+    securityPosture: "/api/v1/dashboard/auth-admin/security-posture/",
+
+    // CONNECTED APPS (OAuth clients)
+    /** GET - List clients | POST - Create client (secret returned once) */
+    clients: "/api/v1/dashboard/auth-admin/clients/",
+    /** GET - Client detail | PATCH - Update client */
+    clientDetail: (clientId: string) =>
+      `/api/v1/dashboard/auth-admin/clients/${clientId}/`,
+    /** POST - Disable client */
+    clientDisable: (clientId: string) =>
+      `/api/v1/dashboard/auth-admin/clients/${clientId}/disable/`,
+    /** POST - Enable client */
+    clientEnable: (clientId: string) =>
+      `/api/v1/dashboard/auth-admin/clients/${clientId}/enable/`,
+
+    // SIGN-IN POLICY
+    /** GET - Current policy | PUT - Update policy */
+    signinPolicy: "/api/v1/dashboard/auth-admin/signin-policy/",
+
+    // LOGIN ATTEMPTS
+    /** GET - Login attempts log (filters: identifier, result, before, limit max 200) */
+    loginAttempts: "/api/v1/dashboard/auth-admin/login-attempts/",
+
+    // SESSIONS
+    /** POST - Revoke a member's sessions ({ user_id | muid, reason }) */
+    sessionsRevoke: "/api/v1/dashboard/auth-admin/sessions/revoke/",
+  },
 } as const;
 
 // Type for type-safe endpoint access

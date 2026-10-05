@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Building,
   Home,
+  KeyRound,
   ListTodo,
   type LucideIcon,
   Settings2,
@@ -110,6 +111,15 @@ const MANAGEMENT_ITEMS: ManagementItem[] = [
     path: "/dashboard/management/homepage",
     color: "bg-chart-2/10 text-chart-2",
     roles: MANAGEMENT_ROLES,
+  },
+  {
+    icon: KeyRound,
+    title: "Authentication Configuration",
+    description:
+      "Security posture, connected apps, sign-in policy, login attempts, and session revocation.",
+    path: "/dashboard/management/manage-auth",
+    color: "bg-chart-4/10 text-chart-4",
+    roles: ADMIN_ROLES,
   },
 ];
 

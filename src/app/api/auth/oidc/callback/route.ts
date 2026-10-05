@@ -46,7 +46,7 @@ function failed(reason: string): NextResponse {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const cookieStore = await cookies();
 
   const verifier = cookieStore.get(PKCE_VERIFIER_COOKIE)?.value;
@@ -83,13 +83,17 @@ export async function GET(request: NextRequest) {
 
   const issuer = process.env.NEXT_PUBLIC_OIDC_ISSUER;
   const clientId = process.env.NEXT_PUBLIC_OIDC_CLIENT_ID;
-  if (!issuer || !clientId) {
+  // Fixed from env, matching ../start/route.ts — must be byte-identical to
+  // what was sent there, since authserver matches it exactly (D4).
+  const redirectUri = process.env.OIDC_REDIRECT_URI;
+  if (!issuer || !clientId || !redirectUri) {
     return failed("signin_unavailable");
   }
 
   let tokens: {
     access_token?: string;
     refresh_token?: string;
+    id_token?: string;
     expires_in?: number;
   };
   try {
@@ -99,7 +103,7 @@ export async function GET(request: NextRequest) {
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: `${origin}/api/auth/oidc/callback`,
+        redirect_uri: redirectUri,
         client_id: clientId,
         code_verifier: verifier,
       }),
@@ -135,6 +139,18 @@ export async function GET(request: NextRequest) {
     httpOnly: false,
     maxAge: tokens.expires_in ?? 15 * 60,
   });
+
+  // Needed to end the provider's own session on logout (D2):
+  // /oauth/logout/?id_token_hint=... requires it, and it has to be read
+  // before the refresh-token revoke clears everything. httpOnly — nothing on
+  // the page needs to read it, it only ever gets forwarded server-side.
+  if (tokens.id_token) {
+    cookieStore.set("idToken", tokens.id_token, {
+      ...base,
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60,
+    });
+  }
 
   cookieStore.set("isAuthenticated", "true", { ...base, maxAge: 86_400 });
 

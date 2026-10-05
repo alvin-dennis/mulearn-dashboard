@@ -19,8 +19,19 @@
  *      desired behaviour for a stolen token and a self-inflicted logout if we
  *      drop the replacement on the floor.
  *
- * So a failed refresh must clear the cookies and send the person to sign in
- * again, never retry with the same token.
+ * So a genuinely failed refresh must clear the cookies and send the person to
+ * sign in again, never retry with the same token.
+ *
+ * TEMPORARY vs FAILED
+ * -------------------
+ * Not every non-2xx means "this session is invalid". /oauth/token/'s
+ * 429-at-120/min-per-IP throttle is authserver's correct, intended behaviour
+ * — and every dashboard refresh shares one server IP, so it triggers at real
+ * scale. A 5xx or network timeout means authserver is unreachable right now.
+ * Neither means the refresh token itself is bad. Logging someone out for a
+ * transient provider hiccup is strictly worse than leaving them signed in and
+ * retrying. Only 400 (invalid_grant — the token was rejected or already
+ * spent) and 401 mean the session is actually dead.
  */
 
 export interface RefreshedSession {
@@ -29,13 +40,25 @@ export interface RefreshedSession {
   expiresIn: number;
 }
 
+/** Session is actually invalid — clear cookies, send to sign in again. */
 export class RefreshFailed extends Error {}
+
+/** Provider hiccup (429/5xx/timeout/bad body) — keep the session, maybe retry. */
+export class RefreshTemporary extends Error {
+  retryAfterSeconds?: number;
+  constructor(message: string, retryAfterSeconds?: number) {
+    super(message);
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
 
 /**
  * Exchange a refresh token for a new pair.
  *
- * @throws RefreshFailed when the provider refuses or is unreachable. The caller
- *   must clear the session rather than retry.
+ * @throws RefreshFailed when the provider rejects the token (400/401) — the
+ *   caller must clear the session rather than retry.
+ * @throws RefreshTemporary on 429/5xx/timeout/malformed response — the caller
+ *   should keep the session and may retry, honoring `retryAfterSeconds`.
  */
 export async function refreshOidcSession(
   refreshToken: string,
@@ -56,12 +79,19 @@ export async function refreshOidcSession(
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new RefreshFailed("provider unreachable");
+    throw new RefreshTemporary("provider unreachable");
   }
 
   if (!response.ok) {
-    // Includes the case where this token was already spent — the provider has
-    // now revoked the family. Nothing to retry.
+    if (response.status === 429 || response.status >= 500) {
+      const retryAfter = response.headers.get("Retry-After");
+      throw new RefreshTemporary(
+        `provider returned ${response.status}`,
+        retryAfter ? Number(retryAfter) : undefined,
+      );
+    }
+    // 400 invalid_grant (including an already-spent token — the provider has
+    // now revoked the family) or 401. Nothing to retry.
     throw new RefreshFailed(`provider returned ${response.status}`);
   }
 
@@ -73,7 +103,7 @@ export async function refreshOidcSession(
   try {
     body = await response.json();
   } catch {
-    throw new RefreshFailed("provider returned a non-JSON response");
+    throw new RefreshTemporary("provider returned a non-JSON response");
   }
 
   if (!body.access_token || !body.refresh_token) {

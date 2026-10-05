@@ -42,8 +42,13 @@ const FLOW_TTL_SECONDS = 600;
 export async function GET(request: NextRequest) {
   const issuer = process.env.NEXT_PUBLIC_OIDC_ISSUER;
   const clientId = process.env.NEXT_PUBLIC_OIDC_CLIENT_ID;
+  // Fixed from env, never derived from request.nextUrl.origin. On Netlify
+  // that origin is the deploy permalink (<deploy-id>--<site>.netlify.app),
+  // not app.mulearn.org — and authserver matches redirect_uri exactly, so
+  // prod sign-in would be refused (D4).
+  const redirectUri = process.env.OIDC_REDIRECT_URI;
 
-  if (!issuer || !clientId) {
+  if (!issuer || !clientId || !redirectUri) {
     // Configuration error, not a user error. Fail visibly rather than
     // redirecting somewhere confusing.
     return NextResponse.json(
@@ -82,10 +87,7 @@ export async function GET(request: NextRequest) {
   const authorizeUrl = new URL("/oauth/authorize/", issuer);
   authorizeUrl.searchParams.set("response_type", "code");
   authorizeUrl.searchParams.set("client_id", clientId);
-  authorizeUrl.searchParams.set(
-    "redirect_uri",
-    `${request.nextUrl.origin}/api/auth/oidc/callback`,
-  );
+  authorizeUrl.searchParams.set("redirect_uri", redirectUri);
   authorizeUrl.searchParams.set(
     "scope",
     "openid profile email mulearn.read mulearn.write",
@@ -98,5 +100,18 @@ export async function GET(request: NextRequest) {
   // Absolute, and cross-origin by design: this one genuinely goes to the
   // identity provider. The relative-Location rule in ../refresh/route.ts
   // applies to same-origin redirects, which this is not.
-  return NextResponse.redirect(authorizeUrl.toString(), 307);
+  const authorizeHref = authorizeUrl.toString();
+
+  // D9: `/register` hands off here with `?signup=1`. Route through
+  // authentication-module's own /signup screen first (proxied to
+  // authserver's /accounts/api/signup/ for the write) instead of straight to
+  // /oauth/authorize/ — `next` carries the browser on to the normal
+  // authorize step once the account exists.
+  if (request.nextUrl.searchParams.get("signup") === "1") {
+    const signupUrl = new URL("/accounts/signup/", issuer);
+    signupUrl.searchParams.set("next", authorizeHref);
+    return NextResponse.redirect(signupUrl.toString(), 307);
+  }
+
+  return NextResponse.redirect(authorizeHref, 307);
 }

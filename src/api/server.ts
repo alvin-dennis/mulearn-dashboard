@@ -8,9 +8,9 @@
 
 import { cookies } from "next/headers";
 import type { z } from "zod";
+import { performRefresh } from "@/lib/auth/refresh-session";
 import { getBaseUrl } from "./base-url.server";
 import { ApiError, extractDjangoMessage, logSchemaMismatch } from "./errors";
-import { refreshAccessTokenServer } from "./refresh.server";
 
 // ─── URL + Headers ──────────────────────────────────────────────────────────
 
@@ -43,33 +43,42 @@ async function refreshAndSetToken(): Promise<string | null> {
 
   if (!refreshToken) return null;
 
-  try {
-    const newAccessToken = await refreshAccessTokenServer(refreshToken);
+  // Branches on token kind (D3) and retries once on a transient provider
+  // error (D5) — shared with the refresh route handlers.
+  const outcome = await performRefresh(refreshToken);
+  if (outcome.kind !== "ok") return null;
 
-    if (newAccessToken) {
-      const isProduction = process.env.NODE_ENV === "production";
-      // "lax", not "strict" — see the rationale in lib/auth/token-store.ts.
-      // Re-setting these as Strict here would silently re-break OAuth returns.
-      cookieStore.set("accessToken", newAccessToken, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 86_400_000),
-        secure: isProduction,
-        sameSite: "lax",
-        path: "/",
-      });
-      cookieStore.set("isAuthenticated", "true", {
-        expires: new Date(Date.now() + 86_400_000),
-        secure: isProduction,
-        sameSite: "lax",
-        path: "/",
-      });
-      return newAccessToken;
-    }
+  const isProduction = process.env.NODE_ENV === "production";
 
-    return null;
-  } catch {
-    return null;
+  if (outcome.refreshToken) {
+    cookieStore.set("refreshToken", outcome.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
   }
+
+  // JS-readable, expires_in-based — matching every other place this cookie
+  // is set (oidc/callback, /api/auth/refresh). This was previously httpOnly
+  // with a flat 24h lifetime, which both hid the token from the client-side
+  // apiClient's own Authorization header logic and left a stale cookie
+  // outliving the JWT it held (D6).
+  cookieStore.set("accessToken", outcome.accessToken, {
+    httpOnly: false,
+    expires: new Date(Date.now() + outcome.maxAgeMs),
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/",
+  });
+  cookieStore.set("isAuthenticated", "true", {
+    expires: new Date(Date.now() + 86_400_000),
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/",
+  });
+  return outcome.accessToken;
 }
 
 // ─── Request options ────────────────────────────────────────────────────────

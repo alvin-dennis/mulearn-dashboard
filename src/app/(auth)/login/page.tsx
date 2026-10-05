@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ ruri?: string }>;
+  searchParams: Promise<{ ruri?: string; error?: string; logged_out?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -40,13 +40,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
    *
    * The old form stays until the metrics show no legacy tokens are being
    * validated. Deleting it earlier would remove the way back.
+   *
+   * Does NOT auto-redirect when `error` or `logged_out` is present (D8/D2):
+   * a persistent failure (bad client config) would otherwise loop straight
+   * back to the provider forever, and a just-signed-out visitor would be
+   * silently signed back in with no password prompt — neither is "signed
+   * out". Both render a message + explicit Sign in button instead.
    */
-  if (process.env.OIDC_ENABLED === "true") {
+  if (
+    process.env.OIDC_ENABLED === "true" &&
+    !params.error &&
+    !params.logged_out
+  ) {
     const query = params.ruri
       ? `?${new URLSearchParams({ ruri: params.ruri })}`
       : "";
     redirect(`/api/auth/oidc/start${query}`);
   }
 
-  return <LoginClient redirectUri={params.ruri} />;
+  return (
+    <LoginClient
+      redirectUri={params.ruri}
+      error={params.error}
+      loggedOut={params.logged_out === "1"}
+      oidcEnabled={process.env.OIDC_ENABLED === "true"}
+    />
+  );
 }
