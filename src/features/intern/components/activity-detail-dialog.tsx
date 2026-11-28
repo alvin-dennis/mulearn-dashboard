@@ -200,7 +200,7 @@ export function ActivityDetailDialog({
   const [mrBlockers, setMrBlockers] = useState("");
   const [mrSuggestions, setMrSuggestions] = useState("");
 
-  useEffect(() => {
+  const resetForm = () => {
     if (selectedItem) {
       setIsEditMode(false);
       if (selectedItem.type === "timesheet") {
@@ -223,7 +223,10 @@ export function ActivityDetailDialog({
         setMrSuggestions(mr.suggestions || "");
       }
     }
-  }, [selectedItem]);
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset only when the item changes
+  useEffect(resetForm, [selectedItem]);
 
   const editTimesheetMutation = useEditTimesheet();
   const editMonthlyReviewMutation = useEditMonthlyReview();
@@ -830,7 +833,7 @@ export function ActivityDetailDialog({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setIsEditMode(false)}
+                      onClick={resetForm}
                       className="font-black text-[10px] uppercase tracking-widest h-9"
                     >
                       Cancel
@@ -845,14 +848,16 @@ export function ActivityDetailDialog({
                     </Button>
                   </>
                 ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="font-black text-[10px] uppercase tracking-widest h-9"
-              >
-                Close
-              </Button>
+              {!isEditMode && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="font-black text-[10px] uppercase tracking-widest h-9"
+                >
+                  Close
+                </Button>
+              )}
             </DialogFooter>
           </>
         )}
